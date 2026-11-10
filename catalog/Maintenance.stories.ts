@@ -95,10 +95,21 @@ export const RetryRead: Story = {
   args: { scenario: "read-error" },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    await expect(await c.findByRole("alert")).toHaveTextContent(
+    await userEvent.click(
+      await c.findByRole("button", {
+        name: /Open status log:.*could not be reached/,
+      }),
+    );
+    const log = within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Status log",
+      }),
+    );
+    await expect(log.getByRole("list")).toHaveTextContent(
       "could not be reached",
     );
-    await userEvent.click(c.getByRole("button", { name: "Retry refresh" }));
+    await userEvent.click(log.getByRole("button", { name: "Retry refresh" }));
+    await userEvent.keyboard("{Escape}");
     await expect(
       await c.findByRole("button", { name: /Open card: Notebook release/ }),
     ).toBeVisible();
@@ -181,13 +192,13 @@ export const AcceptedWorkflow: Story = {
     const checks = within(await c.findByRole("region", { name: "CI checks" }));
     await expect(checks.getByText("Package acceptance")).toBeVisible();
     await userEvent.click(
-      checks.getByRole("button", { name: "Some checks were not successful" }),
+      checks.getByRole("button", { name: /^Some checks were not successful/ }),
     );
-    await expect(
-      checks.queryByText("Package acceptance"),
-    ).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(checks.getByText("Package acceptance")).not.toBeVisible(),
+    );
     await userEvent.click(
-      checks.getByRole("button", { name: "Some checks were not successful" }),
+      checks.getByRole("button", { name: /^Some checks were not successful/ }),
     );
     await userEvent.click(
       await c.findByRole("button", { name: "Rerun failed jobs" }),
@@ -226,7 +237,7 @@ export const ReviewAndMerge: Story = {
       await c.findByRole("button", { name: /Open card: Version first-party/ }),
     );
     await expect(
-      await c.findByRole("button", { name: "Merge PR" }),
+      await c.findByRole("button", { name: "Squash and merge" }),
     ).toBeDisabled();
     await expect(
       c.getByText("Required maintainer approval is still pending."),
@@ -243,9 +254,9 @@ export const ReviewAndMerge: Story = {
       ).not.toBeInTheDocument(),
     );
     await waitFor(() =>
-      expect(c.getByRole("button", { name: "Merge PR" })).toBeEnabled(),
+      expect(c.getByRole("button", { name: "Squash and merge" })).toBeEnabled(),
     );
-    await userEvent.click(c.getByRole("button", { name: "Merge PR" }));
+    await userEvent.click(c.getByRole("button", { name: "Squash and merge" }));
     modal = await page.findByRole("dialog");
     await waitFor(() => expect(modal).toBeVisible());
     await expect(within(modal).getByText("squash")).toBeVisible();
@@ -258,13 +269,18 @@ export const ReviewAndMerge: Story = {
       ).not.toBeInTheDocument(),
     );
     await expect(
-      await c.findByText("Simulated action completed successfully."),
+      await c.findByRole("button", {
+        name: /Open status log:.*Simulated action completed successfully/,
+      }),
     ).toBeVisible();
     await waitFor(() =>
       expect(
-        c.queryByRole("button", { name: "Merge PR" }),
+        c.queryByRole("button", { name: "Squash and merge" }),
       ).not.toBeInTheDocument(),
     );
+    await expect(
+      c.getByRole("heading", { name: "0 items in view" }),
+    ).toBeVisible();
   },
 };
 export const Loading: Story = { args: { scenario: "loading" } };

@@ -14,6 +14,8 @@
     dark,
     onToggleTheme,
     onConnect,
+    sessionMode = "demo",
+    onDisconnect,
   }: {
     controller: MaintenanceController;
     profile: PersonalProfile;
@@ -21,6 +23,8 @@
     dark: boolean;
     onToggleTheme: () => void;
     onConnect: () => void;
+    sessionMode?: "demo" | "github";
+    onDisconnect?: () => void;
   } = $props();
   let mode = $state<"profile" | "connection" | null>(null);
 </script>
@@ -29,6 +33,7 @@
   {#if controller.connected}
     <RepositoryProfileMenu
       {profile}
+      avatarUrl={profile.avatarUrl ?? ""}
       {compact}
       onProfile={() => (mode = "profile")}
       onSettings={() => (mode = "connection")}
@@ -55,8 +60,9 @@
       ><Dialog.Title
         >{mode === "profile" ? "Profile" : "GitHub connection"}</Dialog.Title
       ><Dialog.Description
-        >This Storybook session simulates sign-in. Real GitHub token connection
-        belongs to the next approved slice.</Dialog.Description
+        >{sessionMode === "demo"
+          ? "This Storybook session simulates sign-in. No real token is used."
+          : `Connected to GitHub as @${profile.principal}. Disconnect removes this device's token and cached repository data.`}</Dialog.Description
       ></Dialog.Header
     >
     <dl class="maintenance-facts">
@@ -66,7 +72,13 @@
       </div>
       <div>
         <dt>Session</dt>
-        <dd>{controller.connected ? "Connected demo" : "Disconnected"}</dd>
+        <dd>
+          {controller.connected
+            ? sessionMode === "demo"
+              ? "Connected demo"
+              : "GitHub · actions follow token permissions"
+            : "Disconnected"}
+        </dd>
       </div>
     </dl>
     <Button variant="outline" onclick={onToggleTheme}
@@ -81,9 +93,13 @@
           disabled={controller.commands.busy}
           variant="outline"
           onclick={() => {
-            controller.disconnect();
+            if (onDisconnect) onDisconnect();
+            else controller.disconnect();
             mode = null;
-          }}>Disconnect demo session</Button
+          }}
+          >{sessionMode === "demo"
+            ? "Disconnect demo session"
+            : "Disconnect GitHub"}</Button
         >
       {:else}<Button
           onclick={() => {

@@ -5,7 +5,7 @@
   import * as Empty from "@lapismd/design-core/shadcn/empty";
   import { FileSearch, CircleAlert } from "@lucide/svelte";
   import RepositoryReview from "./RepositoryReview.svelte";
-  import MaintenanceChecks from "./MaintenanceChecks.svelte";
+  import MaintenanceRunPanel from "./MaintenanceRunPanel.svelte";
   import { statusLabels } from "../../maintenance/types";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
@@ -21,7 +21,7 @@
 </script>
 
 <div class="maintenance-details" aria-label="Maintenance item details">
-  {#if controller.detailLoading}
+  {#if controller.detailLoading && !detail}
     <div
       role="status"
       aria-label="Loading item details"
@@ -73,30 +73,15 @@
         >
         <p>{receipt.message}</p>
       </div>{/if}
-    {#if detail.item.kind === "pull-request"}<RepositoryReview
-        {detail}
+    {#if detail.item.kind === "pull-request" || detail.pullRequest}
+      <RepositoryReview
+        detail={detail.pullRequest ?? detail}
+        context={detail.pullRequest ? detail : undefined}
         {controller}
         {onClose}
       />
     {:else}
-      <p>{detail.description}</p>
-      <dl class="maintenance-facts">
-        <div>
-          <dt>Revision</dt>
-          <dd><code>{detail.item.target.sha.slice(0, 8)}</code></dd>
-        </div>
-        {#if detail.workflow}<div>
-            <dt>Workflow</dt>
-            <dd>{detail.workflow}</dd>
-          </div>{/if}{#if detail.environment}<div>
-            <dt>Environment</dt>
-            <dd>{detail.environment}</dd>
-          </div>{/if}{#if detail.ref}<div>
-            <dt>Reference</dt>
-            <dd>{detail.ref}</dd>
-          </div>{/if}
-      </dl>
-      <MaintenanceChecks {detail} {controller} />
+      <MaintenanceRunPanel {detail} {controller} {onClose} />
     {/if}
   {:else}<Empty.Root
       ><Empty.Header

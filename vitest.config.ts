@@ -12,7 +12,23 @@ export default mergeConfig(
           test: {
             name: "unit",
             include: ["src/**/*.test.ts"],
+            exclude: ["src/**/*.browser.test.ts"],
             environment: "node",
+          },
+        },
+        {
+          extends: true,
+          test: {
+            name: "browser",
+            include: ["src/**/*.browser.test.ts"],
+            testTimeout: 30_000,
+            browser: {
+              viewport: { width: 1280, height: 900 },
+              enabled: true,
+              provider: playwright(),
+              headless: true,
+              instances: [{ browser: "chromium" }],
+            },
           },
         },
         {
@@ -20,6 +36,7 @@ export default mergeConfig(
           plugins: [storybookTest({ configDir: ".storybook" })],
           test: {
             name: "storybook",
+            fileParallelism: false,
             testTimeout: 30000,
             browser: {
               enabled: true,

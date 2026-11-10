@@ -41,6 +41,11 @@ export default defineConfig(headingRequirements(), {
       ignore: ["\\.(?:test|stories)\\.ts$"],
       rules: [
         {
+          pattern: "^src/(?:github|session)/",
+          chapters: ["spec/src/github.md"],
+        },
+        { pattern: "^src/cache/", chapters: ["spec/src/cache.md"] },
+        {
           pattern: "^src/",
           chapters: ["spec/src/dashboard.md", "spec/src/controller.md"],
         },

@@ -12,6 +12,7 @@ import {
 const priority: Record<ItemStatus, number> = {
   "approval-wait": 0,
   failed: 1,
+  unavailable: 1.5,
   "review-needed": 2,
   blocked: 3,
   draft: 4,
@@ -30,7 +31,7 @@ export class MaintenanceController {
   detailError = $state<string | null>(null);
   query = $state("");
   repositories = $state<string[]>([]);
-  status = $state<ItemStatus | "">("");
+  statuses = $state<ItemStatus[]>([]);
   view = $state<View>("inbox");
   connected = $state(true);
   readonly commands: MaintenanceCommands;
@@ -47,7 +48,9 @@ export class MaintenanceController {
   ) {
     this.#read = read;
     this.connected = connected;
-    this.commands = new MaintenanceCommands(read, write, () => this.refresh());
+    this.commands = new MaintenanceCommands(read, write, () =>
+      this.refresh(true),
+    );
   }
   get items() {
     const query = this.query.toLowerCase().trim();
@@ -59,7 +62,7 @@ export class MaintenanceController {
             item.kind === this.view) &&
           (!this.repositories.length ||
             this.repositories.includes(item.repository)) &&
-          (!this.status || item.status === this.status) &&
+          (!this.statuses.length || this.statuses.includes(item.status)) &&
           (!query ||
             [item.title, item.repository, item.category, ...item.reasons]
               .join(" ")
@@ -83,7 +86,10 @@ export class MaintenanceController {
     };
   }
   get unavailable() {
-    return this.snapshot?.repositories.filter((r) => !r.available) ?? [];
+    return (
+      this.snapshot?.repositories.filter((r) => !r.available && !r.loading) ??
+      []
+    );
   }
   async connect(): Promise<void> {
     if (!this.#disposed) {
@@ -108,7 +114,7 @@ export class MaintenanceController {
     this.commands.cancel();
     this.commands.receipts = [];
   }
-  async refresh(): Promise<void> {
+  async refresh(force = false): Promise<void> {
     if (this.#disposed || !this.connected) return;
     const generation = ++this.#readSequence;
     this.#readAbort?.abort();
@@ -116,13 +122,23 @@ export class MaintenanceController {
     this.phase = this.snapshot ? "refreshing" : "loading";
     this.error = null;
     try {
-      const snapshot = await this.#read.readSnapshot(this.#readAbort.signal);
+      const snapshot = await this.#read.readSnapshot(this.#readAbort.signal, {
+        force,
+        onProgress: (snapshot) => {
+          if (
+            !this.#disposed &&
+            generation === this.#readSequence &&
+            this.phase === "loading"
+          )
+            this.snapshot = snapshot;
+        },
+      });
       if (this.#disposed || generation !== this.#readSequence) return;
       this.snapshot = snapshot;
       this.phase = "ready";
       if (this.selectedId) {
         if (snapshot.items.some((i) => i.id === this.selectedId))
-          await this.select(this.selectedId);
+          await this.select(this.selectedId, force);
         else this.closeDetail();
       }
     } catch (error) {
@@ -136,17 +152,22 @@ export class MaintenanceController {
       this.phase = "error";
     }
   }
-  async select(id: string): Promise<void> {
+  async select(id: string, fresh = false): Promise<void> {
     if (this.#disposed || !this.connected) return;
+    if (!fresh && this.selectedId === id && this.detailLoading) return;
     const sequence = ++this.#detailSequence;
     this.#detailAbort?.abort();
     this.#detailAbort = new AbortController();
+    if (this.selectedId !== id) this.detail = null;
     this.selectedId = id;
-    this.detail = null;
     this.detailLoading = true;
     this.detailError = null;
     try {
-      const detail = await this.#read.readDetails(id, this.#detailAbort.signal);
+      const detail = await this.#read.readDetails(
+        id,
+        this.#detailAbort.signal,
+        { fresh },
+      );
       if (
         !this.#disposed &&
         sequence === this.#detailSequence &&
@@ -178,7 +199,7 @@ export class MaintenanceController {
   resetFilters(): void {
     this.query = "";
     this.repositories = [];
-    this.status = "";
+    this.statuses = [];
   }
   dispose(): void {
     this.#disposed = true;

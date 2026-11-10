@@ -37,17 +37,31 @@ for (const file of [
   )
     findings.push(`${file}: production imports catalog`);
   if (
-    /\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(|\b(?:localStorage|sessionStorage|indexedDB|serviceWorker)\s*\./.test(
-      text,
+    /\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(text) &&
+    !file.startsWith("src/github/")
+  )
+    findings.push(`${file}: live transport belongs in src/github`);
+  if (
+    /\b(?:localStorage|sessionStorage|indexedDB)\b/.test(text) &&
+    !file.startsWith("src/session/")
+  )
+    findings.push(
+      `${file}: credential/preference persistence belongs in src/session`,
+    );
+  if (
+    /\bserviceWorker\s*\./.test(text) &&
+    !(
+      file === "src/app/isolation.ts" &&
+      !/\.\s*(?:register|unregister)\s*\(/.test(text)
     )
   )
     findings.push(
-      `${file}: Slice 1 permits no live transport or browser persistence`,
+      `${file}: service worker registration belongs to the published isolation bootstrap`,
     );
   if (/globalThis\s*\.\s*app\b/.test(text))
     findings.push(`${file}: ambient App ownership`);
 }
 if (findings.length) throw new Error(findings.join("\n"));
 console.log(
-  "Source boundaries and file budgets passed; Slice 1 is in-memory only.",
+  "Source boundaries and file budgets passed; credentials, transport and data caches retain separate owners.",
 );

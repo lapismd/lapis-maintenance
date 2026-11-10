@@ -3,14 +3,15 @@
     AppShell,
     type AppShellController,
   } from "@lapismd/design-core/shell";
-  import { Button } from "@lapismd/design-core/shadcn/button";
+  import * as Tooltip from "@lapismd/design-core/shadcn/tooltip";
+  import MaintenanceNavigationItem from "./MaintenanceNavigationItem.svelte";
+  import MaintenanceRepositories from "./MaintenanceRepositories.svelte";
   import {
     Inbox,
     Activity,
     GitPullRequest,
     Workflow,
     ShieldCheck,
-    FolderGit2,
   } from "@lucide/svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import lapisLogo from "../../assets/lapis-logo.svg";
@@ -24,6 +25,8 @@
     onToggleTheme,
     onConnect,
     profile,
+    sessionMode = "demo",
+    onDisconnect,
   }: {
     controller: MaintenanceController;
     shell: AppShellController;
@@ -31,6 +34,8 @@
     onToggleTheme: () => void;
     onConnect: () => void;
     profile: PersonalProfile;
+    sessionMode?: "demo" | "github";
+    onDisconnect?: () => void;
   } = $props();
   const compact = $derived(
     shell.mobile.resolvedMode === "desktop" &&
@@ -57,7 +62,7 @@
   variant="rail"
 >
   <AppShell.Sidebar.Header
-    ><div class="maintenance-brand">
+    ><div class="maintenance-brand" data-compact={compact}>
       <img
         src={lapisLogo}
         alt="Lapis logo"
@@ -69,52 +74,22 @@
     </div></AppShell.Sidebar.Header
   >
   <AppShell.Sidebar.Body
-    ><nav class="maintenance-navigation" aria-label="Maintenance views">
-      {#if !compact}<h2 class="maintenance-nav-section">Workspace</h2>{/if}
-      {#each navigation as entry}<Button
-          variant="ghost"
-          aria-label={entry.label}
-          aria-current={controller.view === entry.id ? "page" : undefined}
-          onclick={() => {
-            controller.view = entry.id;
-            shell.mobile.showMain();
-          }}
-          ><entry.icon size={18} aria-hidden="true" />{#if !compact}<span
-              >{entry.label}</span
-            >{/if}</Button
-        >{/each}
-    </nav>
-    <nav class="maintenance-navigation" aria-label="Repository filters">
-      {#if !compact}<h2 class="maintenance-nav-section">Repositories</h2>{/if}
-      <Button
-        variant="ghost"
-        aria-label="Show all repositories"
-        aria-pressed={!controller.repositories.length}
-        title="All repositories"
-        onclick={() => {
-          controller.repositories = [];
-          shell.mobile.showMain();
-        }}
-        ><Inbox size={16} aria-hidden="true" />{#if !compact}<span
-            >All repositories</span
-          >{/if}</Button
+    ><Tooltip.Provider
+      ><nav
+        class="maintenance-navigation"
+        data-compact={compact}
+        aria-label="Maintenance views"
       >
-      {#each controller.snapshot?.repositories ?? [] as repo}
-        <Button
-          variant="ghost"
-          aria-label={`Show ${repo.repository}`}
-          aria-pressed={controller.repositories.includes(repo.repository)}
-          title={repo.repository}
-          onclick={() => {
-            controller.toggleRepository(repo.repository);
-            shell.mobile.showMain();
-          }}
-          ><FolderGit2 size={16} aria-hidden="true" />{#if !compact}<span
-              >{repo.repository.split("/")[1]}</span
-            >{/if}</Button
-        >
-      {/each}
-    </nav>
+        {#if !compact}<h2 class="maintenance-nav-section">Workspace</h2>{/if}
+        {#each navigation as entry}<MaintenanceNavigationItem
+            {entry}
+            {controller}
+            {shell}
+            {compact}
+          />{/each}
+      </nav>
+      <MaintenanceRepositories {controller} {compact} /></Tooltip.Provider
+    >
   </AppShell.Sidebar.Body>
   <AppShell.Sidebar.Footer style="padding-inline:0"
     ><MaintenanceProfile
@@ -124,6 +99,8 @@
       {dark}
       {onToggleTheme}
       {onConnect}
+      {sessionMode}
+      {onDisconnect}
     /></AppShell.Sidebar.Footer
   >
 </AppShell.Sidebar>

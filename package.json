@@ -11,6 +11,10 @@
     "node": ">=24.11.0 <25"
   },
   "scripts": {
+    "dev": "vite --host 127.0.0.1 --port 7511 --strictPort",
+    "build": "vite build --base=/lapis-maintenance/",
+    "preview": "vite preview --host 127.0.0.1 --port 7512 --strictPort --base=/lapis-maintenance/",
+    "test:browser": "vitest run --project browser",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm format:check && pnpm check:architecture && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
@@ -30,8 +34,10 @@
   },
   "dependencies": {
     "@lapismd/design-core": "^0.12.3",
-    "@lapismd/repository-ui": "^0.1.1",
+    "@lapismd/repository-ui": "^0.2.0",
     "@lucide/svelte": "^1.66.0",
+    "@tursodatabase/database-wasm": "^0.8.3",
+    "coi-serviceworker": "^0.1.7",
     "svelte": "^5.57.3"
   },
   "devDependencies": {

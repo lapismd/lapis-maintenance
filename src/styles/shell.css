@@ -41,10 +41,15 @@ body {
 }
 .maintenance-navigation {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 0.25rem;
   padding: 0.5rem;
 }
 .maintenance-navigation button {
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
   justify-content: flex-start;
   gap: 0.7rem;
   width: 100%;
@@ -123,6 +128,26 @@ body {
 }
 .maintenance-context {
   padding: 0 0.75rem;
+}
+.maintenance-context-disconnected {
+  padding-bottom: 0.75rem;
+}
+.maintenance-brand[data-compact="true"] {
+  justify-content: center;
+  padding-inline: 0;
+}
+.maintenance-navigation[data-compact="true"] button {
+  justify-content: center;
+  padding-inline: 0;
+}
+.maintenance-repository-rows {
+  display: grid;
+  gap: 0.25rem;
+}
+.maintenance-repository-heading {
+  margin-block: 0.5rem 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
 }
 .maintenance-fixed-filters {
   padding: 0 0.75rem 0.75rem;

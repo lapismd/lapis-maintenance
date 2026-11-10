@@ -4,7 +4,10 @@
   import * as CommandView from "@lapismd/design-core/shadcn/command-view";
   import { Check, ChevronDown, FolderGit2 } from "@lucide/svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
-  let { controller }: { controller: MaintenanceController } = $props();
+  let {
+    controller,
+    compact = false,
+  }: { controller: MaintenanceController; compact?: boolean } = $props();
   const label = $derived(
     controller.repositories.length === 0
       ? "All repositories"
@@ -19,15 +22,20 @@
     {#snippet child({ props })}
       <Button
         {...props}
-        variant="outline"
+        variant={compact ? "ghost" : "outline"}
+        size={compact ? "icon-sm" : "default"}
         aria-label={`Filter repositories: ${label}`}
       >
-        {label}<ChevronDown size={14} aria-hidden="true" />
+        {#if compact}<FolderGit2
+            size={18}
+            aria-hidden="true"
+          />{:else}{label}<ChevronDown size={14} aria-hidden="true" />{/if}
       </Button>
     {/snippet}
   </Popover.Trigger>
   <Popover.Content
     align="start"
+    side={compact ? "right" : "bottom"}
     sideOffset={8}
     collisionPadding={12}
     style="width:min(22rem,calc(100vw - 2rem));padding:0.5rem"

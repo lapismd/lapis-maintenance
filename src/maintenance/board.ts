@@ -23,7 +23,7 @@ const lanes = [
     id: "blocked",
     label: "Blocked",
     color: "var(--muted-foreground)",
-    statuses: ["blocked"],
+    statuses: ["blocked", "unavailable"],
   },
   {
     id: "waiting",

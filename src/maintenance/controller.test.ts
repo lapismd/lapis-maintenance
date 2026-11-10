@@ -33,7 +33,7 @@ describe("maintenance read boundary", () => {
     controller.query = "";
     controller.repositories = ["lapismd/lapis-notes", "lapismd/lapis-desktop"];
     expect(controller.items).toHaveLength(4);
-    controller.status = "cancelled";
+    controller.statuses = ["cancelled"];
     expect(controller.items.map((i) => i.id)).toEqual(["cancelled"]);
     controller.resetFilters();
     controller.view = "activity";

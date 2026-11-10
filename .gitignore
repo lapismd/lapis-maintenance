@@ -1,4 +1,5 @@
 node_modules/
+dist/
 .jj/
 storybook-static/
 coverage/
@@ -8,6 +9,7 @@ spec/book/
 .qmd/*
 !.qmd/index.yml
 .local/
+.vitest/
 .env*
 !.env.example
 .qmd/index.sqlite*

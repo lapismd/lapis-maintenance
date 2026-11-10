@@ -67,6 +67,13 @@
   align-items: center;
   gap: 0.55rem;
 }
+.maintenance-clear-filters {
+  background: color-mix(in srgb, var(--foreground) 6%, transparent);
+}
+.maintenance-clear-filters:hover,
+.maintenance-clear-filters:focus-visible {
+  background: color-mix(in srgb, var(--foreground) 14%, transparent);
+}
 .maintenance-search {
   display: flex;
   align-items: center;

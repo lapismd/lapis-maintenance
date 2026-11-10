@@ -7,7 +7,10 @@
   }: { controller: MaintenanceController; title: string } = $props();
 </script>
 
-<div class="maintenance-context">
+<div
+  class="maintenance-context"
+  class:maintenance-context-disconnected={!controller.connected}
+>
   <h1 class="maintenance-sr-only">{title}</h1>
   <div class="maintenance-summary" aria-label="Repository summary">
     <div>

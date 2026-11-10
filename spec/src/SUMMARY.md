@@ -5,6 +5,7 @@
 - [Dashboard](dashboard.md)
 - [Controller and ports](controller.md)
 - [GitHub and token sessions](github.md)
+- [Local read cache](cache.md)
 - [Write actions](actions.md)
 - [Hosting and offline](hosting.md)
 - [Slice tracker](slices.md)

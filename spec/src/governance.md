@@ -9,5 +9,5 @@ explicit user approval boundary after each verified slice.
 
 - Each requirement has one verification row; future behavior remains planned.
 - Spec-validator validates navigation, governance, verification, QMD wiring, Markdown, book output and mapped specification-first changes.
-- Tools and CI Actions are pinned; dependencies and lockfiles resolve npm.
-- CI exercises the current slice's functional gates and fail-closed source-boundary audit without screenshots.
+- Tools and CI Actions are pinned; dependencies and lockfiles resolve npm, with shared forge panels/checks requiring published Repository UI ^0.2.0 and frozen registry acceptance without local archives, package patches or source aliases.
+- CI exercises functional gates, app/fixture-only static builds, real browser storage and a fail-closed boundary audit, with credentials/transport/cache in their owning modules; the local manual live-session story is excluded from published and automated discovery, without screenshot comparisons.

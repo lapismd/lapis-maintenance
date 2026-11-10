@@ -11,7 +11,12 @@ Commit this complete plan and the canonical specifications before UI code.
 **Slice 1 is only the Storybook UI, production controller and in-memory ports.**
 Stop for user approval after every slice. Approval of one slice does not
 authorize the next. The user authorized foundation and Slice 1 on 2026-11-10;
-Slices 2–5 remain planned and unapproved.
+Slice 1 was approved and Slice 2 authorized on 2026-11-10. The subsequent request
+for write access in the live story explicitly authorizes Slice 3 implementation.
+The user also authorized dependency publication, pushing and Pages hosting;
+Slice 4 release actions and Slice 5 PWA acceptance remain planned and unapproved.
+Slice 2 remembers a token on this device,
+shows token login without a valid session, and uses Turso WASM to cache reads.
 
 ## Repository and specification foundation
 
@@ -40,7 +45,7 @@ details. Kanban lanes represent observed status; moving cards cannot mutate
 GitHub state. Retain its responsive layout, scrolling, toggles and keyboard behavior. Provide
 Inbox, Activity, Pull Requests, Workflows and Approvals views over the same data.
 Use public Kanban Activity for records grouped by latest update. Keep search,
-the Command View repository multi-select, status filter, counts, freshness and
+the Command View repository/status multi-selects, counts, freshness and
 icon-only refresh in fixed chrome. Join the inspector to Main, place its GitHub
 icon in the header, and keep confirmed actions in a compact fixed footer.
 
@@ -88,8 +93,9 @@ Commit evidence, present the Storybook review URL, and stop for approval.
 
 ### Slice 2: token connection and live reads
 
-- Accept one token, identify its user, and keep credentials/data in memory.
-  Reload requires reconnecting; disconnect clears the session and fetched data.
+- Accept one token and identify its GitHub user and avatar. Remember the token
+  on this device separately from cached data. Show token login without a valid
+  session. Disconnect clears credentials, cached/fetched data and pending reads.
 - Read defaults from dependency-automation's current allowlist, include the
   coordinator, and allow explicit additions/exclusions.
 - Fetch open PRs, current-head checks/statuses/reviews, runs and environment
@@ -97,6 +103,13 @@ Commit evidence, present the Storybook review URL, and stop for approval.
   Preserve holds and explicitly show incomplete coverage.
 - Refresh manually and every five minutes while visible, with bounded
   concurrency, pagination, conditional requests and rate-limit backoff.
+- Use token-partitioned Turso WASM/OPFS response caching with five-minute
+  freshness, ETag revalidation, bounded retention and visible freshness/cache
+  status. Authenticate before cache reuse; disconnect clears the partition.
+  Storage failure falls back visibly to a memory cache.
+- Bundle a same-origin isolation bootstrap for WASM compatibility on GitHub
+  Pages. It caches no responses; offline installation remains Slice 5. Build
+  and exercise the static application now; publishing remains Slice 5.
 - Use browser REST plus narrow GraphQL operations where needed. Reject stale
   responses after refresh, reconnect or disposal.
 - Fine-grained tokens belong to one owner. Inaccessible repositories remain
@@ -107,8 +120,9 @@ Stop for data coverage and connection review before writes.
 ### Slice 3: PR and CI writes
 
 Support marking drafts ready, submitting approval/change-request/comment
-reviews, merging eligible PRs with repository-allowed methods, rerunning failed
-jobs, and cancelling running workflows. Show the exact target and effect before
+reviews, merging eligible PRs with repository-allowed methods, approving waiting
+workflow runs, rerunning failed jobs, and cancelling running workflows.
+PR approval requires available current-revision checks. Show the exact target and effect before
 confirmation. Re-read immediately before writes and bind reviews/merges to the
 displayed SHA. Required reviews, merge queues and repository rules remain
 authoritative. Prevent duplicate submissions, refresh after effects, and retain
@@ -125,10 +139,14 @@ Signing/publication credentials remain in owning workflows. Stop for review.
 ### Slice 5: GitHub Pages and PWA
 
 Publish the app at `/lapis-maintenance/` and fixture-only Storybook under
-`/lapis-maintenance/storybook/`. Use hash navigation and base-aware assets,
-manifest and service-worker scope. Cache versioned app assets only; exclude
-credentials, authenticated responses, repository data and Storybook. Offline
-mode opens the shell with a reconnect message. Complete production acceptance.
+`/lapis-maintenance/storybook/`. The local development catalog additionally has
+a user-authorized manual live-session story for token acceptance; it is excluded
+from static builds and automated story runs. Use hash navigation and base-aware assets,
+manifest and service-worker scope. The offline worker caches versioned app assets
+only, excluding credentials, authenticated responses, repository data and
+Storybook from CacheStorage; the authorized token record and token-partitioned
+Turso response cache remain separate device storage. Offline mode opens the
+shell with a reconnect message. Complete production acceptance.
 
 ## Verification and acceptance
 
@@ -141,8 +159,9 @@ mode opens the shell with a reconnect message. Complete production acceptance.
 - Slices 3–4: denied permissions, changed targets, duplicate clicks, uncertain
   responses, blocked merges, changed waits and dispatch input validation.
   Use mocked transport then designated disposable acceptance targets.
-- Slice 5: Pages paths, reload, install, offline and absence of secrets/API
-  responses from storage/caches.
+- Slice 5: Pages paths, reload, install and offline, with credentials confined to
+  the explicitly remembered session record, API bodies confined to the authorized
+  Turso cache, and neither present in service-worker CacheStorage.
 - Record commands, counts, failures and gaps in canonical verification/evidence.
   Commit every verified slice with Jujutsu and stop for its review.
 
@@ -157,3 +176,17 @@ hosted service remain deferred.
 - [Merge expected SHA](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request)
 - [Deployment review](https://docs.github.com/en/rest/actions/workflow-runs#review-pending-deployments-for-a-workflow-run)
 - [Manual workflow dispatch](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)
+
+## Slices 2 and 3 qualification
+
+Local implementation and packed-consumer qualification are recorded in
+`spec/records/2026-11-10-slice-2-local.md`; that earlier checkpoint is historical.
+Shared source PR #22 and version PR #23 are merged and checked on main. The
+immutable v0.2.2 cohort published Agent UI 0.2.2 and Repository UI 0.2.0; exact
+registry bytes, clean installs and provenance passed. Maintenance now uses the
+released ^0.2.0 range and frozen registry lock. All local unit, browser,
+interaction/accessibility, type and static-build gates pass. Disposable PR/CI
+writes and real reviewed-candidate PR/workflow approvals also passed.
+Evidence: `spec/records/2026-11-11-release.md` and its linked checkpoints.
+Maintenance hosted CI, Pages delivery and user review remain open at this
+checkpoint. Release actions and PWA acceptance remain unapproved.

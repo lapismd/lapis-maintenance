@@ -12,11 +12,17 @@ importers:
         specifier: ^0.12.3
         version: 0.12.3(svelte@5.57.3)(tailwindcss@4.3.5)
       '@lapismd/repository-ui':
-        specifier: ^0.1.1
-        version: 0.1.1(svelte@5.57.3)(tailwindcss@4.3.5)
+        specifier: ^0.2.0
+        version: 0.2.0(svelte@5.57.3)(tailwindcss@4.3.5)
       '@lucide/svelte':
         specifier: ^1.66.0
         version: 1.71.0(svelte@5.57.3)
+      '@tursodatabase/database-wasm':
+        specifier: ^0.8.3
+        version: 0.8.3
+      coi-serviceworker:
+        specifier: ^0.1.7
+        version: 0.1.7
       svelte:
         specifier: ^5.57.3
         version: 5.57.3
@@ -239,14 +245,23 @@ packages:
   '@emnapi/core@1.11.0':
     resolution: {integrity: sha512-l9Oo58x0HOP5znGzVhYW9U3e5wVuA4LAZU2AGezTmkhO1CgQRFDhDg4nneHsu/t3WniXg9QrG2nIXL/ZS8ln8Q==}
 
+  '@emnapi/core@1.8.1':
+    resolution: {integrity: sha512-AvT9QFpxK0Zd8J0jopedNm+w/2fIzvtPKPjqyw9jwvBaReTTqPBk9Hixaz7KbjimP+QNz605/XnjFcDAL2pqBg==}
+
   '@emnapi/core@1.9.2':
     resolution: {integrity: sha512-UC+ZhH3XtczQYfOlu3lNEkdW/p4dsJ1r/bP7H8+rhao3TTTMO1ATq/4DdIi23XuGoFY+Cz0JmCbdVl0hz9jZcA==}
 
   '@emnapi/runtime@1.11.0':
     resolution: {integrity: sha512-55coeOFKHv1ywEcUXJtWU5f+Jr/W5tZDvZig8DLKSwUN1JpROQ4rk/SNOQiFWmaR/VKF4zuFyW1B8JduOSv6Pg==}
 
+  '@emnapi/runtime@1.8.1':
+    resolution: {integrity: sha512-mehfKSMWjjNol8659Z8KxEMrdSJDDot5SXMq00dM8BN4o+CLNXQ0xH2V7EchNHV4RmbZLmmPdEaXZc5H2FXmDg==}
+
   '@emnapi/runtime@1.9.2':
     resolution: {integrity: sha512-3U4+MIWHImeyu1wnmVygh5WlgfYDtyf0k8AbLhMFxOipihf6nrWC4syIm/SwEeec0mNSafiiNnMJwbza/Is6Lw==}
+
+  '@emnapi/wasi-threads@1.1.0':
+    resolution: {integrity: sha512-WI0DdZ8xFSbgMjR1sFsKABJ/C5OnRrjT06JXbZKexJGrDuPTzZdDYfFlsgcCXCyf+suG5QU2e/y1Wo2V/OapLQ==}
 
   '@emnapi/wasi-threads@1.2.1':
     resolution: {integrity: sha512-uTII7OYF+/Mes/MrcIOYp5yOtSMLBWSIoLPpcgwipoiKbli6k322tcoFsxoIIxPDqW01SQGAgko4EzZi2BNv2w==}
@@ -500,8 +515,8 @@ packages:
       '@lezer/markdown': ^1.4.3
       svelte: ^5.0.0
 
-  '@lapismd/repository-ui@0.1.1':
-    resolution: {integrity: sha512-832wm9ThHWQbvyyEoDaeuHrFedB+orB1hqLEbRhoZ75VDx+SilafMwZWwrSa8Q+HFYDtBRh5N49v/0SxpUkhmg==}
+  '@lapismd/repository-ui@0.2.0':
+    resolution: {integrity: sha512-hIX0iH0EXd6dpfuL21QWwplfF9qJaa9D7V5bg6Cg7P9EIn5BZff/elTVZFfa9p25qnSBrfZW4MXJgWD4gUb6ag==}
     peerDependencies:
       svelte: ^5.0.0
 
@@ -579,6 +594,9 @@ packages:
     peerDependencies:
       '@types/react': '>=16'
       react: '>=16'
+
+  '@napi-rs/wasm-runtime@1.0.7':
+    resolution: {integrity: sha512-SeDnOO0Tk7Okiq6DbXmmBODgOAb9dp9gjlphokTUxmt8U3liIP1ZsozBahH69j/RJv+Rfs6IwUKHTgQYJ/HBAw==}
 
   '@napi-rs/wasm-runtime@1.2.7':
     resolution: {integrity: sha512-zJccwplOAbgfZju95IUHazLnx9RAPtPN2YGJXI6UbrgeaR9QfPjGrQL6ERkSAtnVCA4Q+83ApGyaX5zdpCaKkQ==}
@@ -1060,6 +1078,15 @@ packages:
     peerDependencies:
       '@testing-library/dom': '>=7.21.4'
 
+  '@tursodatabase/database-common@0.8.3':
+    resolution: {integrity: sha512-T8sMfSnRjgGzKMDVkSg0lh1Jh6dDtTWzjYFK0ZJHtKzr+zs69a7Igo4Z+sxfh+rk9gEqn2njLgRYfpMEghMVMw==}
+
+  '@tursodatabase/database-wasm-common@0.8.3':
+    resolution: {integrity: sha512-lqsbszBThqLmnSLUBcCOTqLRigv6kVhOOQonz+2JKM5nU227TTNQibnl3Q3fyfn7HOuYcgiodJgcBECnVc/TXg==}
+
+  '@tursodatabase/database-wasm@0.8.3':
+    resolution: {integrity: sha512-rq4aTMKd1e8BaO4FoI2YPF8PXR9IlUIuyd4VwdZi0X9B3PBbFuoDJecwgrdYI9eZbQF8fRrb9hxX9hSQB/Nf/Q==}
+
   '@tybys/wasm-util@0.10.4':
     resolution: {integrity: sha512-W3c4gRigFS0T/Ma4qIYF3GDAc5AQdHb1yL5znJT1Zv1YaD9Kitx656wBjvr19qbiosmZT8lWDM5BEMynUqX65A==}
 
@@ -1285,6 +1312,9 @@ packages:
 
   codemirror-lang-mermaid@0.5.0:
     resolution: {integrity: sha512-Taw/2gPCyNArQJCxIP/HSUif+3zrvD+6Ugt7KJZ2dUKou/8r3ZhcfG8krNTZfV2iu8AuGnymKuo7bLPFyqsh/A==}
+
+  coi-serviceworker@0.1.7:
+    resolution: {integrity: sha512-bjSUqEngCPOkErY2vbyWsaIGCNRODYzlNycaREVw5s12/C8SM+RnRUUeX6pZbTtov6C52ZLY/+tvHK+BDxuUuA==}
 
   comma-separated-tokens@2.0.3:
     resolution: {integrity: sha512-Fu4hJdvzeylCfQPp9SGWidpzrMs7tTrlu6Vb8XGaRGck8QSNZJJp538Wrb60Lax4fPwR64ViY468OIUTbRlGZg==}
@@ -2923,7 +2953,11 @@ snapshots:
     dependencies:
       '@emnapi/wasi-threads': 1.2.2
       tslib: 2.9.1
-    optional: true
+
+  '@emnapi/core@1.8.1':
+    dependencies:
+      '@emnapi/wasi-threads': 1.1.0
+      tslib: 2.9.1
 
   '@emnapi/core@1.9.2':
     dependencies:
@@ -2934,12 +2968,19 @@ snapshots:
   '@emnapi/runtime@1.11.0':
     dependencies:
       tslib: 2.9.1
-    optional: true
+
+  '@emnapi/runtime@1.8.1':
+    dependencies:
+      tslib: 2.9.1
 
   '@emnapi/runtime@1.9.2':
     dependencies:
       tslib: 2.9.1
     optional: true
+
+  '@emnapi/wasi-threads@1.1.0':
+    dependencies:
+      tslib: 2.9.1
 
   '@emnapi/wasi-threads@1.2.1':
     dependencies:
@@ -2949,7 +2990,6 @@ snapshots:
   '@emnapi/wasi-threads@1.2.2':
     dependencies:
       tslib: 2.9.1
-    optional: true
 
   '@emoji-mart/data@1.2.1': {}
 
@@ -3266,7 +3306,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@lapismd/repository-ui@0.1.1(svelte@5.57.3)(tailwindcss@4.3.5)':
+  '@lapismd/repository-ui@0.2.0(svelte@5.57.3)(tailwindcss@4.3.5)':
     dependencies:
       '@codemirror/autocomplete': 6.20.4
       '@codemirror/language': 6.13.1
@@ -3396,6 +3436,12 @@ snapshots:
       '@types/mdx': 2.0.14
       '@types/react': 19.3.0
       react: 19.3.1
+
+  '@napi-rs/wasm-runtime@1.0.7':
+    dependencies:
+      '@emnapi/core': 1.11.0
+      '@emnapi/runtime': 1.11.0
+      '@tybys/wasm-util': 0.10.4
 
   '@napi-rs/wasm-runtime@1.2.7(@emnapi/core@1.11.0)(@emnapi/runtime@1.11.0)':
     dependencies:
@@ -3728,10 +3774,22 @@ snapshots:
     dependencies:
       '@testing-library/dom': 10.4.2
 
+  '@tursodatabase/database-common@0.8.3': {}
+
+  '@tursodatabase/database-wasm-common@0.8.3':
+    dependencies:
+      '@emnapi/core': 1.8.1
+      '@emnapi/runtime': 1.8.1
+      '@napi-rs/wasm-runtime': 1.0.7
+
+  '@tursodatabase/database-wasm@0.8.3':
+    dependencies:
+      '@tursodatabase/database-common': 0.8.3
+      '@tursodatabase/database-wasm-common': 0.8.3
+
   '@tybys/wasm-util@0.10.4':
     dependencies:
       tslib: 2.9.1
-    optional: true
 
   '@types/aria-query@5.0.4': {}
 
@@ -3962,6 +4020,8 @@ snapshots:
       '@codemirror/language': 6.13.1
       '@lezer/highlight': 1.2.5
       '@lezer/lr': 1.4.12
+
+  coi-serviceworker@0.1.7: {}
 
   comma-separated-tokens@2.0.3: {}
 

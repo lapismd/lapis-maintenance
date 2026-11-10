@@ -5,7 +5,11 @@
   import { Textarea } from "@lapismd/design-core/shadcn/textarea";
   import { untrack } from "svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
-  let { controller }: { controller: MaintenanceController } = $props();
+  let {
+    controller,
+    sessionMode = "demo",
+  }: { controller: MaintenanceController; sessionMode?: "demo" | "github" } =
+    $props();
   let body = $state("");
   let ref = $state("main");
   const confirmation = $derived(controller.commands.confirmation);
@@ -39,12 +43,17 @@
     <Dialog.Header
       ><Dialog.Title>{confirmation?.label ?? "Confirm action"}</Dialog.Title
       ><Dialog.Description
-        >Confirm this operation against the displayed target. The Storybook
-        session simulates the result.</Dialog.Description
+        >{sessionMode === "github"
+          ? "This action changes GitHub. The target will be checked again immediately before submission."
+          : "Confirm this operation against the displayed target. This fixture session simulates the result."}</Dialog.Description
       ></Dialog.Header
     >
     {#if confirmation}
       <dl class="maintenance-facts">
+        <div>
+          <dt>Target</dt>
+          <dd>{confirmation.command.itemId}</dd>
+        </div>
         <div>
           <dt>Repository</dt>
           <dd>{confirmation.command.repository}</dd>
@@ -81,7 +90,9 @@
           !!(needsBody && !body.trim()) ||
           (confirmation?.command.kind === "dispatch-workflow" && !ref.trim())}
         onclick={() => controller.commands.confirm({ body, ref })}
-        >Confirm simulated action</Button
+        >{sessionMode === "github"
+          ? "Confirm GitHub action"
+          : "Confirm simulated action"}</Button
       ></Dialog.Footer
     >
   </Dialog.Content>

@@ -77,6 +77,7 @@ export class MaintenanceCommands {
       const fresh = await this.#read.readDetails(
         command.itemId,
         this.#validation.signal,
+        { fresh: true },
       );
       if (this.#disposed) return;
       if (
@@ -126,5 +127,6 @@ export class MaintenanceCommands {
     this.#disposed = true;
     this.#validation?.abort();
     this.confirmation = null;
+    this.busy = false;
   }
 }

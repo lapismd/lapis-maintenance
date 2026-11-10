@@ -13,6 +13,7 @@ export type ItemStatus =
   | "draft"
   | "running"
   | "cancelled"
+  | "unavailable"
   | "passed";
 export type ActionKind =
   | "mark-ready"
@@ -22,13 +23,20 @@ export type ActionKind =
   | "merge-pr"
   | "rerun-failed"
   | "cancel-run"
+  | "approve-run"
   | "approve-deployment"
   | "reject-deployment"
   | "dispatch-workflow";
 export type Target =
   | { kind: "pull-request"; sha: string }
   | { kind: "workflow"; sha: string; runId: number; attempt: number }
-  | { kind: "deployment"; sha: string; runId: number; environmentId: number };
+  | {
+      kind: "deployment";
+      sha: string;
+      runId: number;
+      environmentId: number;
+      attempt?: number;
+    };
 export interface ActionCapability {
   kind: ActionKind;
   label: string;
@@ -52,6 +60,7 @@ export interface MaintenanceItem {
   updatedAt: string;
   url: string;
   reasons: string[];
+  draft?: boolean;
   target: Target;
   actions: ActionCapability[];
 }
@@ -59,6 +68,8 @@ export interface RepositoryCoverage {
   repository: string;
   available: boolean;
   reason?: string;
+  holdReason?: string;
+  loading?: boolean;
 }
 export interface MaintenanceSnapshot {
   items: MaintenanceItem[];
@@ -77,10 +88,26 @@ export interface MaintenanceDetail {
   workflow?: string;
   environment?: string;
   ref?: string;
+  baseRef?: string;
+  mergeable?: boolean;
+  mergeMethods?: ("merge" | "squash" | "rebase")[];
+  coverage?: string[];
+  pullRequest?: MaintenanceDetail;
+  workflowApprovals?: MaintenanceItem[];
 }
 export interface MaintenanceReadPort {
-  readSnapshot(signal: AbortSignal): Promise<MaintenanceSnapshot>;
-  readDetails(itemId: string, signal: AbortSignal): Promise<MaintenanceDetail>;
+  readSnapshot(
+    signal: AbortSignal,
+    options?: {
+      force?: boolean;
+      onProgress?: (snapshot: MaintenanceSnapshot) => void;
+    },
+  ): Promise<MaintenanceSnapshot>;
+  readDetails(
+    itemId: string,
+    signal: AbortSignal,
+    options?: { fresh?: boolean },
+  ): Promise<MaintenanceDetail>;
 }
 export interface CommandInputs {
   body?: string;
@@ -124,5 +151,6 @@ export const statusLabels: Record<ItemStatus, string> = {
   running: "Running",
   cancelled: "Cancelled",
   passed: "Checks passed",
+  unavailable: "Data unavailable",
 };
 export const targetKey = (target: Target): string => JSON.stringify(target);

@@ -15,6 +15,7 @@ const actionLabels: Record<ActionKind, string> = {
   "merge-pr": "Merge PR",
   "rerun-failed": "Rerun failed jobs",
   "cancel-run": "Cancel workflow",
+  "approve-run": "Approve workflow run",
   "approve-deployment": "Approve deployment",
   "reject-deployment": "Reject deployment",
   "dispatch-workflow": "Start release workflow",
@@ -207,6 +208,7 @@ export function detailFixture(item: MaintenanceItem): MaintenanceDetail {
   return {
     item,
     description: item.reasons.join("\n\n"),
+    mergeable: true,
     checks: [
       {
         name: "Types and contracts",

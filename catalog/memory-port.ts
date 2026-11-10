@@ -8,6 +8,9 @@ import {
 } from "../src/maintenance/types";
 import { detailFixture, snapshotFixture } from "./fixtures";
 export type Scenario =
+  | "long-repositories"
+  | "passed-workflow"
+  | "linked-pr"
   | "populated"
   | "loading"
   | "refreshing"
@@ -50,7 +53,24 @@ export class MemoryMaintenancePort
     public scenario: Scenario = "populated",
     private delay = 120,
   ) {
+    if (scenario === "passed-workflow") {
+      const run = this.snapshot.items.find((item) => item.id === "failure")!;
+      run.status = "passed";
+      run.reasons = ["The latest workflow attempt completed successfully."];
+      run.actions = [];
+    }
+    if (scenario === "linked-pr") {
+      const pr = this.snapshot.items.find((item) => item.id === "dependency")!;
+      const run = this.snapshot.items.find((item) => item.id === "failure")!;
+      pr.status = "failed";
+      run.target.sha = pr.target.sha;
+    }
     if (scenario === "empty") this.snapshot.items = [];
+    if (scenario === "long-repositories")
+      this.snapshot.repositories.push({
+        repository: "lapismd/storybook-addon-visual-delta",
+        available: true,
+      });
     if (scenario === "partial")
       this.snapshot.repositories.push({
         repository: "stevejuma/jj-store",
@@ -93,7 +113,13 @@ export class MemoryMaintenancePort
     this.details.set(itemId, count);
     if (this.scenario === "stale-target" && count === 2)
       item.target = { ...item.target, sha: "b".repeat(40) };
-    return structuredClone(detailFixture(item));
+    const detail = detailFixture(item);
+    if (this.scenario === "linked-pr" && item.id === "failure") {
+      detail.pullRequest = detailFixture(
+        this.snapshot.items.find((value) => value.id === "dependency")!,
+      );
+    }
+    return structuredClone(detail);
   }
   async execute(command: MaintenanceCommand): Promise<CommandResult> {
     this.commands.push(structuredClone(command));
@@ -137,6 +163,10 @@ export class MemoryMaintenancePort
         ? "Request accepted; the workflow is still running."
         : "The simulated action completed. No GitHub data changed.",
     ];
+    if (command.kind === "merge-pr")
+      this.snapshot.items = this.snapshot.items.filter(
+        (value) => value.id !== item.id,
+      );
     return {
       status: accepted ? "accepted" : "completed",
       message: accepted
