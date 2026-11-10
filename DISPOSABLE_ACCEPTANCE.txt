@@ -1,1 +1,2 @@
 Maintenance production adapter acceptance; merge only into maintenance-acceptance/base-20261110.
+PR revision is separate from the intentionally failing workflow-run revision.
