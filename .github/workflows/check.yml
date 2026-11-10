@@ -19,4 +19,11 @@ jobs:
       - run: corepack enable && corepack prepare pnpm@10.34.5 --activate
       - run: pnpm install --frozen-lockfile
       - run: pnpm check
-      - run: pnpm spec:validate
+      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2
+        with:
+          tool: mdbook@0.5.4
+      - run: pnpm test
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:storybook
+      - run: pnpm build-storybook
+      - run: pnpm spec:check

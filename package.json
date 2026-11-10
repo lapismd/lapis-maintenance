@@ -13,9 +13,9 @@
   "scripts": {
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "check": "pnpm format:check && tsc --noEmit",
+    "check": "pnpm format:check && pnpm check:architecture && svelte-check --tsconfig ./tsconfig.json --fail-on-warnings",
     "test": "vitest run --project unit",
-    "test:storybook": "vitest run --project storybook",
+    "test:storybook": "STORYBOOK_DISABLE_TELEMETRY=1 vitest run --project storybook",
     "storybook": "storybook dev --host 127.0.0.1 --port 7510 --no-open --disable-telemetry",
     "build-storybook": "storybook build --disable-telemetry",
     "doctor": "spec-validator doctor",
@@ -25,10 +25,12 @@
     "spec:build": "spec-validator build",
     "spec:serve": "spec-validator serve",
     "spec:search": "spec-validator search",
-    "spec:index": "spec-validator index"
+    "spec:index": "spec-validator index",
+    "check:architecture": "node scripts/check-boundaries.mjs"
   },
   "dependencies": {
     "@lapismd/design-core": "^0.12.3",
+    "@lapismd/repository-ui": "^0.1.1",
     "@lucide/svelte": "^1.66.0",
     "svelte": "^5.57.3"
   },
@@ -40,11 +42,15 @@
     "@storybook/svelte-vite": "10.6.5",
     "@sveltejs/vite-plugin-svelte": "7.3.1",
     "@types/node": "24.10.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
     "@vitest/browser-playwright": "5.0.5",
     "markdownlint-cli2": "0.22.1",
     "playwright": "1.64.1",
     "prettier": "3.7.4",
     "prettier-plugin-svelte": "3.5.2",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "storybook": "10.6.5",
     "svelte-check": "4.7.7",
     "typescript": "6.0.3",

@@ -35,9 +35,14 @@ This foundation documents the whole intended product without live GitHub code.
 
 The default screen is an action inbox across repositories. Use public Design
 Core AppShell with left navigation, main inbox and optional right details panel.
-Retain its responsive layout, scrolling, toggles and keyboard behavior. Provide
-Inbox, Pull Requests, Workflows and Approvals views over the same data, with
-search, repository/status filters, counts, freshness and refresh.
+Use Design Core Kanban for the inbox and Agent UI repository components for PR
+details. Kanban lanes represent observed status; moving cards cannot mutate
+GitHub state. Retain its responsive layout, scrolling, toggles and keyboard behavior. Provide
+Inbox, Activity, Pull Requests, Workflows and Approvals views over the same data.
+Use public Kanban Activity for records grouped by latest update. Keep search,
+the Command View repository multi-select, status filter, counts, freshness and
+icon-only refresh in fixed chrome. Join the inspector to Main, place its GitHub
+icon in the header, and keep confirmed actions in a compact fixed footer.
 
 Show repository, title, automation category, current status, age, reasons for
 attention, actions and GitHub link. Prioritize approval waits, current failures,
@@ -130,7 +135,7 @@ mode opens the shell with a reconnect message. Complete production acceptance.
 - Foundation: doctor, search, validation, formatting and CI wiring.
 - Slice 1: focused controller cases and Storybook journeys for filters,
   selection, confirmation, failure and retry; keyboard/accessibility, type,
-  static Storybook and specification checks. No screenshots/baseline changes.
+  static Storybook and specification checks. No screenshot comparisons or baseline updates.
 - Slice 2: pagination, partial permissions, rate limits, stale responses,
   reconnect/disposal and revision classification.
 - Slices 3–4: denied permissions, changed targets, duplicate clicks, uncertain

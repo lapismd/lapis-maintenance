@@ -1,0 +1,202 @@
+html,
+body,
+#storybook-root {
+  margin: 0;
+  min-height: 100%;
+}
+body {
+  color: var(--foreground);
+  background: var(--background);
+}
+.maintenance-app {
+  height: 100dvh;
+  container-type: inline-size;
+  min-height: 28rem;
+  font-family: "DM Sans Variable", sans-serif;
+  color: var(--foreground);
+  background: var(--background);
+}
+.maintenance-app :where(h1, h2, h3, p) {
+  margin: 0;
+}
+.maintenance-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+.maintenance-brand svg {
+  color: var(--primary);
+  flex-shrink: 0;
+}
+.maintenance-brand-sub {
+  display: block;
+  font-size: 0.73rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: var(--muted-foreground);
+}
+.maintenance-navigation {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem;
+}
+.maintenance-navigation button {
+  justify-content: flex-start;
+  gap: 0.7rem;
+  width: 100%;
+}
+.maintenance-nav-note {
+  padding: 2rem 1rem;
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+  line-height: 1.65;
+}
+.maintenance-nav-note p {
+  margin: 0.6rem 0 1rem;
+}
+.maintenance-eyebrow {
+  font-size: 0.67rem;
+  font-weight: 650;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.maintenance-session {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.4rem 0.2rem;
+  font-size: 0.75rem;
+}
+.maintenance-session div {
+  flex: 1;
+}
+.maintenance-session small {
+  display: block;
+  margin-top: 0.15rem;
+  color: var(--muted-foreground);
+}
+.maintenance-session-dot,
+.maintenance-live-dot {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: var(--primary);
+  flex-shrink: 0;
+}
+.maintenance-breadcrumb {
+  display: flex;
+  gap: 0.7rem;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+.maintenance-breadcrumb span {
+  color: var(--muted-foreground);
+}
+.maintenance-toolbar-spacer {
+  flex: 1;
+}
+.maintenance-main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 0.5rem 1.75rem 0.5rem;
+  min-width: 0;
+}
+
+.maintenance-toolbar-content {
+  display: grid;
+  width: 100%;
+  gap: 1rem;
+}
+.maintenance-toolbar-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  min-height: var(--ui-shell-toolbar-height);
+}
+.maintenance-context {
+  padding: 0 0.75rem;
+}
+.maintenance-fixed-filters {
+  padding: 0 0.75rem 0.75rem;
+}
+.maintenance-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.maintenance-app {
+  --ui-shell-right-sidebar-gap: 0;
+}
+.maintenance-nav-section {
+  margin: 0.75rem 0.5rem 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+}
+.maintenance-navigation button {
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+}
+.maintenance-navigation button:hover,
+.maintenance-navigation button:focus-visible {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 7%, transparent);
+}
+.maintenance-navigation button[aria-current] {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 11%, transparent);
+}
+.maintenance-navigation button span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.maintenance-navigation button svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+.maintenance-icon-link {
+  display: inline-flex;
+  width: 2rem;
+  height: 2rem;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius);
+  color: var(--muted-foreground);
+}
+.maintenance-icon-link:hover,
+.maintenance-icon-link:focus-visible {
+  background: var(--muted);
+  color: var(--foreground);
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
+
+.maintenance-navigation button[aria-pressed="true"] {
+  color: var(--foreground);
+  background: color-mix(in srgb, var(--foreground) 11%, transparent);
+}
+.maintenance-profile-footer {
+  padding: 0;
+}
+.maintenance-sign-in {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.6rem;
+  width: 100%;
+}

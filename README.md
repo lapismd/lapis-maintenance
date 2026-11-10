@@ -35,3 +35,25 @@ registry exports. Catalog fixtures must never enter production components.
 Real tokens are neither needed nor accepted by the Slice 1 demo session.
 
 No public deployment exists yet. Storybook is a local review deliverable.
+
+## Slice 1 review
+
+The inbox uses public Design Core Kanban with read-only status lanes. The
+inspector joins Main using AppShell's attached variant. PR details and the
+profile footer use published Repository UI components from the Agent UI repo.
+Workflow checks adapt Repository UI 0.1.1's private PR checks presentation to the
+dashboard's own workflow data: compact divided rows, semantic state icons,
+expandable summary, revision and read-only refresh. No private package imports
+are used. See [third-party notices](THIRD_PARTY.md) for adapted source licenses.
+Repository filters support multiple selections, mirrored in the left navigation.
+Activity uses public Kanban Activity to group current records by latest update.
+Eligible PRs expose Merge in the fixed inspector footer; the review/merge story
+demonstrates required approval and refreshed eligibility before confirmation.
+The transparent sidebar retains the shell background; its logo is the Lapis
+asset from `lapis-desktop/public/lapis-logo.svg` (same workspace, AGPL).
+
+Profile/login, approvals, merges and workflows are all in-memory simulations.
+Storybook includes retry, permission, stale-target and uncertain-result examples.
+No real token input, network adapter, service worker or deployment is included.
+
+The canonical source-boundary audit runs in both `check` and `spec:check`.

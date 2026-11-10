@@ -56,5 +56,15 @@ export default defineConfig(headingRequirements(), {
       ],
     },
   },
-  check: { build: true, first: true },
+  check: {
+    lanes: [
+      {
+        name: "source-boundaries",
+        command: "pnpm",
+        args: ["run", "check:architecture"],
+      },
+    ],
+    build: true,
+    first: true,
+  },
 });

@@ -1,0 +1,130 @@
+.maintenance-page-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.maintenance-page-heading h1 {
+  font-size: clamp(1.3rem, 2.1vw, 1.8rem);
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  margin-top: 0.35rem;
+}
+.maintenance-page-heading p {
+  margin-top: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--muted-foreground);
+}
+.maintenance-freshness {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  white-space: nowrap;
+  color: var(--muted-foreground);
+  padding-bottom: 0.2rem;
+}
+.maintenance-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  border: 1px solid var(--border);
+  border-radius: 0.6rem;
+  margin-bottom: 0;
+  background: var(--card);
+}
+.maintenance-summary > div {
+  padding: 0.9rem 1.1rem;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  text-align: center;
+  gap: 0.35rem;
+}
+.maintenance-summary > div + div {
+  border-inline-start: 1px solid var(--border);
+}
+.maintenance-summary span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  color: var(--muted-foreground);
+}
+.maintenance-summary strong {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+.maintenance-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.55rem;
+}
+.maintenance-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1 1 17rem;
+  color: var(--muted-foreground);
+}
+.maintenance-search input {
+  min-width: 0;
+}
+.maintenance-board-heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.5rem 0 0.7rem;
+}
+.maintenance-board-heading h2 {
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.maintenance-board-heading span {
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+.maintenance-board {
+  --kanban-board-height: 100%;
+  flex: 1;
+  min-height: 0;
+  margin-inline: -1.75rem;
+}
+.maintenance-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.8rem;
+  margin-bottom: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  background: var(--muted);
+  font-size: 0.8rem;
+}
+.maintenance-alert > div {
+  flex: 1;
+}
+.maintenance-alert p {
+  margin-top: 0.25rem;
+  color: var(--muted-foreground);
+}
+.maintenance-loading {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  padding: 1rem 0;
+}
+.maintenance-loading > div,
+.maintenance-detail-skeleton {
+  display: grid;
+  gap: 0.8rem;
+}
