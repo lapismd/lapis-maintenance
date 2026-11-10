@@ -1,0 +1,13 @@
+node_modules/
+.jj/
+storybook-static/
+coverage/
+test-results/
+playwright-report/
+spec/book/
+.qmd/*
+!.qmd/index.yml
+.local/
+.env*
+!.env.example
+.qmd/index.sqlite*

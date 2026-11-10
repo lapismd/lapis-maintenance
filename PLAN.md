@@ -1,0 +1,154 @@
+# Lapis Maintenance: a dashboard delivered in reviewed slices
+
+## Summary and authorization
+
+Create public `lapismd/lapis-maintenance` for a static Svelte 5 and TypeScript
+dashboard built with Design Core's AppShell. The completed application asks for
+a GitHub token and uses it directly for repository reads, PR actions, workflow
+operations and release approvals. Its final host is GitHub Pages, as a PWA.
+
+Commit this complete plan and the canonical specifications before UI code.
+**Slice 1 is only the Storybook UI, production controller and in-memory ports.**
+Stop for user approval after every slice. Approval of one slice does not
+authorize the next. The user authorized foundation and Slice 1 on 2026-11-10;
+Slices 2–5 remain planned and unapproved.
+
+## Repository and specification foundation
+
+- Create the public repository and local sibling checkout using Jujutsu.
+- Add tracked agent guidance, development instructions and this complete plan.
+- Install the latest published Deno-free `@lapismd/spec-validator` (0.2.0 at
+  initial setup) and initialize its heading-based canonical specification.
+- Specify dashboard behavior, controller/port boundaries, token lifetime,
+  GitHub reads, writes, hosting and offline behavior. Give requirements unique
+  IDs, atomic acceptance criteria and one verification row each. Mark future
+  behavior planned and evidence pending.
+- Wire `spec:search`, `spec:first`, `spec:check`, validation/build scripts and
+  doctor. Exercise QMD-backed search or its documented executed fallback.
+- Pin tools and CI Actions; wire formatting, types, focused tests and CI.
+  Consume registry semver dependencies and portable registry lockfiles.
+- Use Design Core `^0.12.3` and public component guidance before composition.
+
+This foundation documents the whole intended product without live GitHub code.
+
+## UI and controller contract
+
+The default screen is an action inbox across repositories. Use public Design
+Core AppShell with left navigation, main inbox and optional right details panel.
+Retain its responsive layout, scrolling, toggles and keyboard behavior. Provide
+Inbox, Pull Requests, Workflows and Approvals views over the same data, with
+search, repository/status filters, counts, freshness and refresh.
+
+Show repository, title, automation category, current status, age, reasons for
+attention, actions and GitHub link. Prioritize approval waits, current failures,
+review requests and blockers. Distinguish drafts, running work, holds, cancelled
+runs and unavailable data. Details show checks, reviews, workflow information,
+approval requirements and feedback. Use public controls, native CSS/tokens,
+light/dark and narrow-screen presentations.
+
+- `MaintenanceController` owns selection, filtering, refresh, attention
+  classification and action presentation.
+- `MaintenanceReadPort` supplies snapshots and selected-item details.
+- `MaintenanceCommandPort` executes typed commands against a PR revision,
+  workflow attempt or deployment identity.
+- Results distinguish completed, accepted/running, rejected and uncertain.
+- The host owns adapter construction, credentials and controller disposal.
+  Credentials never enter snapshots, Storybook args or persisted preferences.
+- Stories inject disposable in-memory ports; later slices replace ports while
+  retaining the reviewed controller and screen.
+- Mounting, selection, filtering and refresh never issue writes.
+
+## Delivery slices
+
+| Slice                | Deliverable                                                                   | Review boundary                       |
+| -------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
+| 1 — Storybook UI     | Complete screen, production controller, fixture ports, simulated reads/writes | UI and interaction approval           |
+| 2 — Live reads       | Token session and live GitHub reads                                           | Data coverage and connection approval |
+| 3 — PR and CI writes | Reviews, merges, draft readiness, reruns and cancellation                     | Action behavior approval              |
+| 4 — Release actions  | Deployment approvals/rejections and manual dispatch                           | Release-flow approval                 |
+| 5 — Pages and PWA    | Static deployment, installation and offline shell                             | Final review                          |
+
+### Slice 1: Storybook only
+
+Build realistic fixtures for dependency updates, compatibility drafts, version
+PRs, registry publication, failed builds, protected release approvals and holds.
+Simulate connection, permissions, confirmations, success, failure, stale targets
+and uncertain outcomes. Include populated, loading, refreshing, empty,
+disconnected, partial-access and rate-limited states.
+
+All data and effects remain in memory. No live GitHub adapter, real token,
+backend, bot, deployment or PWA belongs in Slice 1. Complete focused controller
+and browser interactions, accessibility, types, static build and spec checks.
+Commit evidence, present the Storybook review URL, and stop for approval.
+
+### Slice 2: token connection and live reads
+
+- Accept one token, identify its user, and keep credentials/data in memory.
+  Reload requires reconnecting; disconnect clears the session and fetched data.
+- Read defaults from dependency-automation's current allowlist, include the
+  coordinator, and allow explicit additions/exclusions.
+- Fetch open PRs, current-head checks/statuses/reviews, runs and environment
+  approval waits. Associate failures with current heads/latest attempts.
+  Preserve holds and explicitly show incomplete coverage.
+- Refresh manually and every five minutes while visible, with bounded
+  concurrency, pagination, conditional requests and rate-limit backoff.
+- Use browser REST plus narrow GraphQL operations where needed. Reject stale
+  responses after refresh, reconnect or disposal.
+- Fine-grained tokens belong to one owner. Inaccessible repositories remain
+  unavailable. Changing tokens switches the session.
+
+Stop for data coverage and connection review before writes.
+
+### Slice 3: PR and CI writes
+
+Support marking drafts ready, submitting approval/change-request/comment
+reviews, merging eligible PRs with repository-allowed methods, rerunning failed
+jobs, and cancelling running workflows. Show the exact target and effect before
+confirmation. Re-read immediately before writes and bind reviews/merges to the
+displayed SHA. Required reviews, merge queues and repository rules remain
+authoritative. Prevent duplicate submissions, refresh after effects, and retain
+uncertain results without replaying writes. Stop for action review.
+
+### Slice 4: release actions
+
+Approve/reject pending environments only when GitHub says the user can do so.
+Discover existing `workflow_dispatch` workflows and render their declared
+inputs, requiring an explicit branch/tag and review of the operation. Link to
+the resulting run and distinguish submission from successful publication.
+Signing/publication credentials remain in owning workflows. Stop for review.
+
+### Slice 5: GitHub Pages and PWA
+
+Publish the app at `/lapis-maintenance/` and fixture-only Storybook under
+`/lapis-maintenance/storybook/`. Use hash navigation and base-aware assets,
+manifest and service-worker scope. Cache versioned app assets only; exclude
+credentials, authenticated responses, repository data and Storybook. Offline
+mode opens the shell with a reconnect message. Complete production acceptance.
+
+## Verification and acceptance
+
+- Foundation: doctor, search, validation, formatting and CI wiring.
+- Slice 1: focused controller cases and Storybook journeys for filters,
+  selection, confirmation, failure and retry; keyboard/accessibility, type,
+  static Storybook and specification checks. No screenshots/baseline changes.
+- Slice 2: pagination, partial permissions, rate limits, stale responses,
+  reconnect/disposal and revision classification.
+- Slices 3–4: denied permissions, changed targets, duplicate clicks, uncertain
+  responses, blocked merges, changed waits and dispatch input validation.
+  Use mocked transport then designated disposable acceptance targets.
+- Slice 5: Pages paths, reload, install, offline and absence of secrets/API
+  responses from storage/caches.
+- Record commands, counts, failures and gaps in canonical verification/evidence.
+  Commit every verified slice with Jujutsu and stop for its review.
+
+The initial release uses one token, individual actions and existing GitHub
+automation policies. Bulk operations, monitoring while closed and a separate
+hosted service remain deferred.
+
+## Sources
+
+- [Browser API requests](https://docs.github.com/en/rest/using-the-rest-api/using-cors-and-jsonp-to-make-cross-origin-requests)
+- [Token limitations](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+- [Merge expected SHA](https://docs.github.com/en/rest/pulls/pulls#merge-a-pull-request)
+- [Deployment review](https://docs.github.com/en/rest/actions/workflow-runs#review-pending-deployments-for-a-workflow-run)
+- [Manual workflow dispatch](https://docs.github.com/en/rest/actions/workflows#create-a-workflow-dispatch-event)

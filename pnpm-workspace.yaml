@@ -1,0 +1,5 @@
+packages:
+  - .
+useNodeVersion: 24.15.0
+onlyBuiltDependencies:
+  - esbuild
