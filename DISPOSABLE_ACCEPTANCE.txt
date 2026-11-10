@@ -1,0 +1,1 @@
+Maintenance production adapter acceptance; merge only into maintenance-acceptance/base-20261110.
