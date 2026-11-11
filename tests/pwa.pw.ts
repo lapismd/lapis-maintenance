@@ -127,6 +127,9 @@ test("cold offline reload shows reconnect without restoring a saved account", as
   );
   await context.setOffline(false);
   await expect(page.getByLabel("GitHub token", { exact: true })).toBeVisible();
+  await expect(page.getByRole("alert")).toHaveText(
+    "GitHub rejected this token. Sign in again.",
+  );
   expect(githubRequests).toBe(1);
 });
 test("CacheStorage contains only listed public assets, never API data or credentials", async ({

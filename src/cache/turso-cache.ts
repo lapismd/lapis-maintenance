@@ -1,3 +1,4 @@
+import { IndexedDbResponseCache } from "./indexeddb-cache";
 import { ResilientResponseCache } from "./resilient-cache";
 import type { Database } from "@tursodatabase/database-wasm";
 import {
@@ -120,6 +121,14 @@ export async function openResponseCache(
       clearTimeout(timer);
     }
   } catch {
+    try {
+      const cache = await IndexedDbResponseCache.open(partition);
+      return {
+        cache: new ResilientResponseCache(cache, onFallback),
+        notice:
+          "Turso is unavailable in this browser; data is cached on this device using browser storage.",
+      };
+    } catch {}
     return {
       cache: new MemoryResponseCache(),
       notice:

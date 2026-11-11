@@ -38,7 +38,7 @@ export async function readCachedView(
         !Array.isArray(item.actions),
     ) ||
     snapshot.repositories.some(
-      (repo) => !repo || !validRepository(repo.repository) || repo.loading,
+      (repo) => !repo || !validRepository(repo.repository),
     )
   )
     return;

@@ -255,3 +255,11 @@ body {
   gap: 0.6rem;
   width: 100%;
 }
+
+/* Keep the attached inspector's resize rail visually quiet, like navigation. */
+.maintenance-app
+  [data-ui-component="app-shell"][data-ui-part="sidebar"][data-side="right"]
+  > [data-ui-part="sidebar-resize-handle"]
+  > [data-ui-part="sidebar-resize-indicator"] {
+  background: transparent;
+}

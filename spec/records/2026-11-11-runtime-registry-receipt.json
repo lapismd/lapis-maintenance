@@ -1,0 +1,18 @@
+{
+  "source": "7128e5e0c96e661bc3630352084704d254deb3b0",
+  "packages": [
+    {
+      "name": "@lapismd/agent-ui",
+      "version": "0.2.3",
+      "tarball": "lapismd-agent-ui-0.2.3.tgz",
+      "integrity": "sha512-BLcETKWMPT/VIAg3Tn75M4ArDYpO7r21oGJeINVCLzA3Q5YR7KXgAqMhOGObKv+yXnIOGSYmI0DYO1p1rFrCIQ=="
+    },
+    {
+      "name": "@lapismd/repository-ui",
+      "version": "0.2.1",
+      "tarball": "lapismd-repository-ui-0.2.1.tgz",
+      "integrity": "sha512-iAg4REowSdNtr5Qrc2EmA0QKE81/nei1aSAHJad6LZN1Q/RAaoVM0ZMYYKVUM+ydMzHbBlsARXzng6XtXe1zQQ=="
+    }
+  ],
+  "verified": true
+}

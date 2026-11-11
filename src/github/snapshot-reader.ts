@@ -73,10 +73,22 @@ export class GithubSnapshots {
             .filter((repo) => repo.holdReason)
             .map((repo) => [repo.repository, repo.holdReason!]),
         );
-        if (
+        const fresh =
           !options.force &&
-          this.now() - Date.parse(cached.fetchedAt) < 300_000
-        ) {
+          this.now() - Date.parse(cached.fetchedAt) < 300_000 &&
+          !cached.repositories.some((repo) => repo.loading);
+        options.onProgress?.(
+          fresh
+            ? cached
+            : {
+                ...cached,
+                repositories: cached.repositories.map((repo) => ({
+                  ...repo,
+                  loading: true,
+                })),
+              },
+        );
+        if (fresh) {
           if (this.onDefaults) {
             const discovered = await discoverRepositories(
               this.client,
@@ -90,7 +102,6 @@ export class GithubSnapshots {
           }
           return this.scopes.apply(cached, updates);
         }
-        options.onProgress?.(cached);
       }
       let validatedAt = this.now();
       options = {
@@ -120,13 +131,13 @@ export class GithubSnapshots {
           },
         ]),
       );
-      const publish = () => {
+      const publish = (checkpoint = false) => {
         signal.throwIfAborted();
         if (generation !== this.#generation) return;
         this.scopes.fold(updates, completed, pendingCoverage);
         const details = [...completed.values()].flat();
         for (const detail of details) this.details.set(detail.item.id, detail);
-        options.onProgress?.({
+        const progress: MaintenanceSnapshot = {
           items: [
             ...details.map((detail) => detail.item),
             ...(cached?.items.filter(
@@ -137,8 +148,18 @@ export class GithubSnapshots {
             ...coverage,
             ...pendingCoverage.values(),
           ]),
-          fetchedAt: new Date(validatedAt).toISOString(),
-        });
+          fetchedAt: cached?.fetchedAt ?? new Date(validatedAt).toISOString(),
+        };
+        options.onProgress?.(progress);
+        if (checkpoint)
+          void this.persist(async () => {
+            if (generation === this.#generation)
+              await saveCachedView(
+                this.cache,
+                selection,
+                this.scopes.apply(progress, updates),
+              );
+          }).catch(() => {});
       };
       this.holds = new Map(
         [...repositories.values()]
@@ -159,7 +180,7 @@ export class GithubSnapshots {
             );
             completed.set(entry.repository, result.details);
             pendingCoverage.set(entry.repository, result.coverage);
-            publish();
+            publish(true);
             return result;
           } catch (error) {
             pendingCoverage.set(entry.repository, {

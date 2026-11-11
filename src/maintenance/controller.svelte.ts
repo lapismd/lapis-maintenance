@@ -96,6 +96,18 @@ export class MaintenanceController {
       []
     );
   }
+  isRefreshing(id: string): boolean {
+    const item = this.snapshot?.items.find((item) => item.id === id);
+    return (
+      !!item &&
+      ((this.detailLoading && this.selectedId === id) ||
+        this.refreshingRepository === item.repository ||
+        (["loading", "refreshing"].includes(this.phase) &&
+          !!this.snapshot?.repositories.find(
+            (row) => row.repository === item.repository,
+          )?.loading))
+    );
+  }
   async connect(): Promise<void> {
     if (!this.#disposed) {
       this.connected = true;
@@ -132,11 +144,7 @@ export class MaintenanceController {
       const snapshot = await this.#read.readSnapshot(this.#readAbort.signal, {
         force,
         onProgress: (snapshot) => {
-          if (
-            !this.#disposed &&
-            generation === this.#readSequence &&
-            this.phase === "loading"
-          )
+          if (!this.#disposed && generation === this.#readSequence)
             this.snapshot = snapshot;
         },
       });

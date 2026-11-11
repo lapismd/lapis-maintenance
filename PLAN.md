@@ -107,7 +107,8 @@ Commit evidence, present the Storybook review URL, and stop for approval.
 - Use token-partitioned Turso WASM/OPFS response caching with five-minute
   freshness, ETag revalidation, bounded retention and visible freshness/cache
   status. Authenticate before cache reuse; disconnect clears the partition.
-  Storage failure falls back visibly to a memory cache.
+  If Turso cannot start, use bounded token-partitioned IndexedDB persistence;
+  fall back visibly to memory only when neither persistent store is available.
 - Bundle a same-origin isolation bootstrap for WASM compatibility on GitHub
   Pages. Its replacement in Slice 5 caches only public app assets. Build
   and exercise the static application now; publishing remains Slice 5.
@@ -165,7 +166,7 @@ not interrupted. Complete production acceptance.
   Use mocked transport then designated disposable acceptance targets.
 - Slice 5: Pages paths, reload, install and offline, with credentials confined to
   the explicitly remembered session record, API bodies confined to the authorized
-  Turso cache, and neither present in service-worker CacheStorage.
+  repository-data cache, and neither present in service-worker CacheStorage.
 - Record commands, counts, failures and gaps in canonical verification/evidence.
   Commit every verified slice with Jujutsu and stop for its review.
 
@@ -204,3 +205,13 @@ deployed app passes byte-identity, isolation, installation, offline reload,
 reconnect and cache-boundary acceptance. Evidence and the dependency release
 receipt are in `spec/records/2026-11-11-pwa.md`. Slice 5 is ready for user review;
 Slice 4 remains unapproved.
+
+## Cached reload follow-up
+
+Restore assembled cards before discovery, retain them during background refresh
+and mark repository/card revalidation independently. Checkpoint partial scans so
+reload can reuse completed work. Turso remains preferred, with a persistent
+browser-storage fallback when isolation is unavailable. Qualify the shared UI
+runtime floor upstream to keep long checks separate from merge controls, then
+consume the npm release. See `spec/records/2026-11-11-cached-reload.md` for the
+failure ledger and qualification; Slice 4 remains unapproved.

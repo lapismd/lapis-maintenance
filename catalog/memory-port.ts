@@ -6,9 +6,12 @@ import {
   type MaintenanceCommandPort,
   type MaintenanceReadPort,
   type MaintenanceDetail,
+  type MaintenanceSnapshot,
 } from "../src/maintenance/types";
 import { detailFixture, snapshotFixture } from "./fixtures";
 export type Scenario =
+  | "long-checks"
+  | "background-refresh"
   | "cached-details"
   | "detail-refresh-error"
   | "long-repositories"
@@ -88,8 +91,27 @@ export class MemoryMaintenancePort
           reason: "This session has read access only.",
         }));
   }
-  async readSnapshot(signal: AbortSignal) {
+  async readSnapshot(
+    signal: AbortSignal,
+    options: { onProgress?: (snapshot: MaintenanceSnapshot) => void } = {},
+  ) {
     this.reads++;
+    if (this.scenario === "background-refresh") {
+      await pause(this.delay, signal);
+      const snapshot = structuredClone(this.snapshot);
+      for (const row of snapshot.repositories)
+        row.loading = [
+          "lapismd/lapis-plugin-notebook",
+          "lapismd/lapis-desktop",
+        ].includes(row.repository);
+      options.onProgress?.(snapshot);
+      await pause(800, signal);
+      snapshot.repositories.find(
+        (row) => row.repository === "lapismd/lapis-plugin-notebook",
+      )!.loading = false;
+      options.onProgress?.(structuredClone(snapshot));
+      await pause(2 ** 30, signal);
+    }
     if (
       this.scenario === "loading" ||
       (this.scenario === "refreshing" && this.reads > 1)
@@ -135,6 +157,13 @@ export class MemoryMaintenancePort
     if (this.scenario === "stale-target" && count === 2)
       item.target = { ...item.target, sha: "b".repeat(40) };
     const detail = detailFixture(item);
+    if (this.scenario === "long-checks")
+      detail.checks = Array.from({ length: 24 }, (_, n) => ({
+        id: `check-${n}`,
+        name: `Check ${n + 1}`,
+        state: n < 2 ? ("failed" as const) : ("passed" as const),
+        description: "Conclusion: skipped",
+      }));
     if (this.scenario === "linked-pr" && item.id === "failure") {
       detail.pullRequest = detailFixture(
         this.snapshot.items.find((value) => value.id === "dependency")!,

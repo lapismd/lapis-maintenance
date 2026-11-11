@@ -142,7 +142,7 @@ export class MaintenanceSession {
       }
       this.notice ||= opened.notice ?? "";
       this.cacheKind =
-        opened.cache.kind === "turso"
+        opened.cache.kind !== "memory"
           ? "Cached on this device · 5 min"
           : "Session cache · 5 min";
       this.#cache = opened.cache;

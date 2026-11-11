@@ -3,7 +3,10 @@
     KanbanBoard,
     KanbanActivityView,
     type KanbanColumnMeta,
+    type KanbanCardContext,
   } from "@lapismd/design-core/workspace/kanban";
+  import { Badge } from "@lapismd/design-core/shadcn/badge";
+  import { LoaderCircle, Tag } from "@lucide/svelte";
   import { maintenanceColumns } from "../../maintenance/board";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
@@ -38,9 +41,34 @@
   );
 </script>
 
+{#snippet cardTags({ card }: KanbanCardContext)}
+  <span class="maintenance-card-tags">
+    {#each card.tags ?? [] as tag}<span
+        ><Tag size={12} aria-hidden="true" /><Badge
+          variant="outline"
+          style="color:inherit;border-color:currentColor;background:transparent;font-size:inherit"
+          >{tag}</Badge
+        ></span
+      >{/each}
+    {#if controller.isRefreshing(card.id)}
+      <span
+        role="img"
+        aria-label={`Refreshing ${card.title}`}
+        title="Refreshing cached card"
+      >
+        <LoaderCircle
+          class="maintenance-card-spinner"
+          size={14}
+          aria-hidden="true"
+        />
+      </span>
+    {/if}
+  </span>
+{/snippet}
 <div class="maintenance-board">
   {#if controller.view === "activity"}
     <KanbanActivityView
+      cardSnippets={{ tags: cardTags }}
       {entries}
       columns={columns.map((column) => ({
         id: column.id,
@@ -51,6 +79,7 @@
     />
   {:else}
     <KanbanBoard
+      cardSnippets={{ tags: cardTags }}
       {columns}
       anchorColumnId={columns.find((column) => column.cards.length)?.id ??
         "approval"}
@@ -66,3 +95,31 @@
     />
   {/if}
 </div>
+
+<style>
+  .maintenance-card-tags,
+  .maintenance-card-tags > span {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+  .maintenance-card-tags {
+    flex-wrap: wrap;
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .maintenance-card-tags :global(.maintenance-card-spinner) {
+    animation: maintenance-card-spin 1s linear infinite;
+  }
+  @keyframes maintenance-card-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .maintenance-card-tags :global(.maintenance-card-spinner) {
+      animation: none;
+    }
+  }
+</style>

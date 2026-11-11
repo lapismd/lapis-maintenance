@@ -102,3 +102,55 @@ it("scoped refresh invalidates only its repository and survives an older global 
   expect(initial.items[0]?.title).toBe("Before command");
   client.dispose();
 });
+it("checkpoints completed repositories so an interrupted scan can restore cards", async () => {
+  const cache = new MemoryResponseCache();
+  const selection = { additions: [], exclusions: [] };
+  const client = new GithubTransport("invented", cache, vi.fn());
+  const reader = new GithubReadPort(
+    client,
+    () => selection,
+    Date.now,
+    undefined,
+    cache,
+  );
+  const item = {
+    ...snapshotFixture().items[0]!,
+    repository: "owner/a",
+    id: "pr:owner/a:1",
+  };
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  vi.mocked(readRepository).mockImplementation(async (_client, entry) => {
+    if (entry.repository === "owner/b") await gate;
+    return {
+      details: entry.repository === "owner/a" ? [detailFixture(item)] : [],
+      coverage: {
+        repository: entry.repository,
+        available: true,
+        reason: undefined,
+        holdReason: undefined,
+      },
+    };
+  });
+  const abort = new AbortController();
+  const progress = vi.fn();
+  const reading = reader.readSnapshot(abort.signal, { onProgress: progress });
+  void reading.catch(() => {});
+  await vi.waitFor(() =>
+    expect(
+      progress.mock.calls.some(([snapshot]) => snapshot.items.length === 1),
+    ).toBe(true),
+  );
+  await reader.drain();
+  abort.abort();
+  release();
+  await expect(reading).rejects.toThrow();
+  const restored = await readCachedView(cache, selection, Date.now());
+  expect(restored?.items.map((item) => item.id)).toEqual([item.id]);
+  expect(
+    restored?.repositories.find((row) => row.repository === "owner/b")?.loading,
+  ).toBe(true);
+  client.dispose();
+});

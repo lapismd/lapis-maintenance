@@ -1,0 +1,30 @@
+[
+  {
+    "width": 1800,
+    "geometry": {
+      "viewport": 784.125,
+      "height": 384,
+      "scrollHeight": 1546,
+      "scrollTop": 1162,
+      "last": 774.109375
+    },
+    "footerTop": 784.125,
+    "resizeHandle": 1,
+    "githubRequests": 0,
+    "errors": []
+  },
+  {
+    "width": 975,
+    "geometry": {
+      "viewport": 758.515625,
+      "height": 384,
+      "scrollHeight": 1546,
+      "scrollTop": 1162,
+      "last": 748.5
+    },
+    "footerTop": 758.515625,
+    "resizeHandle": 0,
+    "githubRequests": 0,
+    "errors": []
+  }
+]

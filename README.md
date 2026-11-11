@@ -39,7 +39,10 @@ active cache. Only remember a token on a device you trust.
 Repository reads use a token-partitioned Turso WASM database with five-minute
 freshness, conditional requests, bounded storage and rate-limit backoff. Fresh
 cached details open immediately; manual refresh revalidates them. GitHub actions
-always re-read their target. Storage failure falls back visibly to memory.
+always re-read their target. Cached cards remain visible during background refresh,
+with an indicator on cards being re-fetched. Where Turso cannot start, a bounded
+IndexedDB cache preserves data across reloads; memory is the final fallback if
+both persistent stores are unavailable.
 
 ## Install the app
 

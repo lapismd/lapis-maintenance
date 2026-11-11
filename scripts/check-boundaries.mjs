@@ -44,7 +44,11 @@ for (const file of [
     findings.push(`${file}: live transport belongs in src/github`);
   if (
     /\b(?:localStorage|sessionStorage|indexedDB)\b/.test(text) &&
-    !file.startsWith("src/session/")
+    !file.startsWith("src/session/") &&
+    !(
+      file === "src/cache/indexeddb-cache.ts" &&
+      !/\b(?:localStorage|sessionStorage)\b/.test(text)
+    )
   )
     findings.push(
       `${file}: credential/preference persistence belongs in src/session`,
