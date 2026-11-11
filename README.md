@@ -67,7 +67,7 @@ pnpm dev          # app: http://127.0.0.1:7511
 pnpm storybook    # fixtures: http://127.0.0.1:7510
 ```
 
-The local-only **Maintenance/Live session** story mounts the production host for
+The local-only **Maintenance/Live → GitHub session** story mounts the production host for
 manual token testing. It is excluded from hosted Storybook and automated tests.
 Never put real tokens in fixtures, args or screenshots.
 

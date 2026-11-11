@@ -16,3 +16,7 @@ These component stories remain fixture-only and visual-pending. Token login
 stories use invented input and a no-op callback. The separate local-development
 Live/GitHub session story mounts the production app for user-entered token
 acceptance; it is excluded from published builds and automated discovery.
+
+Installation/update controls and the offline reconnect shell also have standalone
+stories using the same production components as the live host. Their callbacks
+are simulated; fixture stories never register a service worker or install an app.

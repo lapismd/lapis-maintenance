@@ -7,9 +7,10 @@ upstream; no private checks implementation is copied into this application.
 The [license](licenses/repository-ui-Apache-2.0.md) and
 [package notice](licenses/repository-ui-NOTICE.md) are retained for attribution.
 
-`@tursodatabase/database-wasm` and `coi-serviceworker` are registry dependencies
-licensed under MIT; they provide the local database and header-only isolation
-bootstrap respectively.
+`@tursodatabase/database-wasm` is a registry dependency licensed under MIT and
+provides the local database. The app owns its combined isolation/PWA worker.
+The development-only `@resvg/resvg-js` rasterizer is MPL-2.0 and generates install
+icons from the existing Lapis vector logo.
 
 `GitHubIcon.svelte` uses GitHub's Octicons mark under the
 [MIT license](licenses/octicons-MIT.md).

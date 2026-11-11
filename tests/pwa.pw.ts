@@ -64,6 +64,7 @@ test.afterAll(async () => {
 });
 test.beforeEach(() => {
   server.root(path.join(directory, "a"));
+  server.delayWorker(0);
 });
 test("publishes an installable manifest under the Pages base", async ({
   page,
@@ -278,4 +279,24 @@ test("hash navigation and reload retain the selected view", async ({
   await expect(
     page.getByRole("button", { name: "Activity", exact: true }),
   ).toHaveAttribute("aria-current", "page");
+});
+
+test("delayed worker registration bounds login startup and preserves unsent input", async ({
+  page,
+}) => {
+  server.delayWorker(9000);
+  await page.goto(server.url, { waitUntil: "domcontentloaded" });
+  const input = page.getByLabel("GitHub token", { exact: true });
+  await expect(input).toBeVisible({ timeout: 5000 });
+  await input.fill("invented-unsent-during-install");
+  await expect
+    .poll(
+      () =>
+        page.evaluate(
+          () => navigator.serviceWorker.controller?.scriptURL ?? "",
+        ),
+      { timeout: 15000 },
+    )
+    .toContain("/service-worker.js");
+  await expect(input).toHaveValue("invented-unsent-during-install");
 });

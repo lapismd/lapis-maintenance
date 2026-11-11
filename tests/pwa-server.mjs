@@ -13,6 +13,7 @@ const types = {
 };
 export async function servePwa(initialRoot) {
   let root = path.resolve(initialRoot);
+  let workerDelay = 0;
   const server = createServer(async (request, response) => {
     const url = new URL(request.url, "http://localhost");
     const relative = decodeURIComponent(url.pathname).replace(
@@ -28,6 +29,8 @@ export async function servePwa(initialRoot) {
       return;
     }
     try {
+      if (url.pathname.endsWith("/service-worker.js") && workerDelay)
+        await new Promise((resolve) => setTimeout(resolve, workerDelay));
       const data = await readFile(file);
       response.writeHead(200, {
         "Content-Type": types[path.extname(file)] || "application/octet-stream",
@@ -43,6 +46,9 @@ export async function servePwa(initialRoot) {
     url: `http://127.0.0.1:${server.address().port}/lapis-maintenance/`,
     root: (value) => {
       root = path.resolve(value);
+    },
+    delayWorker: (value) => {
+      workerDelay = value;
     },
     close: () => new Promise((resolve) => server.close(resolve)),
   };
