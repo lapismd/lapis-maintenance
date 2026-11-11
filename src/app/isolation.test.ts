@@ -16,6 +16,11 @@ function fixture(isolated: boolean, controlled = false) {
     removeEventListener: events.removeEventListener.bind(events),
   };
   const reload = vi.fn();
+  const storage = new Map<string, string>();
+  vi.stubGlobal("sessionStorage", {
+    getItem: (key: string) => storage.get(key) ?? null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+  });
   vi.stubGlobal("window", host);
   vi.stubGlobal("location", { reload });
   vi.stubGlobal("crossOriginIsolated", isolated);
@@ -45,4 +50,29 @@ it("reloads before mounting when the new header worker takes control", async () 
   await vi.advanceTimersByTimeAsync(0);
   expect(reload).toHaveBeenCalledOnce();
   expect(host.lapisMaintenanceStarted).toBeUndefined();
+});
+
+it("does not loop when isolation remains unavailable after one reload", async () => {
+  const { host, reload } = fixture(false, true);
+  void settleIsolation();
+  await vi.advanceTimersByTimeAsync(3000);
+  expect(reload).toHaveBeenCalledOnce();
+  const second = settleIsolation();
+  await vi.advanceTimersByTimeAsync(3000);
+  await second;
+  expect(reload).toHaveBeenCalledOnce();
+  expect(host.lapisMaintenanceStarted).toBe(true);
+});
+it("starts without reloading when bootstrap marker storage is denied", async () => {
+  const { host, reload } = fixture(false, true);
+  vi.stubGlobal("sessionStorage", {
+    getItem: () => {
+      throw new Error("Denied");
+    },
+  });
+  const boot = settleIsolation();
+  await vi.advanceTimersByTimeAsync(3000);
+  await boot;
+  expect(reload).not.toHaveBeenCalled();
+  expect(host.lapisMaintenanceStarted).toBe(true);
 });

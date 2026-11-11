@@ -2,12 +2,12 @@
 
 ## LM-HOST-001 — Static Pages PWA
 
-**Requirement.** The user-authorized Pages delivery MUST host the app under /lapis-maintenance/ and fixture-only
-Storybook under /lapis-maintenance/storybook/ as static GitHub Pages output.
+**Requirement.** The application MUST be installable as a static GitHub Pages PWA under
+/lapis-maintenance/, with fixture-only Storybook under /lapis-maintenance/storybook/.
 
 ### Acceptance details
 
-- Hash navigation and all assets, manifest and worker scope respect the base.
-- The offline worker caches only versioned app assets, excluding authenticated requests, credentials, the separate Turso database and Storybook; offline opens the shell with reconnect state, while Slice 2's isolation bootstrap adds headers without response caching.
-- Verify installation, reload and subpaths; Closed-app monitoring, bulk writes and a hosted service remain deferred.
-- Deploy only checked main output through pinned Pages Actions, combining app assets and fixture-only Storybook; the current publication authorizes hosting while installation/offline acceptance remains a later PWA slice.
+- Hash navigation, manifest identity/start URL/scope, icons and assets respect the Pages base; supported browsers offer installation, and documented browser installation covers other platforms.
+- One worker supplies isolation headers and caches only the versioned public app asset inventory; authenticated requests, credentials, repository data, unknown URLs and Storybook never enter CacheStorage, and offline startup shows a reconnect shell without authentication or cached account data.
+- Bound isolation bootstrap reloads, migrate the former isolation worker, and keep updates waiting for explicit reload without interrupting forms or commands; preserve older clients, prune obsolete asset versions once they are no longer needed, and cache only the app's own assets.
+- Pinned CI verifies installation metadata, subpaths, hash/reload, offline/cache boundaries, migration and deferred updates before publishing checked main output; closed-app monitoring, bulk writes and a hosted service remain deferred.

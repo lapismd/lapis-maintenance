@@ -11,8 +11,8 @@ to their owning Design Core or Agent/Repository UI package.
   token-partitioned Turso WASM cache. The user subsequently authorized Slice 3
   PR/CI writes through the live app/story; stop before Slice 4 release actions.
   The user also explicitly authorized publishing required dependencies, pushing
-  the completed changes and deploying the live app to GitHub Pages. PWA/offline
-  acceptance remains separate from this Pages hosting authorization.
+  the completed changes and deploying the live app to GitHub Pages. The user authorized Slice 5 PWA installation/offline work on 2026-11-11;
+  Slice 4 release actions remain unapproved.
 - Search with `pnpm spec:search --semantic "topic"` before reading specs;
   use the CLI's executed rg fallback only when QMD is unavailable.
 - Update the owning requirement and verification evidence with protected code.
@@ -27,7 +27,7 @@ to their owning Design Core or Agent/Repository UI package.
   app for manual token acceptance; it has no token args or automated play.
   Live transport belongs in
   src/github, persistence in src/cache and src/session; credentials never enter
-  controller state or the data cache. The isolation worker never caches data.
+  controller state or the data cache. The app worker caches public versioned assets only; private data remains in Turso.
 - Keep new production files within 300 counted lines, stories within 400 and
   tests within 500. Split by responsibility.
 - Run exact changed tests first, then all repository check, test, Storybook

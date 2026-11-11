@@ -8,4 +8,4 @@
 | 3 — PR/CI writes    | Authorized 2026-11-10 | Implemented         | Pending                  |
 | 4 — Release actions | Not authorized        | Planned             | Pending                  |
 | 5 — Pages hosting   | Authorized 2026-11-10 | Implemented         | Pending                  |
-| 5 — PWA acceptance  | Not authorized        | Planned             | Pending                  |
+| 5 — PWA acceptance  | Authorized 2026-11-11 | In progress         | Pending                  |

@@ -14,7 +14,8 @@ authorize the next. The user authorized foundation and Slice 1 on 2026-11-10;
 Slice 1 was approved and Slice 2 authorized on 2026-11-10. The subsequent request
 for write access in the live story explicitly authorizes Slice 3 implementation.
 The user also authorized dependency publication, pushing and Pages hosting;
-Slice 4 release actions and Slice 5 PWA acceptance remain planned and unapproved.
+The user authorized Slice 5 PWA implementation on 2026-11-11.
+Slice 4 release actions remain planned and unapproved.
 Slice 2 remembers a token on this device,
 shows token login without a valid session, and uses Turso WASM to cache reads.
 
@@ -108,7 +109,7 @@ Commit evidence, present the Storybook review URL, and stop for approval.
   status. Authenticate before cache reuse; disconnect clears the partition.
   Storage failure falls back visibly to a memory cache.
 - Bundle a same-origin isolation bootstrap for WASM compatibility on GitHub
-  Pages. It caches no responses; offline installation remains Slice 5. Build
+  Pages. Its replacement in Slice 5 caches only public app assets. Build
   and exercise the static application now; publishing remains Slice 5.
 - Use browser REST plus narrow GraphQL operations where needed. Reject stale
   responses after refresh, reconnect or disposal.
@@ -146,7 +147,10 @@ manifest and service-worker scope. The offline worker caches versioned app asset
 only, excluding credentials, authenticated responses, repository data and
 Storybook from CacheStorage; the authorized token record and token-partitioned
 Turso response cache remain separate device storage. Offline mode opens the
-shell with a reconnect message. Complete production acceptance.
+shell with a reconnect message without restoring account data or sending GitHub
+requests. Use one worker for isolation and precaching, migrate the old isolation
+worker, and offer explicit reload for waiting updates so forms and writes are
+not interrupted. Complete production acceptance.
 
 ## Verification and acceptance
 
@@ -190,5 +194,4 @@ writes and real reviewed-candidate PR/workflow approvals also passed.
 Evidence: `spec/records/2026-11-11-release.md` and its linked checkpoints.
 Maintenance hosted CI and Pages delivery are verified, including public login,
 reload, isolation, fixture filters and deployed-asset byte equality. Slices 2/3
-and hosting are ready for user review. Release actions and PWA acceptance remain
-unapproved; implementation stops at that boundary.
+and hosting are ready for user review. PWA implementation is now authorized; release actions remain unapproved.

@@ -38,7 +38,8 @@ for (const file of [
     findings.push(`${file}: production imports catalog`);
   if (
     /\b(?:fetch|XMLHttpRequest|WebSocket)\s*\(/.test(text) &&
-    !file.startsWith("src/github/")
+    !file.startsWith("src/github/") &&
+    file !== "src/pwa/worker.template.mjs"
   )
     findings.push(`${file}: live transport belongs in src/github`);
   if (
@@ -51,12 +52,13 @@ for (const file of [
   if (
     /\bserviceWorker\s*\./.test(text) &&
     !(
-      file === "src/app/isolation.ts" &&
-      !/\.\s*(?:register|unregister)\s*\(/.test(text)
+      file === "src/pwa/controller.svelte.ts" ||
+      (file === "src/app/isolation.ts" &&
+        !/\.\s*(?:register|unregister)\s*\(/.test(text))
     )
   )
     findings.push(
-      `${file}: service worker registration belongs to the published isolation bootstrap`,
+      `${file}: service worker registration belongs to src/pwa/controller.svelte.ts`,
     );
   if (/globalThis\s*\.\s*app\b/.test(text))
     findings.push(`${file}: ambient App ownership`);

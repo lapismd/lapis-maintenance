@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
-import { isolationAssets } from "./scripts/isolation-assets.ts";
+import { pwaAssets } from "./scripts/pwa-assets.ts";
 export default defineConfig({
-  plugins: [svelte(), isolationAssets()],
+  plugins: [svelte(), pwaAssets()],
   base: "./",
   server: {
     headers: {

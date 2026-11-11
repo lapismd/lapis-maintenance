@@ -20,6 +20,8 @@
     "catalog/**/*.ts",
     "catalog/**/*.svelte",
     ".storybook/**/*.ts",
-    "*.config.ts"
+    "*.config.ts",
+    "scripts/**/*.ts",
+    "tests/**/*.ts"
   ]
 }

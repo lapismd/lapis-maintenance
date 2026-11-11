@@ -30,18 +30,20 @@
     "spec:serve": "spec-validator serve",
     "spec:search": "spec-validator search",
     "spec:index": "spec-validator index",
-    "check:architecture": "node scripts/check-boundaries.mjs"
+    "check:architecture": "node scripts/check-boundaries.mjs",
+    "test:pwa": "playwright test --config tests/pwa.config.ts",
+    "pwa:icons": "node scripts/pwa-icons.mjs"
   },
   "dependencies": {
     "@lapismd/design-core": "^0.12.3",
     "@lapismd/repository-ui": "^0.2.0",
     "@lucide/svelte": "^1.66.0",
     "@tursodatabase/database-wasm": "^0.8.3",
-    "coi-serviceworker": "^0.1.7",
     "svelte": "^5.57.3"
   },
   "devDependencies": {
     "@lapismd/spec-validator": "^0.2.0",
+    "@resvg/resvg-js": "^2.6.2",
     "@storybook/addon-a11y": "10.6.5",
     "@storybook/addon-docs": "10.6.5",
     "@storybook/addon-vitest": "10.6.5",

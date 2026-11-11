@@ -1,3 +1,4 @@
+import { claimIsolationReload } from "../session/isolation-reload";
 /** Let the public header bootstrap settle before accepting credentials. */
 export async function settleIsolation(): Promise<void> {
   if (
@@ -20,7 +21,11 @@ export async function settleIsolation(): Promise<void> {
         })
         .catch(finish);
     });
-    if (navigator.serviceWorker.controller && window === window.top) {
+    if (
+      navigator.serviceWorker.controller &&
+      window === window.top &&
+      claimIsolationReload()
+    ) {
       location.reload();
       return new Promise<void>(() => {});
     }

@@ -36,10 +36,15 @@ export default defineConfig(headingRequirements(), {
         "^\\.storybook/",
         "^\\.github/",
         "^scripts/",
+        "^public/|^index\\.html$|^tests/",
         "^(?:package\\.json|pnpm-lock\\.yaml|.*config\\.(?:ts|js)|AGENTS\\.md)$",
       ],
       ignore: ["\\.(?:test|stories)\\.ts$"],
       rules: [
+        {
+          pattern: "^src/pwa/|^public/|^index\\.html$|^tests/|^scripts/pwa",
+          chapters: ["spec/src/hosting.md"],
+        },
         {
           pattern: "^src/(?:github|session)/",
           chapters: ["spec/src/github.md"],

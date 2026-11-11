@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Input } from "@lapismd/design-core/shadcn/input";
   import { Checkbox } from "@lapismd/design-core/shadcn/checkbox";
@@ -11,7 +12,9 @@
     error = "",
     notice = "",
     onConnect,
+    actions,
   }: {
+    actions?: Snippet;
     busy?: boolean;
     restoring?: boolean;
     error?: string;
@@ -83,5 +86,6 @@
         rel="noreferrer">Manage GitHub tokens</a
       >
     {/if}
+    {@render actions?.()}
   </section>
 </main>
