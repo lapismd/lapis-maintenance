@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@lapismd/design-core':
-        specifier: ^0.12.3
-        version: 0.12.3(svelte@5.57.3)(tailwindcss@4.3.5)
+        specifier: ^0.12.4
+        version: 0.12.4(svelte@5.57.3)(tailwindcss@4.3.5)
       '@lapismd/repository-ui':
         specifier: ^0.2.0
         version: 0.2.0(svelte@5.57.3)(tailwindcss@4.3.5)
@@ -480,8 +480,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
 
-  '@lapismd/design-core@0.12.3':
-    resolution: {integrity: sha512-kIxLTCrb64GashyWB04BM9LYSXW87tJfAXhmVY8A3Gr+Ib3jWjT6ypvoQ9D+CzPzXhSyGi1nHW+cYv7tcg9R9g==}
+  '@lapismd/design-core@0.12.4':
+    resolution: {integrity: sha512-SHfnaPiN6BvdrZmsxG1L/ScT8Btr2nJX8JfVGEJ2ALB5ZpKt7m9VyTPcj/x55vt0tjIgGn5oFdC5T8xy1tGbOQ==}
     engines: {node: ^22.11 || ^24 || >=26}
     peerDependencies:
       svelte: ^5.0.0
@@ -3215,7 +3215,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.6.0
 
-  '@lapismd/design-core@0.12.3(svelte@5.57.3)(tailwindcss@4.3.5)':
+  '@lapismd/design-core@0.12.4(svelte@5.57.3)(tailwindcss@4.3.5)':
     dependencies:
       '@codemirror/autocomplete': 6.20.4
       '@codemirror/commands': 6.11.1
