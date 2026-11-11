@@ -24,6 +24,40 @@ export const Disconnected: Story = {
     props: { part: "toolbar", scenario: "disconnected" },
   }),
 };
+export const ToggleControls: Story = {
+  render: () => ({ Component: Demo, props: { part: "toolbar" } }),
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const search = await c.findByRole("textbox", {
+      name: "Search maintenance items",
+    });
+    await userEvent.type(search, "Version first-party");
+    const collapse = await c.findByRole("button", {
+      name: "Collapse dashboard controls",
+    });
+    collapse.focus();
+    await userEvent.keyboard("{Enter}");
+    await expect(
+      await c.findByRole("button", { name: "Expand dashboard controls" }),
+    ).toHaveAttribute("aria-expanded", "false");
+    await waitFor(() =>
+      expect(
+        c.queryByRole("textbox", { name: "Search maintenance items" }),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(
+      c.getByRole("button", { name: "Expand dashboard controls" }),
+    ).toHaveFocus();
+    await expect(
+      c.getByRole("heading", { level: 1, name: "Inbox" }),
+    ).toBeInTheDocument();
+    await expect(c.getByRole("button", { name: /^Refresh$/ })).toBeVisible();
+    await userEvent.keyboard(" ");
+    await expect(
+      await c.findByRole("textbox", { name: "Search maintenance items" }),
+    ).toHaveValue("Version first-party");
+  },
+};
 export const StatusLog: Story = {
   render: () => ({
     Component: Demo,

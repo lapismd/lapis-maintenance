@@ -119,6 +119,10 @@ body {
   width: 100%;
   gap: 1rem;
 }
+.maintenance-toolbar-details {
+  display: grid;
+  gap: 1rem;
+}
 .maintenance-toolbar-row {
   display: flex;
   flex-wrap: wrap;
