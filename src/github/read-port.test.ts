@@ -295,6 +295,41 @@ it("restores a fresh assembled view without rebuilding responses and revalidates
   await reader.readSnapshot(signal);
   expect(read).toHaveBeenCalled();
 });
+it("publishes stale details before revalidation completes and never previews command validation", async () => {
+  const { reader, client, send, advance } = fixture();
+  const signal = new AbortController().signal;
+  await reader.readSnapshot(signal);
+  const first = await reader.readDetails("pr:owner/active:7", signal);
+  advance(300_001);
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  const original = send.getMockImplementation()!;
+  send.mockImplementation(async (input, init) => {
+    if (new URL(String(input)).pathname === "/repos/owner/active/pulls/7")
+      await gate;
+    return original(input, init);
+  });
+  const progress = vi.fn();
+  const pending = reader.readDetails(first.item.id, signal, {
+    onProgress: progress,
+  });
+  void pending.catch(() => {});
+  try {
+    await vi.waitFor(() => expect(progress).toHaveBeenCalledWith(first));
+  } finally {
+    release();
+    await pending;
+  }
+  const validation = vi.fn();
+  await reader.readDetails(first.item.id, signal, {
+    fresh: true,
+    onProgress: validation,
+  });
+  expect(validation).not.toHaveBeenCalled();
+  client.dispose();
+});
 it("bounds workflow inventory to current heads and pending approvals", async () => {
   const { reader, send } = fixture();
   await reader.readSnapshot(new AbortController().signal);
@@ -417,4 +452,28 @@ it("distinguishes cancelled current-head checks from missing or unavailable chec
   expect(
     snapshot.items.find((value) => value.id === "pr:owner/active:7")?.status,
   ).toBe("cancelled");
+});
+it("drops denied persisted and in-memory detail previews rather than showing them on retry", async () => {
+  const { reader, client, send, advance } = fixture();
+  const signal = new AbortController().signal;
+  await reader.readSnapshot(signal);
+  await reader.readDetails("pr:owner/active:7", signal);
+  advance(300_001);
+  const original = send.getMockImplementation()!;
+  send.mockImplementation(async (input, init) =>
+    new URL(String(input)).pathname === "/repos/owner/active/pulls/7"
+      ? Response.json({}, { status: 403 })
+      : original(input, init),
+  );
+  const first = vi.fn();
+  await expect(
+    reader.readDetails("pr:owner/active:7", signal, { onProgress: first }),
+  ).rejects.toMatchObject({ discardPreview: true });
+  expect(first).toHaveBeenCalled();
+  const retry = vi.fn();
+  await expect(
+    reader.readDetails("pr:owner/active:7", signal, { onProgress: retry }),
+  ).rejects.toThrow();
+  expect(retry).not.toHaveBeenCalled();
+  client.dispose();
 });

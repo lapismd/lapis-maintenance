@@ -23,6 +23,12 @@ it("persists real Turso WASM records across connections, isolates tokens and cle
     ),
   );
   expect((await second.get("parallel-19"))?.body).toEqual({ index: 19 });
+  for (const key of ["repo:a:detail", "repo:a:checks", "repo:ab:detail"])
+    await second.put(key, record);
+  await second.removePrefix("repo:a:");
+  expect(await second.get("repo:a:detail")).toBeUndefined();
+  expect(await second.get("repo:a:checks")).toBeUndefined();
+  expect(await second.get("repo:ab:detail")).toEqual(record);
   await second.clear();
   expect(await second.get("pulls")).toBeUndefined();
   await second.close();

@@ -7,18 +7,18 @@ import type { RepositorySelection } from "../github/models";
 import type { ResponseCache } from "./response-cache";
 import { viewKey } from "./view-cache";
 const key = (selection: RepositorySelection, id: string) =>
-  `maintenance-detail:v1:${viewKey(selection)}:${id}`;
+  `maintenance-detail:v2:${id.split(":")[1]}:${viewKey(selection)}:${id}`;
 export async function readCachedDetail(
   cache: ResponseCache | undefined,
   selection: RepositorySelection,
   id: string,
   target: Target,
   now: number,
-): Promise<MaintenanceDetail | undefined> {
+): Promise<{ detail: MaintenanceDetail; fetchedAt: number } | undefined> {
   const entry = await cache?.get(key(selection, id));
   if (
     !entry ||
-    now - entry.fetchedAt >= 300_000 ||
+    now - entry.fetchedAt >= 86_400_000 ||
     entry.fetchedAt > now + 60_000
   )
     return;
@@ -33,7 +33,7 @@ export async function readCachedDetail(
     targetKey(detail.item.target) !== targetKey(target)
   )
     return;
-  return detail;
+  return { detail, fetchedAt: entry.fetchedAt };
 }
 export async function saveCachedDetail(
   cache: ResponseCache | undefined,

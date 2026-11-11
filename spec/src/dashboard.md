@@ -8,9 +8,9 @@ accessible action inbox with light and dark themes.
 ### Acceptance details
 
 - The live host bounds login startup and preserves unsent input after late worker activation; hash navigation preserves the selected view across reload/back, and left navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals over one dataset, with authenticated profile/avatar, transparent sidebar, expandable repositories with ellipsized names and full-name hover labels, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
-- Search, multi-select repository/status filters and counts stay in the fixed header behind a keyboard-accessible disclosure that starts collapsed in the shell's mobile presentation and expanded on desktop, preserving filters and each presentation's choice while keeping the breadcrumb, status, freshness and refresh available; the centered latest-status line truncates and opens a counted icon timeline with retry and reduced-motion-aware animation.
+- Fixed summary/filters retain their mobile-collapsed and desktop-expanded disclosure choices; the breadcrumb shrinks/truncates before the status panel, freshness displays time without a Snapshot prefix, and the bounded status line remains visible and opens its counted timeline with retry and reduced-motion-aware animation.
 - Attention prioritizes approval waits, current failures, reviews and blockers before drafts, cancelled and running work, while unavailable data never appears healthy.
-- Every card click opens the joined inspector, including a selected item after its sidebar was hidden; cached details open immediately, with a header icon-only refresh, GitHub link, fixed action footer and shared panels, bounded checks, square group headers and horizontal description scrolling, while empty checks start collapsed.
+- Every card click opens the joined inspector, including after its sidebar was hidden; cached details remain visible with explicit refreshing/failure feedback and disabled actions during incomplete refresh, retaining header refresh/GitHub controls, joined shared panels, bounded square-group checks, fixed actions and horizontal descriptions, while empty checks start collapsed.
 
 ## LM-UI-002 — Storybook review boundary
 

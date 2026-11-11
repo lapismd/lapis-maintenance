@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { MaintenanceController } from "./controller.svelte";
 import { MemoryMaintenancePort } from "../../catalog/memory-port";
 import { snapshotFixture } from "../../catalog/fixtures";
@@ -51,6 +51,7 @@ describe("maintenance read boundary", () => {
       b = deferred<MaintenanceDetail>();
     let reads = 0;
     const read: MaintenanceReadPort = {
+      refreshRepository: async () => snapshotFixture(),
       readSnapshot: () => (++reads === 1 ? first.promise : second.promise),
       readDetails: (id) => (id === "a" ? a.promise : b.promise),
     };
@@ -96,6 +97,33 @@ describe("maintenance read boundary", () => {
   });
 });
 describe("explicit command boundary", () => {
+  it("refreshes only the affected repository after a command and preserves other cards", async () => {
+    const { controller: c, port } = create();
+    const scoped = vi.fn(async (repository: string) => ({
+      items: structuredClone(
+        port.snapshot.items.filter((item) => item.repository === repository),
+      ),
+      repositories: port.snapshot.repositories.filter(
+        (row) => row.repository === repository,
+      ),
+      fetchedAt: port.snapshot.fetchedAt,
+    }));
+    Object.assign(port, { refreshRepository: scoped });
+    await c.refresh();
+    await c.select("failure");
+    const repository = c.detail!.item.repository;
+    const untouched = c.snapshot!.items.filter(
+      (item) => item.repository !== repository,
+    );
+    c.commands.prepare(c.detail!.item, "rerun-failed");
+    await c.commands.confirm();
+    expect(scoped).toHaveBeenCalledWith(repository, expect.any(AbortSignal));
+    expect(port.reads).toBe(1);
+    expect(
+      c.snapshot!.items.filter((item) => item.repository !== repository),
+    ).toEqual(untouched);
+    c.dispose();
+  });
   it("does not submit before confirmation, prevents double confirmation, and distinguishes accepted", async () => {
     const { controller: c, port } = create();
     await c.refresh();

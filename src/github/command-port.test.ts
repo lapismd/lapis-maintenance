@@ -78,7 +78,11 @@ function fixture(kind: MaintenanceCommand["kind"] = "merge-pr", status = 200) {
     return Response.json({ merged: true });
   });
   const readDetails = vi.fn(async () => structuredClone(detail));
-  const reader: MaintenanceReadPort = { readDetails, readSnapshot: vi.fn() };
+  const reader: MaintenanceReadPort = {
+    readDetails,
+    readSnapshot: vi.fn(),
+    refreshRepository: vi.fn(),
+  };
   const client = new GithubTransport(
     "invented-command-token",
     new MemoryResponseCache(),

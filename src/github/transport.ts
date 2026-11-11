@@ -1,17 +1,22 @@
 import { MaintenanceReadError } from "../maintenance/types";
 import type { MaintenanceSnapshot } from "../maintenance/types";
 import type { CachedResponse, ResponseCache } from "../cache/response-cache";
-import { RequestLimiter } from "./request-limiter";
+import { RequestLimiter, type ReadPriority } from "./request-limiter";
 export class GithubError extends MaintenanceReadError {
   constructor(
     public status: number,
     message: string,
     public retryAt?: number,
   ) {
-    super(message, retryAt ? "rate-limit" : "unavailable");
+    super(
+      message,
+      retryAt ? "rate-limit" : "unavailable",
+      !retryAt && [401, 403, 404].includes(status),
+    );
   }
 }
 export interface ReadOptions {
+  priority?: ReadPriority;
   force?: boolean;
   fresh?: boolean;
   ttl?: number;
@@ -27,6 +32,11 @@ export class GithubTransport {
     { promise: Promise<CachedResponse>; signal: AbortSignal }
   >();
   #blockedUntil = 0;
+  #repositoryEpoch = new Map<string, number>();
+  invalidateRepository(repository: string) {
+    const key = repository.toLowerCase();
+    this.#repositoryEpoch.set(key, (this.#repositoryEpoch.get(key) ?? 0) + 1);
+  }
   constructor(
     private token: string,
     private cache: ResponseCache,
@@ -83,9 +93,18 @@ export class GithubTransport {
     if (url.origin !== "https://api.github.com" || url.username || url.password)
       throw new GithubError(0, "Refused an unexpected API origin.");
     const key = `${options.accept ?? "json"}:${url.pathname}${url.search}`;
+    const repository =
+      url.pathname
+        .match(/^\/repos\/([^/]+\/[^/]+)(?:\/|$)/)?.[1]
+        ?.toLowerCase() ?? "";
+    const epoch = this.#repositoryEpoch.get(repository) ?? 0;
+    const priority =
+      options.priority ?? (options.fresh ? "interactive" : "background");
     const combined = AbortSignal.any([signal, this.#lifetime.signal]);
     combined.throwIfAborted();
     const cached = options.fresh ? undefined : await this.cache.get(key);
+    if (epoch !== (this.#repositoryEpoch.get(repository) ?? 0))
+      return this.#response(path, signal, options);
     if (
       cached &&
       !options.force &&
@@ -98,84 +117,92 @@ export class GithubTransport {
         "GitHub requests are paused until the rate limit resets.",
         this.#blockedUntil,
       );
-    const pendingKey = `${key}:${options.fresh ? "fresh" : "cached"}`;
+    const pendingKey = `${key}:${options.fresh ? "fresh" : "cached"}:${epoch}`;
     let entry = this.#pending.get(pendingKey);
     if (!entry || entry.signal.aborted) {
-      const pending = this.#limiter.run(combined, async () => {
-        if (this.now() < this.#blockedUntil)
-          throw new GithubError(
-            429,
-            "GitHub requests are paused until the rate limit resets.",
-            this.#blockedUntil,
-          );
-        const headers: Record<string, string> = {
-          Authorization: `Bearer ${this.token}`,
-          Accept: options.accept ?? "application/vnd.github+json",
-          "X-GitHub-Api-Version": "2022-11-28",
-        };
-        if (cached?.etag && !options.fresh)
-          headers["If-None-Match"] = cached.etag;
-        const response = await this.send(url.href, {
-          method: "GET",
-          headers,
-          signal: AbortSignal.any([combined, AbortSignal.timeout(30_000)]),
-          cache: "no-store",
-          credentials: "omit",
-        });
-        combined.throwIfAborted();
-        if (response.status === 401) this.onUnauthorized();
-        if (!response.ok && response.status !== 304) {
-          const retry = response.headers.get("retry-after");
-          if (
-            response.status === 429 ||
-            retry ||
-            response.headers.get("x-ratelimit-remaining") === "0"
-          ) {
-            const reset =
-              Number(response.headers.get("x-ratelimit-reset")) * 1000;
-            this.#blockedUntil = Math.max(
-              this.now() + 60_000,
-              Number.isFinite(reset) ? reset : 0,
-              retry && Number.isFinite(Number(retry))
-                ? this.now() + Number(retry) * 1000
-                : retry && Number.isFinite(Date.parse(retry))
-                  ? Date.parse(retry)
-                  : 0,
-            );
+      const pending = this.#limiter.run(
+        combined,
+        async () => {
+          if (this.now() < this.#blockedUntil)
             throw new GithubError(
-              response.status,
-              `GitHub rate limit reached. Refresh after ${new Date(this.#blockedUntil).toISOString()}.`,
+              429,
+              "GitHub requests are paused until the rate limit resets.",
               this.#blockedUntil,
             );
+          const headers: Record<string, string> = {
+            Authorization: `Bearer ${this.token}`,
+            Accept: options.accept ?? "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+          };
+          if (cached?.etag && !options.fresh)
+            headers["If-None-Match"] = cached.etag;
+          const response = await this.send(url.href, {
+            method: "GET",
+            headers,
+            signal: AbortSignal.any([combined, AbortSignal.timeout(30_000)]),
+            cache: "no-store",
+            credentials: "omit",
+          });
+          combined.throwIfAborted();
+          if (response.status === 401) this.onUnauthorized();
+          if (!response.ok && response.status !== 304) {
+            const retry = response.headers.get("retry-after");
+            if (
+              response.status === 429 ||
+              retry ||
+              response.headers.get("x-ratelimit-remaining") === "0"
+            ) {
+              const reset =
+                Number(response.headers.get("x-ratelimit-reset")) * 1000;
+              this.#blockedUntil = Math.max(
+                this.now() + 60_000,
+                Number.isFinite(reset) ? reset : 0,
+                retry && Number.isFinite(Number(retry))
+                  ? this.now() + Number(retry) * 1000
+                  : retry && Number.isFinite(Date.parse(retry))
+                    ? Date.parse(retry)
+                    : 0,
+              );
+              throw new GithubError(
+                response.status,
+                `GitHub rate limit reached. Refresh after ${new Date(this.#blockedUntil).toISOString()}.`,
+                this.#blockedUntil,
+              );
+            }
+            if (
+              response.status === 401 ||
+              response.status === 403 ||
+              response.status === 404
+            )
+              await this.cache.remove(key);
+            throw new GithubError(
+              response.status,
+              response.status === 401
+                ? "GitHub rejected this token. Sign in again."
+                : `GitHub data unavailable (HTTP ${response.status}). Check token permissions and repository access.`,
+            );
           }
+          const value: CachedResponse =
+            response.status === 304 && cached
+              ? { ...cached, fetchedAt: this.now() }
+              : {
+                  body: await response.json(),
+                  fetchedAt: this.now(),
+                  etag: response.headers.get("etag") ?? undefined,
+                  next: response.headers
+                    .get("link")
+                    ?.match(/<([^>]+)>;\s*rel="next"/)?.[1],
+                };
+          combined.throwIfAborted();
           if (
-            response.status === 401 ||
-            response.status === 403 ||
-            response.status === 404
+            !options.fresh &&
+            epoch === (this.#repositoryEpoch.get(repository) ?? 0)
           )
-            await this.cache.remove(key);
-          throw new GithubError(
-            response.status,
-            response.status === 401
-              ? "GitHub rejected this token. Sign in again."
-              : `GitHub data unavailable (HTTP ${response.status}). Check token permissions and repository access.`,
-          );
-        }
-        const value: CachedResponse =
-          response.status === 304 && cached
-            ? { ...cached, fetchedAt: this.now() }
-            : {
-                body: await response.json(),
-                fetchedAt: this.now(),
-                etag: response.headers.get("etag") ?? undefined,
-                next: response.headers
-                  .get("link")
-                  ?.match(/<([^>]+)>;\s*rel="next"/)?.[1],
-              };
-        combined.throwIfAborted();
-        if (!options.fresh) await this.cache.put(key, value);
-        return value;
-      });
+            await this.cache.put(key, value);
+          return value;
+        },
+        priority,
+      );
       entry = { promise: pending, signal: combined };
       this.#pending.set(pendingKey, entry);
       void pending
@@ -185,6 +212,7 @@ export class GithubTransport {
         })
         .catch(() => {});
     }
+    if (priority === "interactive") this.#limiter.promote(entry.signal);
     const value = await entry.promise;
     combined.throwIfAborted();
     return value;

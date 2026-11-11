@@ -5,9 +5,12 @@ import {
   type MaintenanceCommand,
   type MaintenanceCommandPort,
   type MaintenanceReadPort,
+  type MaintenanceDetail,
 } from "../src/maintenance/types";
 import { detailFixture, snapshotFixture } from "./fixtures";
 export type Scenario =
+  | "cached-details"
+  | "detail-refresh-error"
   | "long-repositories"
   | "passed-workflow"
   | "linked-pr"
@@ -104,8 +107,26 @@ export class MemoryMaintenancePort
       );
     return structuredClone(this.snapshot);
   }
-  async readDetails(itemId: string, signal: AbortSignal) {
+  async refreshRepository(repository: string, signal: AbortSignal) {
     await pause(this.delay, signal);
+    return structuredClone({
+      items: this.snapshot.items.filter(
+        (item) => item.repository === repository,
+      ),
+      repositories: this.snapshot.repositories.filter(
+        (row) => row.repository === repository,
+      ),
+      fetchedAt: this.snapshot.fetchedAt,
+    });
+  }
+  async readDetails(
+    itemId: string,
+    signal: AbortSignal,
+    options: {
+      fresh?: boolean;
+      onProgress?: (detail: MaintenanceDetail) => void;
+    } = {},
+  ) {
     const item = this.snapshot.items.find((i) => i.id === itemId);
     if (!item)
       throw new MaintenanceReadError("This item is no longer available.");
@@ -119,6 +140,17 @@ export class MemoryMaintenancePort
         this.snapshot.items.find((value) => value.id === "dependency")!,
       );
     }
+    if (
+      !options.fresh &&
+      ["cached-details", "detail-refresh-error"].includes(this.scenario) &&
+      count === 1
+    ) {
+      options.onProgress?.(structuredClone(detail));
+      if (this.scenario === "cached-details") await pause(2 ** 30, signal);
+      await pause(500, signal);
+      throw new MaintenanceReadError("The connection was interrupted.");
+    }
+    await pause(this.delay, signal);
     return structuredClone(detail);
   }
   async execute(command: MaintenanceCommand): Promise<CommandResult> {

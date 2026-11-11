@@ -98,9 +98,35 @@ body {
   gap: 0.7rem;
   font-size: 0.78rem;
   white-space: nowrap;
+  min-width: 0;
+  flex: 0 1 10rem;
+  max-width: 12rem;
 }
 .maintenance-breadcrumb span {
   color: var(--muted-foreground);
+}
+.maintenance-breadcrumb .maintenance-breadcrumb-current,
+.maintenance-breadcrumb .maintenance-breadcrumb-brand {
+  color: inherit;
+}
+.maintenance-breadcrumb-current {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.maintenance-toolbar {
+  container-type: inline-size;
+}
+@container (max-width:60rem) {
+  .maintenance-breadcrumb {
+    flex-basis: 4rem;
+    max-width: 6rem;
+    gap: 0.3rem;
+  }
+  .maintenance-breadcrumb-brand,
+  .maintenance-breadcrumb-divider {
+    display: none;
+  }
 }
 .maintenance-toolbar-spacer {
   flex: 1;

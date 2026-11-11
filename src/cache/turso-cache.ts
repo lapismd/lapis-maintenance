@@ -74,6 +74,14 @@ export class TursoResponseCache implements ResponseCache {
   async clear() {
     if (!this.#closed) await this.db.exec("DELETE FROM responses");
   }
+  async removePrefix(prefix: string) {
+    if (!this.#closed)
+      await this.db.run(
+        "DELETE FROM responses WHERE substr(key, 1, ?) = ?",
+        prefix.length,
+        prefix,
+      );
+  }
   async close() {
     if (!this.#closed) {
       this.#closed = true;

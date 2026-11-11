@@ -24,9 +24,11 @@
   const branch = $derived(detail.ref ?? `maintenance/${detail.item.id}`);
   $effect(() => {
     const value = detail,
-      busy = controller.commands.busy || controller.detailLoading;
+      busy = controller.commands.busy || controller.detailLoading,
+      failedRefresh = !!controller.detailError;
     untrack(() => {
       const allowed = (kind: ActionKind) =>
+        !failedRefresh &&
         value.item.actions.some((a) => a.kind === kind && a.available) &&
         !controller.commands.blocked(value.item, kind) &&
         (kind !== "merge-pr" ||

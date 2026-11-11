@@ -33,7 +33,7 @@
           style="height:3rem;width:100%"
         />{/each}
     </div>
-  {:else if controller.detailError}
+  {:else if controller.detailError && !detail}
     <Empty.Root
       ><Empty.Header
         ><Empty.Media variant="icon"
@@ -50,6 +50,25 @@
       ></Empty.Root
     >
   {:else if detail}
+    {#if controller.detailLoading}<p class="maintenance-muted" role="status">
+        Showing cached details · Refreshing…
+      </p>
+    {:else if controller.detailError}<div
+        role="status"
+        class="maintenance-feedback"
+      >
+        <p>
+          Could not refresh details. Showing cached data. {controller.detailError}
+        </p>
+        <Button
+          size="sm"
+          variant="outline"
+          onclick={() =>
+            controller.selectedId &&
+            controller.select(controller.selectedId, true)}
+          >Retry details</Button
+        >
+      </div>{/if}
     <div class="maintenance-detail-heading">
       <span class="maintenance-eyebrow"
         >{detail.item.category} · {detail.item.repository}</span

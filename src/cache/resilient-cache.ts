@@ -54,6 +54,15 @@ export class ResilientResponseCache implements ResponseCache {
     await this.#memory.clear();
     await this.persistent.clear();
   }
+  async removePrefix(prefix: string) {
+    await this.#memory.removePrefix(prefix);
+    if (!this.#failed)
+      try {
+        await this.persistent.removePrefix(prefix);
+      } catch {
+        this.#fallback();
+      }
+  }
   async close() {
     await this.#memory.close();
     await this.persistent.close();

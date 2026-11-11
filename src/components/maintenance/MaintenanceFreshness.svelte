@@ -3,8 +3,8 @@
   let { controller }: { controller: MaintenanceController } = $props();
 </script>
 
-<div class="maintenance-freshness">
-  {#if controller.snapshot}<span class="maintenance-live-dot"></span>Snapshot · {new Date(
+<div class="maintenance-freshness" title="Snapshot time (UTC)">
+  {#if controller.snapshot}<span class="maintenance-live-dot"></span>{new Date(
       controller.snapshot.fetchedAt,
     ).toLocaleTimeString("en-GB", {
       hour: "2-digit",

@@ -96,6 +96,10 @@ export interface MaintenanceDetail {
   workflowApprovals?: MaintenanceItem[];
 }
 export interface MaintenanceReadPort {
+  refreshRepository(
+    repository: string,
+    signal: AbortSignal,
+  ): Promise<MaintenanceSnapshot>;
   readSnapshot(
     signal: AbortSignal,
     options?: {
@@ -106,7 +110,10 @@ export interface MaintenanceReadPort {
   readDetails(
     itemId: string,
     signal: AbortSignal,
-    options?: { fresh?: boolean },
+    options?: {
+      fresh?: boolean;
+      onProgress?: (detail: MaintenanceDetail) => void;
+    },
   ): Promise<MaintenanceDetail>;
 }
 export interface CommandInputs {
@@ -138,6 +145,7 @@ export class MaintenanceReadError extends Error {
   constructor(
     message: string,
     public kind: "unavailable" | "rate-limit" = "unavailable",
+    public discardPreview = false,
   ) {
     super(message);
   }

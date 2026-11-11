@@ -1,6 +1,9 @@
 import { MaintenanceCommands } from "./commands.svelte";
+import { patchRepository } from "./repository-snapshot";
 import {
   MaintenanceReadError,
+  targetKey,
+  type MaintenanceCommand,
   type MaintenanceDetail,
   type MaintenanceReadPort,
   type MaintenanceCommandPort,
@@ -29,6 +32,7 @@ export class MaintenanceController {
   detailLoading = $state(false);
   error = $state<MaintenanceReadError | null>(null);
   detailError = $state<string | null>(null);
+  refreshingRepository = $state<string | null>(null);
   query = $state("");
   repositories = $state<string[]>([]);
   statuses = $state<ItemStatus[]>([]);
@@ -41,6 +45,7 @@ export class MaintenanceController {
   #detailSequence = 0;
   #readAbort?: AbortController;
   #detailAbort?: AbortController;
+  #repositoryAbort?: AbortController;
   constructor(
     read: MaintenanceReadPort,
     write: MaintenanceCommandPort,
@@ -48,8 +53,8 @@ export class MaintenanceController {
   ) {
     this.#read = read;
     this.connected = connected;
-    this.commands = new MaintenanceCommands(read, write, () =>
-      this.refresh(true),
+    this.commands = new MaintenanceCommands(read, write, (command) =>
+      this.refreshAffected(command),
     );
   }
   get items() {
@@ -103,6 +108,8 @@ export class MaintenanceController {
     ++this.#detailSequence;
     this.#readAbort?.abort();
     this.#detailAbort?.abort();
+    this.#repositoryAbort?.abort();
+    this.refreshingRepository = null;
     this.connected = false;
     this.snapshot = null;
     this.detail = null;
@@ -166,7 +173,22 @@ export class MaintenanceController {
       const detail = await this.#read.readDetails(
         id,
         this.#detailAbort.signal,
-        { fresh },
+        {
+          fresh,
+          onProgress: (detail) => {
+            const current = this.snapshot?.items.find((item) => item.id === id);
+            if (
+              !fresh &&
+              !this.#disposed &&
+              sequence === this.#detailSequence &&
+              !this.#detailAbort?.signal.aborted &&
+              detail.item.id === id &&
+              current &&
+              targetKey(current.target) === targetKey(detail.item.target)
+            )
+              this.detail = detail;
+          },
+        },
       );
       if (
         !this.#disposed &&
@@ -175,9 +197,12 @@ export class MaintenanceController {
       )
         this.detail = detail;
     } catch (error) {
-      if (!this.#disposed && sequence === this.#detailSequence)
+      if (!this.#disposed && sequence === this.#detailSequence) {
+        if (error instanceof MaintenanceReadError && error.discardPreview)
+          this.detail = null;
         this.detailError =
           error instanceof Error ? error.message : "Details unavailable";
+      }
     } finally {
       if (!this.#disposed && sequence === this.#detailSequence)
         this.detailLoading = false;
@@ -190,6 +215,43 @@ export class MaintenanceController {
     this.detail = null;
     this.detailError = null;
     this.detailLoading = false;
+  }
+  async refreshAffected(command: MaintenanceCommand): Promise<void> {
+    if (this.#disposed || !this.connected) return;
+    this.#repositoryAbort?.abort();
+    const abort = new AbortController();
+    this.#repositoryAbort = abort;
+    this.refreshingRepository = command.repository;
+    try {
+      const patch = await this.#read.refreshRepository(
+        command.repository,
+        abort.signal,
+      );
+      if (this.#disposed || abort.signal.aborted) return;
+      const selected = this.snapshot?.items.find(
+        (item) => item.id === this.selectedId,
+      );
+      this.snapshot = this.snapshot
+        ? patchRepository(this.snapshot, patch, command.repository)
+        : patch;
+      if (this.selectedId && selected?.repository === command.repository) {
+        if (patch.items.some((item) => item.id === this.selectedId))
+          await this.select(this.selectedId, true);
+        else this.closeDetail();
+      }
+    } catch (error) {
+      if (!this.#disposed && !abort.signal.aborted)
+        this.error =
+          error instanceof MaintenanceReadError
+            ? error
+            : new MaintenanceReadError(
+                error instanceof Error
+                  ? error.message
+                  : "Repository refresh failed",
+              );
+    } finally {
+      if (this.#repositoryAbort === abort) this.refreshingRepository = null;
+    }
   }
   toggleRepository(repository: string): void {
     this.repositories = this.repositories.includes(repository)
@@ -207,6 +269,7 @@ export class MaintenanceController {
     ++this.#detailSequence;
     this.#readAbort?.abort();
     this.#detailAbort?.abort();
+    this.#repositoryAbort?.abort();
     this.commands.dispose();
   }
 }

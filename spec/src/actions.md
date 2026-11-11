@@ -10,7 +10,7 @@ failed-job rerun, workflow-run approval and cancellation through the supplied to
 - The production app and manual live story share the command adapter; confirmations identify the real effect, repository, PR/run, revision and merge method before submission; fixture confirmations remain explicitly simulated.
 - Bypass the response cache to re-read the target and its capabilities immediately before writes; reviews and merges send the displayed SHA, while readiness and workflow APIs receive an immediately revalidated target because they offer no atomic revision/attempt condition.
 - Respect permissions, holds, required reviews and merge queues; PR approval requires reported current-revision checks, merges require complete successful checks and an allowed method with clean eligibility, and waiting CI approval uses its own exact run/attempt action, including from PR details; deployment approval/dispatch remains gated by Slice 4.
-- Prevent duplicate or concurrent submissions, force-refresh affected data, distinguish completed, accepted, rejected and uncertain outcomes, and never replay uncertain writes; validate with mocked HTTP/browser journeys before acceptance on isolated disposable targets.
+- Prevent duplicate or concurrent submissions, force-refresh only the affected repository and selected item after a result, distinguish completed, accepted, rejected and uncertain outcomes, and never replay uncertain writes; validation always bypasses previews and cache, with mocked HTTP/browser acceptance.
 
 ## LM-REL-001 — Release approvals and manual dispatch
 

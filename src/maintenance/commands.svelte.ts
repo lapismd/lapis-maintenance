@@ -22,12 +22,12 @@ export class MaintenanceCommands {
   #sequence = 0;
   #read: MaintenanceReadPort;
   #write: MaintenanceCommandPort;
-  #refresh: () => Promise<void>;
+  #refresh: (command: MaintenanceCommand) => Promise<void>;
   #validation?: AbortController;
   constructor(
     read: MaintenanceReadPort,
     write: MaintenanceCommandPort,
-    refresh: () => Promise<void>,
+    refresh: (command: MaintenanceCommand) => Promise<void>,
   ) {
     this.#read = read;
     this.#write = write;
@@ -91,7 +91,7 @@ export class MaintenanceCommands {
             "Target or permissions changed. Refresh and review before confirming again.",
         });
         this.confirmation = null;
-        await this.#refresh();
+        await this.#refresh(command);
         return;
       }
       this.confirmation = null;
@@ -107,7 +107,7 @@ export class MaintenanceCommands {
       }
       if (this.#disposed) return;
       this.#record(command, result);
-      await this.#refresh();
+      await this.#refresh(command);
     } catch (error) {
       if (!this.#disposed) {
         this.#record(command, {

@@ -2,6 +2,45 @@ import { expect, it, vi } from "vitest";
 import { GithubTransport, GithubError } from "./transport";
 import { MemoryResponseCache } from "../cache/response-cache";
 const signal = () => new AbortController().signal;
+it("promotes selected reads and their shared queued requests ahead of background work", async () => {
+  const release = new Map<string, () => void>();
+  const send = vi.fn<typeof fetch>(
+    (input, init) =>
+      new Promise((resolve) => {
+        const finish = () => resolve(Response.json({}));
+        release.set(new URL(String(input)).pathname, finish);
+        init?.signal?.addEventListener("abort", finish, { once: true });
+      }),
+  );
+  const client = new GithubTransport(
+    "invented",
+    new MemoryResponseCache(),
+    send,
+  );
+  const reads = Array.from({ length: 4 }, (_, i) =>
+    client.read(`/initial/${i}`, signal()),
+  );
+  try {
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(4));
+    reads.push(
+      client.read("/background", signal()),
+      client.read("/promoted", signal()),
+    );
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    reads.push(client.read("/promoted", signal(), { priority: "interactive" }));
+    reads.push(client.read("/selected", signal(), { priority: "interactive" }));
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    release.get("/initial/0")!();
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(5));
+    expect(new URL(String(send.mock.calls[4]![0])).pathname).toBe("/promoted");
+    release.get("/promoted")!();
+    await vi.waitFor(() => expect(send).toHaveBeenCalledTimes(6));
+    expect(new URL(String(send.mock.calls[5]![0])).pathname).toBe("/selected");
+  } finally {
+    client.dispose();
+    await Promise.allSettled(reads);
+  }
+});
 it("reuses fresh data, preserves paginated 304 bodies/links and forces conditional manual refresh", async () => {
   let now = 1000;
   const send = vi
@@ -155,4 +194,34 @@ it("preserves previously cached responses when a forced read hits the hourly rat
     value: "retained",
   });
   expect(send).toHaveBeenCalledTimes(2);
+});
+it("fences pre-command responses from overwriting the new repository cache", async () => {
+  const cache = new MemoryResponseCache();
+  let release!: (response: Response) => void;
+  const send = vi
+    .fn<typeof fetch>()
+    .mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          release = resolve;
+        }),
+    )
+    .mockResolvedValueOnce(Response.json({ revision: "new" }));
+  const client = new GithubTransport("invented", cache, send);
+  const path = "/repos/owner/a/pulls/1";
+  const old = client.read(path, signal());
+  await vi.waitFor(() => expect(send).toHaveBeenCalledOnce());
+  client.invalidateRepository("owner/a");
+  expect(await client.read(path, signal(), { force: true })).toEqual({
+    revision: "new",
+  });
+  release(Response.json({ revision: "old" }));
+  await old;
+  expect(await client.read(path, signal())).toEqual({ revision: "new" });
+  expect(send).toHaveBeenCalledTimes(2);
+  client.dispose();
+});
+it("retains previews on a rate limit rather than treating it as lost permission", () => {
+  expect(new GithubError(403, "Paused", 123).discardPreview).toBe(false);
+  expect(new GithubError(403, "Denied").discardPreview).toBe(true);
 });

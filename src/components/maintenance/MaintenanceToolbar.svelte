@@ -36,7 +36,7 @@
   );
 </script>
 
-<AppShell.Toolbar
+<AppShell.Toolbar class="maintenance-toolbar"
   ><Tooltip.Provider
     ><Collapsible.Root
       class="maintenance-toolbar-content"
@@ -49,9 +49,12 @@
       <div class="maintenance-toolbar-row">
         {#if !controlsOpen}<h1 class="maintenance-sr-only">{title}</h1>{/if}
         <AppShell.Sidebar.Toggle side="left" />
-        <div class="maintenance-breadcrumb">
-          LapisMD <span>/</span>
-          {title}
+        <div class="maintenance-breadcrumb" title={`LapisMD / ${title}`}>
+          <span class="maintenance-breadcrumb-brand">LapisMD</span><span
+            class="maintenance-breadcrumb-divider"
+            aria-hidden="true">/</span
+          >
+          <span class="maintenance-breadcrumb-current">{title}</span>
         </div>
         <MaintenanceStatus
           {controller}

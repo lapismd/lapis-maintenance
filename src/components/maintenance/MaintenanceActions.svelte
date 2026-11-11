@@ -32,6 +32,7 @@
             : "outline"}
         disabled={!action.available ||
           controller.detailLoading ||
+          !!controller.detailError ||
           controller.commands.busy ||
           controller.commands.blocked(detail.item, action.kind)}
         onclick={() =>
@@ -50,6 +51,7 @@
           aria-label={`Approve workflow run: ${run.title}`}
           disabled={!action.available ||
             controller.detailLoading ||
+            !!controller.detailError ||
             controller.commands.busy ||
             controller.commands.blocked(run, action.kind)}
           onclick={() => controller.commands.prepare(run, "approve-run")}

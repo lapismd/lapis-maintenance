@@ -44,6 +44,14 @@
           },
         ]
       : []),
+    ...(controller.refreshingRepository
+      ? [
+          {
+            message: `Refreshing ${controller.refreshingRepository}…`,
+            kind: "loading",
+          },
+        ]
+      : []),
   ]);
   const messages = $derived(entries.map((entry) => entry.message));
   const latest = $derived(
@@ -53,7 +61,8 @@
         : "No session connected"),
   );
   const loading = $derived(
-    ["loading", "refreshing"].includes(controller.phase),
+    ["loading", "refreshing"].includes(controller.phase) ||
+      !!controller.refreshingRepository,
   );
 </script>
 
@@ -136,10 +145,10 @@
 
 <style>
   .maintenance-header-status {
-    flex: 1 1 0;
+    flex: 1 1 10rem;
     width: 20rem;
     max-width: 20rem;
-    min-width: 0;
+    min-width: min(8rem, 100%);
     display: flex;
     justify-content: center;
     overflow: hidden;

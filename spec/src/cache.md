@@ -6,7 +6,7 @@
 
 ### Acceptance details
 
-- Persist read payloads, validators, assembled dashboard views and selected details separately from credentials; partition by token and repository selection, restore fresh views/details without API reconstruction and render stale views during revalidation, while five-minute expiry and explicit refresh revalidate reads and commands always bypass the cache.
-- Bound inventory to the current default-branch revision, open PR heads and pending approvals, retaining pagination/deduplication and validators; bound concurrency/storage and honor reset/Retry-After, preserving cached responses on rate exhaustion without replaying writes.
+- Persist reads, validators, assembled views and selected details separately from credentials, partitioned by token and repository selection; serve fresh details directly and show revision-matching cached details immediately during revalidation up to one day old, clearly marking refresh/failure while permission denial clears the preview and commands always bypass cached data.
+- Bound inventory, storage and concurrency while retaining pagination, validators and rate-limit backoff; prioritize selected-item reads ahead of queued background work, promote shared queued reads without duplication, and scope post-command refresh/invalidation to the affected repository while preserving newer scoped results against older full scans.
 - Authenticate before cache reuse; disconnect deletes the active partition and prevents late responses from repopulating it; denied resources invalidate cached results and partial data is visibly unavailable.
 - Exercise real Turso persistence in a browser, including reload/clear; failed storage falls back visibly to memory; the app worker adds isolation headers and caches only public app assets separately from Turso; startup settles with bounded waiting and reload before accepting token input.
