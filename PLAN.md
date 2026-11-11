@@ -194,4 +194,13 @@ writes and real reviewed-candidate PR/workflow approvals also passed.
 Evidence: `spec/records/2026-11-11-release.md` and its linked checkpoints.
 Maintenance hosted CI and Pages delivery are verified, including public login,
 reload, isolation, fixture filters and deployed-asset byte equality. Slices 2/3
-and hosting are ready for user review. PWA implementation is now authorized; release actions remain unapproved.
+and hosting are ready for user review; release actions remain unapproved.
+
+## PWA qualification
+
+The installable Pages app, README badges and installation guidance are delivered.
+The final registry-backed candidate passes all local gates and hosted CI; the
+deployed app passes byte-identity, isolation, installation, offline reload,
+reconnect and cache-boundary acceptance. Evidence and the dependency release
+receipt are in `spec/records/2026-11-11-pwa.md`. Slice 5 is ready for user review;
+Slice 4 remains unapproved.

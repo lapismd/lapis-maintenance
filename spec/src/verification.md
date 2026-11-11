@@ -12,4 +12,4 @@
 | LM-CACHE-001   | Implemented | spec/records/2026-11-11-release.md; spec/records/2026-11-11-pwa.md                                        |
 | LM-ACT-001     | Implemented | spec/records/2026-11-11-release.md                                                                        |
 | LM-REL-001     | Planned     | Slice 4 unapproved                                                                                        |
-| LM-HOST-001    | In progress | spec/records/2026-11-11-pwa.md; acceptance pending                                                        |
+| LM-HOST-001    | Implemented | spec/records/2026-11-11-pwa.md                                                                            |
