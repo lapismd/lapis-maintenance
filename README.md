@@ -5,8 +5,11 @@ Design Core's AppShell/Kanban and Repository UI's shared forge panels and checks
 The complete roadmap is in [PLAN.md](PLAN.md); canonical requirements and current
 verification are in [the specification](spec/src/index.md).
 
-Slice 1 is approved; **Slices 2 and 3 are locally verified against published dependencies**.
-Hosted checks and slice review are next. The application connects to
+Open the [dashboard](https://lapismd.github.io/lapis-maintenance/) or
+[fixture Storybook](https://lapismd.github.io/lapis-maintenance/storybook/).
+
+Slice 1 is approved; **Slices 2 and 3 are implemented and ready for review**.
+Hosted CI and Pages delivery are verified. The application connects to
 GitHub with your token for live reads, remembers it on this device when selected,
 and caches repository responses in Turso WASM. The user additionally authorized
 Slice 3 PR/CI writes in the production app and local live story, required

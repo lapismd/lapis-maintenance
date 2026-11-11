@@ -188,5 +188,7 @@ released ^0.2.0 range and frozen registry lock. All local unit, browser,
 interaction/accessibility, type and static-build gates pass. Disposable PR/CI
 writes and real reviewed-candidate PR/workflow approvals also passed.
 Evidence: `spec/records/2026-11-11-release.md` and its linked checkpoints.
-Maintenance hosted CI, Pages delivery and user review remain open at this
-checkpoint. Release actions and PWA acceptance remain unapproved.
+Maintenance hosted CI and Pages delivery are verified, including public login,
+reload, isolation, fixture filters and deployed-asset byte equality. Slices 2/3
+and hosting are ready for user review. Release actions and PWA acceptance remain
+unapproved; implementation stops at that boundary.

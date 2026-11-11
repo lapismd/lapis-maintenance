@@ -1,0 +1,35 @@
+{
+  "source": "9e9ddc9b5a72c8d3a29df163c2346614644c9886",
+  "base": "https://lapismd.github.io/lapis-maintenance/",
+  "results": [
+    {
+      "path": "index.html",
+      "status": 200,
+      "sha256": "269b6edf0e6365d476cd10af93ea023124b0a116cdc57eb98051bde83c673490"
+    },
+    {
+      "path": "coi-serviceworker.js",
+      "status": 200,
+      "sha256": "d12bd536e27e39a773d7dc7adb1a1167d24002293e97ac81c995fb00cf8d4d5a"
+    },
+    {
+      "path": "assets/index-DGl9BDdn.js",
+      "status": 200,
+      "sha256": "f84ecaf6d7da0fe628b3866085d565182b259c8ea2bf5a2c057fda0bc8ebe541"
+    },
+    {
+      "path": "assets/index-hi2SqnjN.css",
+      "status": 200,
+      "sha256": "cf9e1a11dfe89b286a50ea99eded7786616f0b6085af109d0b62b041962ac28c"
+    },
+    {
+      "path": "assets/main.es-CGiT43gD.js",
+      "status": 200,
+      "sha256": "184c7c4defc9f571c6344e0b53ac5b54721a633d7810634222e510ca999d225c"
+    },
+    {
+      "storybook_entries": 98,
+      "live_story_present": false
+    }
+  ]
+}
