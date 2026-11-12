@@ -14,6 +14,9 @@ import {
   type ResponseCache,
 } from "../cache/response-cache";
 import { openResponseCache } from "../cache/turso-cache";
+import { readCachedView } from "../cache/view-cache";
+import { personalProfile, sessionPartition } from "./session-identity";
+import { RestorePorts } from "./restore-ports";
 import type { DeviceStore } from "./device-store";
 interface SessionDependencies {
   store: DeviceStore;
@@ -37,6 +40,7 @@ export class MaintenanceSession {
   #client?: GithubTransport;
   #writer?: GithubWriteTransport;
   #reader?: GithubReadPort;
+  #ports?: RestorePorts;
   #cache?: ResponseCache;
   #abort?: AbortController;
   #generation = 0;
@@ -58,6 +62,7 @@ export class MaintenanceSession {
     this.#client = undefined;
     this.#writer = undefined;
     this.#reader = undefined;
+    this.#ports = undefined;
     this.#cache = undefined;
     const previous = this.#cleanup;
     this.#cleanup = (async () => {
@@ -79,7 +84,12 @@ export class MaintenanceSession {
   async restore(): Promise<void> {
     try {
       const token = this.dependencies.store.token();
-      if (token) await this.connect(token, true);
+      if (token)
+        await this.#connect(
+          token,
+          true,
+          this.dependencies.store.identity?.() ?? undefined,
+        );
       else this.phase = "login";
     } catch {
       this.phase = "login";
@@ -88,6 +98,13 @@ export class MaintenanceSession {
     }
   }
   async connect(token: string, remember: boolean): Promise<void> {
+    return this.#connect(token, remember);
+  }
+  async #connect(
+    token: string,
+    remember: boolean,
+    saved?: GithubUser,
+  ): Promise<void> {
     const generation = ++this.#generation;
     this.#abort?.abort();
     await this.#retire(false).catch(() => {});
@@ -107,34 +124,75 @@ export class MaintenanceSession {
         new MemoryResponseCache(),
         this.dependencies.send,
       );
-      const user = await auth.read<GithubUser>("/user", abort.signal, {
+      let authFailed = false;
+      const authenticating = auth.read<GithubUser>("/user", abort.signal, {
         fresh: true,
       });
+      void authenticating.catch(() => {
+        authFailed = true;
+      });
+      const openFor = async (identity: GithubUser) => {
+        const result = await (this.dependencies.openCache ?? openResponseCache)(
+          await sessionPartition(identity, token),
+          () => {
+            if (generation !== this.#generation || this.#disposed) return;
+            this.cacheKind = "Session cache · 5 min";
+            this.notice =
+              "Persistent cache unavailable; using a memory cache for this session.";
+          },
+        );
+        if (this.#disposed || generation !== this.#generation) {
+          await result.cache.close();
+          throw new Error("Session replaced");
+        }
+        this.#cache = result.cache;
+        return result;
+      };
+      if (saved) {
+        opened = await openFor(saved);
+        const preview = await readCachedView(
+          opened.cache,
+          this.selection,
+          Date.now(),
+        );
+        if (
+          !authFailed &&
+          preview &&
+          generation === this.#generation &&
+          !this.#disposed
+        ) {
+          this.#ports = new RestorePorts(preview, opened.cache, this.selection);
+          const previewController = new MaintenanceController(
+            this.#ports,
+            this.#ports,
+          );
+          await previewController.refresh();
+          if (authFailed || this.#disposed || generation !== this.#generation) {
+            previewController.dispose();
+          } else {
+            this.controller = previewController;
+            this.profile = personalProfile(saved);
+            this.cacheKind = "Cached on this device · Reconnecting";
+            this.notice = "Reconnecting to GitHub. Cached data is read-only.";
+          }
+        }
+      }
+      const user = await authenticating;
       if (!Number.isInteger(user.id) || !user.login)
         throw new Error("GitHub returned an invalid user identity.");
       auth.dispose();
-      const digest = await crypto.subtle.digest(
-        "SHA-256",
-        new TextEncoder().encode(`lapis-maintenance:v1:${user.id}:${token}`),
-      );
-      const partition = Array.from(new Uint8Array(digest), (byte) =>
-        byte.toString(16).padStart(2, "0"),
-      ).join("");
-      opened = await (this.dependencies.openCache ?? openResponseCache)(
-        partition,
-        () => {
-          if (generation !== this.#generation || this.#disposed) return;
-          this.cacheKind = "Session cache · 5 min";
-          this.notice =
-            "Persistent cache unavailable; using a memory cache for this session.";
-        },
-      );
+      if (saved && saved.id !== user.id) {
+        await this.#retire(false);
+        opened = undefined;
+      }
+      opened ??= await openFor(user);
       if (this.#disposed || generation !== this.#generation) {
         await opened.cache.close();
         return;
       }
       try {
-        if (remember) this.dependencies.store.remember(token);
+        this.notice = "";
+        if (remember) this.dependencies.store.remember(token, user);
         else this.dependencies.store.forget();
       } catch {
         this.notice =
@@ -176,30 +234,20 @@ export class MaintenanceSession {
           void this.disconnect("GitHub rejected the token. Sign in again.");
         },
       );
-      this.controller = new MaintenanceController(
+      this.#ports ??= new RestorePorts(null, opened.cache, this.selection);
+      this.#ports.attach(
         reader,
         new GithubCommandPort(this.#client, this.#writer, reader),
       );
-      this.profile = {
-        principal: user.login,
-        revision: user.id,
-        avatarUrl: /^https:\/\/avatars\.githubusercontent\.com\//.test(
-          user.avatar_url,
-        )
-          ? user.avatar_url
-          : undefined,
-        details: {
-          display_name: user.name || user.login,
-          description: `GitHub @${user.login}`,
-          avatar: null,
-          email: null,
-          gravatar: false,
-        },
-      };
+      this.controller ??= new MaintenanceController(this.#ports, this.#ports);
+      this.profile = personalProfile(user);
       this.phase = "connected";
       await this.controller.refresh();
     } catch (error) {
       if (generation !== this.#generation || this.#disposed) return;
+      await this.#retire(
+        error instanceof GithubError && error.discardPreview,
+      ).catch(() => {});
       if (error instanceof GithubError && error.status === 401) {
         try {
           this.dependencies.store.forget();
@@ -210,7 +258,6 @@ export class MaintenanceSession {
         error instanceof Error && !(error instanceof TypeError)
           ? error.message
           : "Could not reach GitHub. Check your connection and retry.";
-      if (opened) await opened.cache.close();
     } finally {
       auth?.dispose();
       token = "";

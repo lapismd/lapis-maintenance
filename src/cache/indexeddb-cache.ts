@@ -53,6 +53,7 @@ export class IndexedDbResponseCache implements ResponseCache {
     try {
       await cache.#removeWhere(
         (record) => record.touched < Date.now() - 86_400_000,
+        IDBKeyRange.upperBound(Date.now() - 86_400_000, true),
       );
       return cache;
     } catch (error) {
@@ -137,14 +138,19 @@ export class IndexedDbResponseCache implements ResponseCache {
       await request(metadata.put(totals, "size"));
     });
   }
-  async #removeWhere(matches: (value: RecordValue) => boolean) {
+  async #removeWhere(
+    matches: (value: RecordValue) => boolean,
+    expired?: IDBKeyRange,
+  ) {
     await this.#transaction("readwrite", async (records, metadata) => {
       const totals: Totals = (await request(metadata.get("size"))) ?? {
         bytes: 0,
         count: 0,
       };
       await new Promise<void>((resolve, reject) => {
-        const cursor = records.openCursor();
+        const cursor = expired
+          ? records.index("touched").openCursor(expired)
+          : records.openCursor();
         cursor.onerror = () => reject(cursor.error);
         cursor.onsuccess = () => {
           const current = cursor.result;

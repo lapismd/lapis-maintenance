@@ -2,6 +2,29 @@ import { expect, it, vi } from "vitest";
 import { IndexedDbResponseCache } from "./indexeddb-cache";
 import { openResponseCache } from "./turso-cache";
 
+it("expires old records on reopen while retaining the exact retention boundary", async () => {
+  const present = Date.now();
+  let clock = present - 86_400_001;
+  const now = vi.spyOn(Date, "now").mockImplementation(() => clock);
+  let cache: IndexedDbResponseCache | undefined;
+  try {
+    const partition = `test-${crypto.randomUUID()}`;
+    cache = await IndexedDbResponseCache.open(partition);
+    await cache.put("expired", { body: "old", fetchedAt: clock });
+    clock++;
+    await cache.put("boundary", { body: "retained", fetchedAt: clock });
+    await cache.close();
+    clock = present;
+    cache = await IndexedDbResponseCache.open(partition);
+    expect(await cache.get("expired")).toBeUndefined();
+    expect((await cache.get("boundary"))?.body).toBe("retained");
+  } finally {
+    now.mockRestore();
+    await cache?.clear();
+    await cache?.close();
+  }
+});
+
 it("persists bounded browser fallback records across connections and isolates token partitions", async () => {
   const partition = `test-${crypto.randomUUID()}`;
   const first = await IndexedDbResponseCache.open(partition);

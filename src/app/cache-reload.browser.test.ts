@@ -25,7 +25,12 @@ it("restores real persistent fallback cards before blocked background discovery 
   localStorage.removeItem(credentialKey);
   const nativeFetch = globalThis.fetch.bind(globalThis);
   let block = false,
+    blockAuth = false,
+    releaseAuth!: () => void,
     release!: () => void;
+  const authGate = new Promise<void>((resolve) => {
+    releaseAuth = resolve;
+  });
   const gate = new Promise<void>((resolve) => {
     release = resolve;
   });
@@ -36,13 +41,16 @@ it("restores real persistent fallback cards before blocked background discovery 
         path = url.pathname;
       if (url.origin !== "https://api.github.com")
         return nativeFetch(input, init);
-      if (path === "/user")
+      if (path === "/user") {
+        if (blockAuth) await authGate;
         return Response.json({
           id,
           login: "test-maintainer",
           avatar_url: "",
           name: "Reload maintainer",
+          html_url: "https://github.com/test-maintainer",
         });
+      }
       if (path.endsWith("/repositories.json")) {
         if (block) await gate;
         return Response.json({ repositories: [] });
@@ -106,13 +114,19 @@ it("restores real persistent fallback cards before blocked background discovery 
     await cache.removePrefix("application/vnd.github.raw+json:");
     await cache.close();
     expect(JSON.parse(localStorage.getItem(credentialKey)!).token).toBe(token);
+    expect(JSON.parse(localStorage.getItem(credentialKey)!).identity.id).toBe(
+      id,
+    );
     block = true;
+    blockAuth = true;
     app = mount(App, { target });
     await vi.waitFor(
       () => expect(target.querySelector(".maintenance-board")).not.toBeNull(),
       { timeout: 3000 },
     );
     await expect.element(card()).toBeVisible();
+    expect(target.querySelector(".maintenance-loading")).toBeNull();
+    releaseAuth();
     await expect
       .element(page.getByRole("img", { name: "Refreshing Cached reload PR" }))
       .toBeVisible();
@@ -123,6 +137,7 @@ it("restores real persistent fallback cards before blocked background discovery 
       .toBeEnabled();
     expect(target.querySelector(".maintenance-card-spinner")).toBeNull();
   } finally {
+    releaseAuth();
     release();
     await unmount(app);
     target.remove();

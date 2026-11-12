@@ -15,22 +15,51 @@ export const ReopenSelectedItem: Story = {
     });
     await userEvent.click(card);
     await c.findByRole("button", { name: "Approve deployment" });
+    const toolbar = within(c.getByRole("banner", { name: "Main toolbar" }));
     await userEvent.click(
-      c.getByRole("button", { name: /^(Collapse|Close) right sidebar$/ }),
+      toolbar.getByRole("button", { name: /^(Collapse|Close) right sidebar$/ }),
     );
     await waitFor(() =>
       expect(
-        c.getByRole("button", { name: /^(Open|Expand) right sidebar$/ }),
+        toolbar.getByRole("button", { name: /^(Open|Expand) right sidebar$/ }),
       ).toBeVisible(),
     );
     await userEvent.click(card);
     await expect(
-      await c.findByRole("button", {
+      await toolbar.findByRole("button", {
         name: /^(Collapse|Close) right sidebar$/,
       }),
     ).toBeVisible();
     await expect(
       await c.findByRole("button", { name: "Approve deployment" }),
+    ).toBeVisible();
+  },
+};
+
+export const SwitchSelectedItem: Story = {
+  args: { width: 910 },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const first = await c.findByRole("button", {
+      name: /Open card: Notebook release/,
+    });
+    await userEvent.click(first);
+    const inspector = c.getByRole("complementary", { name: "Item inspector" });
+    await waitFor(() =>
+      expect(
+        inspector.querySelector(".maintenance-detail-heading h2"),
+      ).toHaveTextContent("Notebook release · production approval"),
+    );
+    await userEvent.click(
+      c.getByRole("button", { name: /Open card: Desktop CI/ }),
+    );
+    await waitFor(() =>
+      expect(
+        inspector.querySelector(".maintenance-detail-heading h2"),
+      ).toHaveTextContent("Desktop CI · package acceptance"),
+    );
+    await expect(
+      c.getByRole("complementary", { name: "Item inspector" }),
     ).toBeVisible();
   },
 };

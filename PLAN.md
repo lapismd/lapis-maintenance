@@ -106,7 +106,9 @@ Commit evidence, present the Storybook review URL, and stop for approval.
   concurrency, pagination, conditional requests and rate-limit backoff.
 - Use token-partitioned Turso WASM/OPFS response caching with five-minute
   freshness, ETag revalidation, bounded retention and visible freshness/cache
-  status. Authenticate before cache reuse; disconnect clears the partition.
+  status. Online remembered sessions may display a token-bound read-only preview
+  while authentication runs; authenticate before live reads or enabling actions.
+  Offline startup stays on the reconnect shell. Disconnect clears the partition.
   If Turso cannot start, use bounded token-partitioned IndexedDB persistence;
   fall back visibly to memory only when neither persistent store is available.
 - Bundle a same-origin isolation bootstrap for WASM compatibility on GitHub

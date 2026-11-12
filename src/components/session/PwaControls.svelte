@@ -1,6 +1,6 @@
 <script lang="ts">
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { Download, RefreshCw } from "@lucide/svelte";
+  import { ArrowBigUp, Download } from "@lucide/svelte";
   let {
     installAvailable = false,
     updateAvailable = false,
@@ -24,8 +24,16 @@
       </Button>
     {/if}
     {#if updateAvailable}
-      <Button variant="outline" size="sm" disabled={busy} onclick={onReload}>
-        <RefreshCw aria-hidden="true" />Reload update
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        aria-label="Update"
+        title="Update"
+        style="color:var(--muted-foreground)"
+        disabled={busy}
+        onclick={onReload}
+      >
+        <ArrowBigUp fill="currentColor" aria-hidden="true" />
       </Button>
     {/if}
   </div>

@@ -6,10 +6,12 @@
   let {
     scenario = "populated",
     theme = "light",
+    notice = "",
     width,
   }: {
     scenario?: Scenario;
     theme?: "light" | "dark";
+    notice?: string;
     width?: number;
   } = $props();
   const port = untrack(() => new MemoryMaintenancePort(scenario));
@@ -48,6 +50,7 @@
     {controller}
     {profile}
     {dark}
+    {notice}
     onToggleTheme={() => (dark = !dark)}
     onConnect={() => controller.connect()}
   />

@@ -7,8 +7,8 @@
 ### Acceptance details
 
 - Token entry uses a password control; remembering is explicit in the form, credentials stay in a dedicated device-local session record and never enter controller snapshots, Storybook args, URLs, logs or the Turso data cache.
-- Offline startup shows reconnect without reading a token or exposing account data; online restoration authenticates the token before exposing cached repository data; invalid tokens clear the session and return to login; transient errors offer retry without leaking prior-session data.
-- Disconnect aborts pending work, disposes the controller/cache, clears the remembered token and active cached data, and returns to login; changing tokens switches the cache partition and persistent fallback storage remains visibly identified.
+- Offline startup shows reconnect without reading a token or exposing account data; online restoration may use the saved verified identity to open the same token partition and display cached cards read-only while authentication runs; legacy token-only records authenticate once before saving this bootstrap identity; invalid tokens clear the session and return to login; transient errors offer retry without leaking prior-session data.
+- Disconnect aborts pending work, disposes the controller/cache, clears the remembered token and active cached data, and returns to login; identity-only metadata updates preserve other tabs while changing tokens switches the cache partition and persistent fallback storage remains visibly identified.
 - The sidebar shows the authenticated user's name/avatar and session copy describes confirmed PR/CI actions with their token permissions; fixtures supply synthetic identities/disposable ports, while the manual local-only live-session story reuses the production host without credential args.
 
 ## LM-GH-001 — Authenticated repository reads

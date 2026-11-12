@@ -36,6 +36,11 @@ for merges and Actions write for workflows. [Manage GitHub tokens](https://githu
 repository data. Use **Disconnect** in the profile menu to remove it and clear the
 active cache. Only remember a token on a device you trust.
 
+Online remembered sessions show cached cards while GitHub validates the saved
+token. The preview is read-only until authentication succeeds. Existing saved
+logins validate once after this update to remember the identity needed for this
+startup path. Offline startup continues to show the reconnect screen.
+
 Repository reads use a token-partitioned Turso WASM database with five-minute
 freshness, conditional requests, bounded storage and rate-limit backoff. Fresh
 cached details open immediately; manual refresh revalidates them. GitHub actions
@@ -56,7 +61,7 @@ screen; GitHub data and actions require a connection. The service worker caches
 only public app assets, separately from the remembered token and Turso database.
 It excludes authenticated responses, repository data and Storybook.
 
-When a new version is ready, choose **Reload update**. Updates wait so they do not
+When a new version is ready, choose the **Update** arrow. Updates wait so they do not
 interrupt forms or running commands. Installation and storage are per browser
 profile and origin.
 

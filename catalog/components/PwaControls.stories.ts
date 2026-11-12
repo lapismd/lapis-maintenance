@@ -21,7 +21,7 @@ export const Update: Story = {
   args: { updateAvailable: true },
   play: async ({ canvasElement, args }) => {
     await userEvent.click(
-      within(canvasElement).getByRole("button", { name: "Reload update" }),
+      within(canvasElement).getByRole("button", { name: "Update" }),
     );
     await expect(args.onReload).toHaveBeenCalledOnce();
   },
@@ -30,7 +30,7 @@ export const CommandInProgress: Story = {
   args: { updateAvailable: true, busy: true },
   play: async ({ canvasElement }) => {
     await expect(
-      within(canvasElement).getByRole("button", { name: "Reload update" }),
+      within(canvasElement).getByRole("button", { name: "Update" }),
     ).toBeDisabled();
   },
 };

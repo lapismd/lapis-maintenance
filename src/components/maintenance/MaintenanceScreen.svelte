@@ -49,7 +49,7 @@
     const selected = controller.selectedId;
     untrack(() => {
       if (selected) {
-        shell.right.open();
+        shell.right.expand();
         if (shell.mobile.resolvedMode === "mobile") shell.mobile.show("right");
       } else {
         shell.right.close();
@@ -62,7 +62,7 @@
     shell.mobile.showMain();
   }
   function openDetail(id: string) {
-    shell.right.open();
+    shell.right.expand();
     if (shell.mobile.resolvedMode === "mobile") shell.mobile.show("right");
     void controller.select(id);
   }
@@ -72,7 +72,11 @@
 </script>
 
 <div class="maintenance-app" data-ui-theme="lapis">
-  <AppShell.Root controller={shell}>
+  <AppShell.Root
+    controller={shell}
+    mobileBreakpoint={800}
+    desktopMinMainWidth={280}
+  >
     <MaintenanceNavigation
       {controller}
       {shell}

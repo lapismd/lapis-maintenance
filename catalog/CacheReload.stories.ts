@@ -32,6 +32,24 @@ export const BackgroundRefresh: Story = {
 export const DarkRefresh: Story = {
   args: { scenario: "background-refresh", theme: "dark" },
 };
+export const ReadonlyBootstrap: Story = {
+  args: {
+    scenario: "permissions",
+    notice: "Reconnecting to GitHub. Cached data is read-only.",
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(
+      await c.findByRole("button", { name: /Open card: Notebook release/ }),
+    );
+    await expect(
+      await c.findByRole("button", { name: "Approve deployment" }),
+    ).toBeDisabled();
+    await expect(
+      c.getByRole("button", { name: /Open status log:.*Reconnecting/ }),
+    ).toBeVisible();
+  },
+};
 export const LongChecksStayAboveMerge: Story = {
   args: { scenario: "long-checks" },
   play: async ({ canvasElement }) => {

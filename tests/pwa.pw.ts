@@ -185,9 +185,7 @@ test("a waiting update preserves the form until explicit reload", async ({
   await page.evaluate(async () => {
     await (await navigator.serviceWorker.ready).update();
   });
-  await expect(
-    page.getByRole("button", { name: "Reload update" }),
-  ).toBeVisible();
+  await expect(page.getByRole("button", { name: "Update" })).toBeVisible();
   await expect(page.getByLabel("GitHub token", { exact: true })).toHaveValue(
     "invented-unsent-token",
   );
@@ -195,7 +193,7 @@ test("a waiting update preserves the form until explicit reload", async ({
   expect(
     await page.evaluate(() => navigator.serviceWorker.controller!.scriptURL),
   ).toBe(initialWorker);
-  await page.getByRole("button", { name: "Reload update" }).click();
+  await page.getByRole("button", { name: "Update" }).click();
   await expect(page.locator('meta[name="test-version"]')).toHaveAttribute(
     "content",
     "b",
@@ -235,9 +233,7 @@ test("migrates the existing isolation worker without leaving an update prompt", 
       page.evaluate(() => navigator.serviceWorker.controller?.scriptURL ?? ""),
     )
     .toContain("/service-worker.js");
-  await expect(page.getByRole("button", { name: "Reload update" })).toHaveCount(
-    0,
-  );
+  await expect(page.getByRole("button", { name: "Update" })).toHaveCount(0);
 });
 test("hash navigation and reload retain the selected view", async ({
   page,

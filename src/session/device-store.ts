@@ -1,9 +1,29 @@
 import { validRepository, type RepositorySelection } from "../github/models";
+import type { GithubUser } from "../github/models";
+import { savedIdentity } from "./session-identity";
 export const credentialKey = "lapis-maintenance:session:v1";
 const selectionKey = "lapis-maintenance:repositories:v1";
+export function sameRememberedToken(
+  previous: string | null,
+  next: string | null,
+): boolean {
+  const token = (raw: string | null) => {
+    try {
+      const value = JSON.parse(raw ?? "null");
+      return value?.version === 1 && typeof value.token === "string"
+        ? value.token
+        : null;
+    } catch {
+      return null;
+    }
+  };
+  const before = token(previous);
+  return !!before && before === token(next);
+}
 export interface DeviceStore {
   token(): string | null;
-  remember(token: string): void;
+  remember(token: string, identity?: GithubUser): void;
+  identity?(): GithubUser | null;
   forget(): void;
   selection(): RepositorySelection;
   saveSelection(selection: RepositorySelection): void;
@@ -33,10 +53,24 @@ export class BrowserDeviceStore implements DeviceStore {
     this.forget();
     return null;
   }
-  remember(token: string) {
+  identity(): GithubUser | null {
+    if (!this.token()) return null;
+    try {
+      return savedIdentity(
+        JSON.parse(this.#storage().getItem(credentialKey)!).identity,
+      );
+    } catch {
+      return null;
+    }
+  }
+  remember(token: string, identity?: GithubUser) {
     this.#storage().setItem(
       credentialKey,
-      JSON.stringify({ version: 1, token }),
+      JSON.stringify({
+        version: 1,
+        token,
+        identity: savedIdentity(identity) ?? undefined,
+      }),
     );
   }
   forget() {

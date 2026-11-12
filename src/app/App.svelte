@@ -11,7 +11,11 @@
   import TokenLogin from "../components/session/TokenLogin.svelte";
   import RepositorySettings from "../components/session/RepositorySettings.svelte";
   import { MaintenanceSession } from "../session/session.svelte";
-  import { BrowserDeviceStore, credentialKey } from "../session/device-store";
+  import {
+    BrowserDeviceStore,
+    credentialKey,
+    sameRememberedToken,
+  } from "../session/device-store";
   import { startVisibleRefresh } from "../session/visible-refresh";
   let { pwa }: { pwa?: PwaController } = $props();
   let offline = $state(!navigator.onLine);
@@ -46,7 +50,10 @@
     window.addEventListener("online", reconnect);
     window.addEventListener("offline", lostConnection);
     const synchronize = (event: StorageEvent) => {
-      if (event.key === credentialKey)
+      if (
+        event.key === credentialKey &&
+        !sameRememberedToken(event.oldValue, event.newValue)
+      )
         void session.disconnect(
           "The session changed in another tab. Reconnect to continue.",
           false,
@@ -93,9 +100,9 @@
       void session.disconnect();
     }}
   >
-    {#snippet settings()}{@render pwaControls()}<RepositorySettings
-        {session}
-      />{/snippet}
+    {#snippet settings()}{@render pwaControls()}{#if session.phase === "connected"}<RepositorySettings
+          {session}
+        />{/if}{/snippet}
   </MaintenanceScreen>
 {:else}
   <TokenLogin

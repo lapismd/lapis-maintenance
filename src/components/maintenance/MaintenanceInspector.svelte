@@ -18,6 +18,7 @@
   variant="attached"
   mobileLabel="Details"
   closeable
+  constraintPriority={20}
   constrainedPresentation="replace-main"
 >
   <AppShell.Sidebar.Header

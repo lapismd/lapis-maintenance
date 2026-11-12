@@ -60,6 +60,7 @@
   label="Maintenance navigation"
   mobileLabel="Navigation"
   variant="rail"
+  constraintPriority={0}
 >
   <AppShell.Sidebar.Header
     ><div class="maintenance-brand" data-compact={compact}>
