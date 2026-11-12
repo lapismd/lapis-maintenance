@@ -28,7 +28,7 @@ const lanes = [
   {
     id: "waiting",
     label: "Activity",
-    color: "var(--chart-2)",
+    color: "color-mix(in oklch, var(--chart-2), black 20%)",
     statuses: ["running", "cancelled", "passed"],
   },
 ];

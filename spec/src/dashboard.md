@@ -9,7 +9,7 @@ accessible action inbox with light and dark themes.
 
 - The live host bounds login startup and preserves unsent input after late worker activation; hash navigation preserves the selected view across reload/back, and left navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals over one dataset, with authenticated profile/avatar, transparent sidebar and right resize handle, expandable repositories with ellipsized names and full-name hover labels, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
 - Fixed summary/filters retain their mobile-collapsed and desktop-expanded disclosure choices; the breadcrumb shrinks/truncates before the status panel, freshness displays time without a Snapshot prefix, and the bounded status line remains visible and opens its counted timeline with retry and reduced-motion-aware animation.
-- Attention prioritizes approval waits, current failures, reviews and blockers before drafts, cancelled and running work, while unavailable data never appears healthy; category chips retain a small inset from the top of their card.
+- Attention prioritizes approval waits, current failures, reviews and blockers before drafts, cancelled and running work, while unavailable data never appears healthy; category chips retain a small inset from the top of their card, Activity count accents retain readable contrast, and long board lanes use Design Core's measured viewport rendering without mounting every card.
 - Cached boards persist during refresh with accessible, reduced-motion-aware per-card indicators; card activation opens or updates the joined inspector; tablets retain adjacent panes and phones compact navigation; inspectors immediately show known title, status and reasons while full cached details load, then retain matching content with refresh/failure feedback and disabled pending actions; preserve header refresh/GitHub controls, shared panels, bounded square-group checks, fixed actions and horizontal descriptions; empty checks start collapsed, and pending summaries never invent check results.
 
 ## LM-UI-002 — Storybook review boundary
@@ -19,7 +19,7 @@ disposable in-memory ports, without real credentials or network effects.
 
 ### Acceptance details
 
-- Scenarios cover populated, loading, refreshing, empty, disconnected, partial-access, rate-limit, stale-target and uncertain-result states.
+- Scenarios cover populated, loading, refreshing, empty, disconnected, partial-access, rate-limit, stale-target and uncertain-result states, plus a fixture-only 130-card wide shell and standalone board for manual fullscreen scroll/hover diagnosis without GitHub, credentials or persistent caches.
 - Fixtures cover dependencies, compatibility drafts, versioning, registry publication, failed builds, protected approvals and explicit repository holds.
 - Simulated connections, permissions and outcomes exercise real controls with explicit action confirmation, pending-review explanations and merge enabled only after refreshed eligibility.
 - Type, controller, Storybook interaction/accessibility and static build checks pass before slice review; Slice 2 additionally exposes a manual local-development production-app story with login, cache and disconnect, excluded from static builds and automated runs, without token args or play functions.

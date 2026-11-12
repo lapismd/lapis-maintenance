@@ -10,6 +10,7 @@ import {
 } from "../src/maintenance/types";
 import { detailFixture, snapshotFixture } from "./fixtures";
 export type Scenario =
+  | "large-inventory"
   | "long-checks"
   | "background-refresh"
   | "cached-details"
@@ -60,6 +61,29 @@ export class MemoryMaintenancePort
     public scenario: Scenario = "populated",
     private delay = 120,
   ) {
+    if (scenario === "large-inventory") {
+      const run = this.snapshot.items.find((item) => item.id === "running")!;
+      const repositories = this.snapshot.repositories.map(
+        (row) => row.repository,
+      );
+      this.snapshot.items.push(
+        ...Array.from({ length: 120 }, (_, index) => ({
+          ...structuredClone(run),
+          id: `inventory-${String(index + 1).padStart(3, "0")}`,
+          title: `${["CI · packaged application acceptance", "Publish specification to GitHub Pages", "Version first-party packages"][index % 3]} · fixture ${index + 1}`,
+          repository: repositories[index % repositories.length]!,
+          status: index % 15 === 0 ? ("running" as const) : ("passed" as const),
+          target: {
+            kind: "workflow" as const,
+            sha: run.target.sha,
+            runId: 90000 + index,
+            attempt: 2,
+          },
+          reasons: ["Latest observed workflow attempt; fixture data only."],
+          actions: [],
+        })),
+      );
+    }
     if (scenario === "passed-workflow") {
       const run = this.snapshot.items.find((item) => item.id === "failure")!;
       run.status = "passed";
