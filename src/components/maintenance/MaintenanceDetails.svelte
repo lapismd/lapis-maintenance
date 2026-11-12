@@ -6,13 +6,18 @@
   import { FileSearch, CircleAlert } from "@lucide/svelte";
   import RepositoryReview from "./RepositoryReview.svelte";
   import MaintenanceRunPanel from "./MaintenanceRunPanel.svelte";
-  import { statusLabels } from "../../maintenance/types";
+  import { statusLabels, type MaintenanceItem } from "../../maintenance/types";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
     controller,
     onClose,
   }: { controller: MaintenanceController; onClose: () => void } = $props();
   const detail = $derived(controller.detail);
+  const selected = $derived(
+    controller.snapshot?.items.find(
+      (item) => item.id === controller.selectedId,
+    ),
+  );
   const receipt = $derived(
     controller.commands.receipts
       .filter((r) => r.command.itemId === controller.selectedId)
@@ -20,19 +25,33 @@
   );
 </script>
 
+{#snippet itemHeading(item: MaintenanceItem)}
+  <div class="maintenance-detail-heading">
+    <span class="maintenance-eyebrow">{item.category} · {item.repository}</span>
+    <h2>{item.title}</h2>
+    <Badge variant="outline">{statusLabels[item.status]}</Badge>
+  </div>
+{/snippet}
+
 <div class="maintenance-details" aria-label="Maintenance item details">
   {#if controller.detailLoading && !detail}
-    <div
-      role="status"
-      aria-label="Loading item details"
-      class="maintenance-detail-skeleton"
-    >
-      <Skeleton
-        style="height:1.5rem;width:80%"
-      />{#each [1, 2, 3, 4] as n (n)}<Skeleton
-          style="height:3rem;width:100%"
-        />{/each}
-    </div>
+    {#if selected}
+      {@render itemHeading(selected)}
+      <p class="maintenance-muted" role="status">Loading details…</p>
+      {#each selected.reasons as reason}<p>{reason}</p>{/each}
+    {:else}
+      <div
+        role="status"
+        aria-label="Loading item details"
+        class="maintenance-detail-skeleton"
+      >
+        <Skeleton
+          style="height:1.5rem;width:80%"
+        />{#each [1, 2, 3, 4] as n (n)}<Skeleton
+            style="height:3rem;width:100%"
+          />{/each}
+      </div>
+    {/if}
   {:else if controller.detailError && !detail}
     <Empty.Root
       ><Empty.Header
@@ -69,13 +88,7 @@
           >Retry details</Button
         >
       </div>{/if}
-    <div class="maintenance-detail-heading">
-      <span class="maintenance-eyebrow"
-        >{detail.item.category} · {detail.item.repository}</span
-      >
-      <h2>{detail.item.title}</h2>
-      <Badge variant="outline">{statusLabels[detail.item.status]}</Badge>
-    </div>
+    {@render itemHeading(detail.item)}
     {#if receipt}<div
         class="maintenance-feedback"
         data-outcome={receipt.status}

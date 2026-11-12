@@ -104,6 +104,7 @@
     gap: 0.35rem;
   }
   .maintenance-card-tags {
+    margin-block-start: 0.25rem;
     flex-wrap: wrap;
     font-size: 0.65rem;
     font-weight: 600;

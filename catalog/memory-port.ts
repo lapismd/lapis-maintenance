@@ -13,6 +13,7 @@ export type Scenario =
   | "long-checks"
   | "background-refresh"
   | "cached-details"
+  | "loading-details"
   | "detail-refresh-error"
   | "long-repositories"
   | "passed-workflow"
@@ -154,6 +155,7 @@ export class MemoryMaintenancePort
       throw new MaintenanceReadError("This item is no longer available.");
     const count = (this.details.get(itemId) ?? 0) + 1;
     this.details.set(itemId, count);
+    if (this.scenario === "loading-details") await pause(2 ** 30, signal);
     if (this.scenario === "stale-target" && count === 2)
       item.target = { ...item.target, sha: "b".repeat(40) };
     const detail = detailFixture(item);
