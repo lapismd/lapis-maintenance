@@ -2,7 +2,7 @@
   import { AppShell } from "@lapismd/design-core/shell";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
-  import { ArrowUpRight, RefreshCw } from "@lucide/svelte";
+  import { Maximize2, RefreshCw } from "@lucide/svelte";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ReviewChecks from "./ReviewChecks.svelte";
   import ReviewApprovals from "./ReviewApprovals.svelte";
@@ -63,7 +63,7 @@
             variant="outline"
             size="sm"
             onclick={onOpen}
-            >Open PR view<ArrowUpRight size={14} aria-hidden="true" /></Button
+            ><Maximize2 size={14} aria-hidden="true" />Open PR view</Button
           >{/if}<ReviewFeedback {controller} /><ReviewChecks {controller} />
       </div>{/if}
   </AppShell.Sidebar.Body>

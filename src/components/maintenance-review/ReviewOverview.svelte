@@ -1,7 +1,12 @@
 <script lang="ts">
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { CircleCheck, GitBranch, GitCommitHorizontal } from "@lucide/svelte";
+  import {
+    CircleCheck,
+    GitBranch,
+    GitCommitHorizontal,
+    ListChecks,
+  } from "@lucide/svelte";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ReviewResource from "./ReviewResource.svelte";
   import ReviewApprovals from "./ReviewApprovals.svelte";
@@ -53,7 +58,8 @@
           <Button
             variant="outline"
             size="sm"
-            onclick={() => controller.setTab("checks")}>View checks</Button
+            onclick={() => controller.setTab("checks")}
+            ><ListChecks size={15} aria-hidden="true" />View checks</Button
           >
         </div>
       </div>

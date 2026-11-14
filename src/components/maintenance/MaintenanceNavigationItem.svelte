@@ -10,11 +10,13 @@
     controller,
     shell,
     compact,
+    onNavigate,
   }: {
     entry: { id: View; label: string; icon: typeof Inbox };
     controller: MaintenanceController;
     shell: AppShellController;
     compact: boolean;
+    onNavigate?: (view: View) => void;
   } = $props();
 </script>
 
@@ -28,6 +30,7 @@
         aria-current={controller.view === entry.id ? "page" : undefined}
         onclick={() => {
           controller.view = entry.id;
+          onNavigate?.(entry.id);
           shell.mobile.showMain();
         }}
       >

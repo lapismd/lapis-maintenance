@@ -17,6 +17,9 @@ importers:
       '@lucide/svelte':
         specifier: ^1.66.0
         version: 1.71.0(svelte@5.57.3)
+      '@tanstack/svelte-virtual':
+        specifier: ^3.13.52
+        version: 3.13.52(svelte@5.57.3)
       '@tursodatabase/database-wasm':
         specifier: ^0.8.3
         version: 0.8.3

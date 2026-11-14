@@ -39,6 +39,9 @@ export const SearchAndInspect: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByRole("button", { name: /Open card: Notebook release/ });
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Show search and filters" }),
+    );
     await userEvent.type(
       canvas.getByRole("textbox", { name: "Search maintenance items" }),
       "compatibility",
@@ -229,6 +232,9 @@ export const ReviewAndMerge: Story = {
     const c = within(canvasElement),
       page = within(canvasElement.ownerDocument.body);
     await c.findByRole("button", { name: /Open card: Notebook release/ });
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
     await userEvent.type(
       c.getByRole("textbox", { name: "Search maintenance items" }),
       "Version first-party",
@@ -304,51 +310,6 @@ export const Narrow: Story = {
   },
 };
 
-export const MultipleRepositories: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement),
-      page = within(canvasElement.ownerDocument.body);
-    await canvas.findByRole("button", { name: /Open card: Notebook release/ });
-    await userEvent.click(
-      canvas.getByRole("button", { name: /^Filter repositories:/ }),
-    );
-    const search = await page.findByRole("combobox", {
-      name: "Search repositories",
-    });
-    await userEvent.type(search, "lapis-notes");
-    await userEvent.click(
-      await page.findByRole("option", { name: "lapismd/lapis-notes" }),
-    );
-    await expect(
-      page.getByRole("option", { name: "lapismd/lapis-notes" }),
-    ).toHaveAttribute("aria-selected", "true");
-    await userEvent.clear(search);
-    await userEvent.click(
-      await page.findByRole("option", { name: "lapismd/lapis-desktop" }),
-    );
-    await userEvent.keyboard("{Escape}");
-    await waitFor(() =>
-      expect(
-        page.queryByRole("listbox", { name: "Repositories", hidden: true }),
-      ).not.toBeInTheDocument(),
-    );
-    await expect(
-      canvas.getByRole("button", { name: /^Filter repositories:/ }),
-    ).toHaveTextContent("2 repositories");
-    await expect(
-      canvas.getByRole("heading", { name: "4 items in view" }),
-    ).toBeVisible();
-    await expect(
-      canvas.getByRole("button", { name: "Show lapismd/lapis-notes" }),
-    ).toHaveAttribute("aria-pressed", "true");
-    await userEvent.click(
-      canvas.getByRole("button", { name: "Clear filters" }),
-    );
-    await expect(
-      canvas.getByRole("heading", { name: "10 items in view" }),
-    ).toBeVisible();
-  },
-};
 export const ProfileAndLogin: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement),

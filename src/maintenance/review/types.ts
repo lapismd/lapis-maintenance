@@ -18,6 +18,7 @@ export interface ReviewOverview {
   state: "open" | "merged";
   canReview: boolean;
   actionReason?: string;
+  /** Merge permission; GitHub remains authoritative for repository rules. */
   canMerge: boolean;
   additions: number;
   deletions: number;
@@ -49,6 +50,7 @@ export interface ReviewEvent {
   kind: "comment" | "review" | "commit" | "deployment";
   actor: string;
   avatarUrl?: string;
+  outcome?: "success" | "failure";
   title: string;
   body: string;
   time: string;

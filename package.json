@@ -38,6 +38,7 @@
     "@lapismd/design-core": "^0.13.1",
     "@lapismd/repository-ui": "^0.2.2",
     "@lucide/svelte": "^1.66.0",
+    "@tanstack/svelte-virtual": "^3.13.52",
     "@tursodatabase/database-wasm": "^0.8.3",
     "svelte": "^5.57.3"
   },

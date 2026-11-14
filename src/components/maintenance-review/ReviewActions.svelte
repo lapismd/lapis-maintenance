@@ -13,13 +13,15 @@
       (pr?.state === "merged"
         ? "This pull request has been merged."
         : pr?.draft
-          ? "Mark this draft ready before requesting approval."
-          : !controller.resources.checks.data?.length
-            ? "PR approval needs reported checks for this revision."
-            : controller.resources.checks.loading
-              ? "Checking the current revision…"
-              : mode === "merge" && !controller.canMerge
-                ? "Successful checks and maintainer approval are required before merging."
+          ? "Mark this draft ready before taking this action."
+          : mode === "merge"
+            ? controller.canMerge
+              ? "GitHub applies repository checks and approval rules when merging."
+              : "Merge permission and a current pull request target are required."
+            : !controller.resources.checks.data?.length
+              ? "PR approval needs reported checks for this revision."
+              : controller.resources.checks.loading
+                ? "Checking the current revision…"
                 : undefined),
   );
 </script>

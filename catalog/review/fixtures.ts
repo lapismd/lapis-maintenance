@@ -8,6 +8,7 @@ import type {
 } from "../../src/maintenance/review/types";
 export type ReviewScenario =
   | "ready"
+  | "merge-blocked"
   | "workflow-approval"
   | "environment-approval"
   | "eligibility-checking"
@@ -42,7 +43,7 @@ export function reviewSummaries(): ReviewOverview[] {
     draft: item.status === "draft",
     state: "open",
     canReview: true,
-    canMerge: item.id === "dependency",
+    canMerge: item.kind === "pull-request",
     additions: 128,
     deletions: 34,
   }));
@@ -60,6 +61,7 @@ const events = (pr: ReviewOverview): ReviewEvent[] => [
   },
   {
     id: "checks",
+    outcome: "success",
     kind: "comment",
     actor: "github-actions[bot]",
     avatarUrl: reviewAvatars.actions,

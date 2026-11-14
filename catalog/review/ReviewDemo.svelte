@@ -1,5 +1,11 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
+  import { ActivityController } from "../../src/maintenance/activity/controller.svelte";
+  import {
+    MemoryActivityPort,
+    type ActivityScenario,
+  } from "../activity/memory-port";
+  import type { View } from "../../src/maintenance/types";
   import ReviewShell from "../../src/components/maintenance-review/ReviewShell.svelte";
   import ReviewWorkspace from "../../src/components/maintenance-review/ReviewWorkspace.svelte";
   import ReviewChecks from "../../src/components/maintenance-review/ReviewChecks.svelte";
@@ -24,6 +30,8 @@
     workspace = true,
     theme = "light",
     width,
+    view = "inbox",
+    activityScenario = "populated",
   }: {
     part?:
       | "shell"
@@ -40,10 +48,15 @@
     workspace?: boolean;
     theme?: "light" | "dark";
     width?: number;
+    view?: View;
+    activityScenario?: ActivityScenario;
   } = $props();
   const port = untrack(() => new MemoryReviewPort(scenario));
   const review = untrack(
     () => new ReviewController(port.summaries, port, port),
+  );
+  const activity = untrack(
+    () => new ActivityController(new MemoryActivityPort(activityScenario)),
   );
   const inboxPort = new MemoryMaintenancePort("populated", 0);
   if (untrack(() => scenario === "workflow-approval")) {
@@ -70,6 +83,7 @@
     document.documentElement.classList.toggle("dark", dark);
   });
   onMount(() => {
+    inbox.view = view;
     void inbox.refresh().then(() => inbox.select(selected));
     const selecting = review.select(selected);
     review.setTab(part === "activity" || part === "checks" ? part : tab);
@@ -85,6 +99,7 @@
     });
     return () => {
       review.dispose();
+      activity.dispose();
       inbox.dispose();
       document.documentElement.classList.remove("dark");
     };
@@ -99,6 +114,7 @@
 >
   {#if part === "shell"}<ReviewShell
       {inbox}
+      {activity}
       {review}
       {profile}
       {dark}

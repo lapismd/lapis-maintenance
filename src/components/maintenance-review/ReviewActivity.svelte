@@ -1,8 +1,8 @@
 <script lang="ts">
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { Avatar } from "@lapismd/design-core/shadcn/avatar";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
-  import { Activity, ExternalLink } from "@lucide/svelte";
+  import { Activity, History } from "@lucide/svelte";
+  import ActivityEntry from "../maintenance-activity/ActivityEntry.svelte";
   import ReviewResource from "./ReviewResource.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import "./review.css";
@@ -21,31 +21,13 @@
       <span class="review-muted">Latest updates for this pull request</span>
     </header>
     <ol class="review-timeline" aria-label="Pull request activity">
-      {#each controller.resources.activity.data?.items ?? [] as event (event.id)}<li
+      {#each controller.resources.activity.data?.items ?? [] as event, index (event.id)}<li
         >
-          <span class="review-timeline-avatar"
-            ><Avatar
-              src={event.avatarUrl}
-              name={event.actor}
-              style="--ui-avatar-size:2.25rem"
-              decorative
-            /></span
-          >
-          <article>
-            <header>
-              <div class="review-timeline-byline">
-                <strong>{event.actor}</strong><span>{event.title}</span><a
-                  href={event.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open activity: ${event.title}`}
-                  ><ExternalLink size={12} aria-hidden="true" /></a
-                >
-              </div>
-              <small>{event.time}</small>
-            </header>
-            <p>{event.body}</p>
-          </article>
+          <ActivityEntry
+            {event}
+            connect={index <
+              (controller.resources.activity.data?.items.length ?? 0) - 1}
+          />
         </li>{:else}<li class="review-timeline-empty">
           <Empty.Root
             ><Empty.Header
@@ -62,7 +44,7 @@
         disabled={controller.resources.activity.loading}
         onclick={() =>
           controller.load("activity", controller.resources.activity.data?.next)}
-        >Load older activity</Button
+        ><History size={15} aria-hidden="true" />Load older activity</Button
       >{/if}
   </div>
 </ReviewResource>

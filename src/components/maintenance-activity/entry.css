@@ -1,0 +1,80 @@
+.activity-entry {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.75rem;
+  position: relative;
+  padding-block: 0.75rem 1.25rem;
+}
+.activity-entry-connected::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 1.125rem;
+  top: 3rem;
+  bottom: -0.75rem;
+  width: 1px;
+  background: var(--border);
+}
+.activity-entry-avatar {
+  position: relative;
+  z-index: 1;
+}
+.activity-entry article {
+  min-width: 0;
+}
+.activity-entry article > header {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.78rem;
+}
+.activity-entry-byline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.activity-entry-byline > span {
+  color: var(--muted-foreground);
+}
+.activity-entry small {
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+}
+.activity-entry article > p {
+  margin-top: 0.65rem;
+  font-size: 0.8rem;
+  line-height: 1.65;
+  overflow-wrap: anywhere;
+}
+.activity-entry-context {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.65rem;
+  color: var(--muted-foreground);
+  font-size: 0.7rem;
+}
+
+.activity-entry article[data-outcome] {
+  padding: 0.65rem 0.8rem;
+  border-radius: var(--radius);
+}
+.activity-entry article[data-outcome="success"] {
+  background: color-mix(in srgb, var(--success) 7%, var(--background));
+}
+.activity-entry article[data-outcome="failure"] {
+  background: color-mix(in srgb, var(--destructive) 6%, var(--background));
+}
+.activity-entry small,
+.activity-entry-outcome {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+.activity-entry small {
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}

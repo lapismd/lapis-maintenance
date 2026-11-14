@@ -20,7 +20,7 @@ export const ReviewThenMerge: Story = {
     await waitFor(() => expect(approve).toBeEnabled());
     await expect(
       c.getByRole("button", { name: "Squash and merge" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     await userEvent.click(approve);
     await userEvent.click(
       within(await page.findByRole("dialog")).getByRole("button", {
@@ -49,4 +49,43 @@ export const NoChecks: Story = { render, args: { scenario: "empty" } };
 export const ReadOnly: Story = {
   render,
   args: { scenario: "permission-denied" },
+};
+
+export const MergeWithoutApproval: Story = {
+  render,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    const merge = await c.findByRole("button", { name: "Squash and merge" });
+    await waitFor(() => expect(merge).toBeEnabled());
+    await userEvent.click(merge);
+    const dialog = within(await page.findByRole("dialog"));
+    await waitFor(() =>
+      expect(dialog.getByText(/Squash this revision/)).toBeVisible(),
+    );
+    await userEvent.click(
+      dialog.getByRole("button", { name: "Simulate squash and merge" }),
+    );
+    await c.findByText("The displayed PR revision was merged in this preview.");
+    await expect(merge).toBeDisabled();
+  },
+};
+export const RepositoryRuleRejection: Story = {
+  render,
+  args: { scenario: "merge-blocked" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    const merge = await c.findByRole("button", { name: "Squash and merge" });
+    await waitFor(() => expect(merge).toBeEnabled());
+    await userEvent.click(merge);
+    await userEvent.click(
+      within(await page.findByRole("dialog")).getByRole("button", {
+        name: "Simulate squash and merge",
+      }),
+    );
+    await c.findByText(/GitHub rejected the merge/);
+    await expect(c.getByText("Preview · rejected")).toBeVisible();
+    await waitFor(() => expect(merge).toBeEnabled());
+  },
 };

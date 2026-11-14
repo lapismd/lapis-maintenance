@@ -207,7 +207,14 @@
   border-top: 1px solid var(--border);
 }
 .review-card-header-link {
-  margin-inline-start: auto;
+  position: absolute;
+  inset-inline-end: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.review-section-heading:has(> .review-card-header-link) {
+  position: relative;
+  padding-inline-end: 3.5rem;
 }
 .review-confirm-facts {
   display: grid;

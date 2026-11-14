@@ -29,3 +29,20 @@ export const Empty: Story = {
     props: { part: "board", scenario: "empty" },
   }),
 };
+export const EmptyColumnsCollapsed: Story = {
+  render: () => ({
+    Component: Demo,
+    props: { part: "board", view: "workflow" },
+  }),
+  play: async ({ canvasElement }) => {
+    const { expect, within, userEvent } = await import("storybook/test");
+    const c = within(canvasElement);
+    await c.findByRole("button", { name: /Open card: Desktop CI/ });
+    const empty = await c.findByRole("button", {
+      name: "Expand 0 Approval waiting",
+    });
+    await expect(empty).toHaveAttribute("aria-expanded", "false");
+    await userEvent.click(empty);
+    await c.findByRole("button", { name: "Collapse 0 Approval waiting" });
+  },
+};

@@ -25,6 +25,18 @@ export const Workspace: Story = {
       name: "Publish approved registry updates #63",
       level: 1,
     });
+    const about = (
+      await c.findByRole("heading", { name: "About this pull request" })
+    ).closest("header")!;
+    const details = (
+      await c.findByRole("heading", { name: "Pull request details" })
+    ).closest("header")!;
+    await expect(
+      Math.abs(
+        about.getBoundingClientRect().height -
+          details.getBoundingClientRect().height,
+      ),
+    ).toBeLessThan(1);
     await expect(
       c.queryByRole("tab", { name: /^Files/ }),
     ).not.toBeInTheDocument();
@@ -49,6 +61,9 @@ export const Inbox: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await c.findByRole("button", { name: "Open PR view" });
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
     await userEvent.type(
       c.getByRole("textbox", { name: "Search maintenance items" }),
       "compatibility",
@@ -59,6 +74,9 @@ export const Inbox: Story = {
       level: 1,
     });
     await userEvent.click(c.getByRole("button", { name: "Back to inbox" }));
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
     await expect(
       c.getByRole("textbox", { name: "Search maintenance items" }),
     ).toHaveValue("compatibility");
@@ -76,6 +94,9 @@ export const BreadcrumbNavigation: Story = {
     );
     await userEvent.click(
       navigation.getByRole("button", { name: "lapismd/plugin-registry" }),
+    );
+    await userEvent.click(
+      await c.findByRole("button", { name: "Show search and filters" }),
     );
     await c.findByRole("button", {
       name: "Filter repositories: plugin-registry",
@@ -95,6 +116,9 @@ export const BreadcrumbNavigation: Story = {
       within(
         await c.findByRole("navigation", { name: "breadcrumb" }),
       ).getByRole("button", { name: "All repositories" }),
+    );
+    await userEvent.click(
+      await c.findByRole("button", { name: "Show search and filters" }),
     );
     await c.findByRole("button", {
       name: "Filter repositories: All repositories",
@@ -163,7 +187,7 @@ export const Checks: Story = {
     ).toBeVisible();
     await expect(
       checks.getByRole("button", { name: "Squash and merge" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
   },
 };
 export const Activity: Story = { render, args: { tab: "activity" } };
@@ -199,3 +223,27 @@ export const StaleTarget: Story = { render, args: { scenario: "stale" } };
 export const Uncertain: Story = { render, args: { scenario: "uncertain" } };
 export const Dark: Story = { render, args: { theme: "dark", tab: "checks" } };
 export const Narrow: Story = { render, args: { width: 390, tab: "activity" } };
+
+export const SidebarRepositoryNavigation: Story = {
+  render,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByRole("region", { name: "Pull request workspace" });
+    await userEvent.click(
+      await c.findByRole("button", { name: "Show lapismd/lapis-notes" }),
+    );
+    await expect(
+      c.queryByRole("region", { name: "Pull request workspace" }),
+    ).not.toBeInTheDocument();
+    await c.findByRole("group", { name: /^Maintenance status board/ });
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
+    await expect(
+      c.getByRole("button", { name: "Filter repositories: lapis-notes" }),
+    ).toBeVisible();
+    await expect(
+      await c.findByRole("button", { name: "Show lapismd/lapis-notes" }),
+    ).toHaveAttribute("aria-pressed", "true");
+  },
+};

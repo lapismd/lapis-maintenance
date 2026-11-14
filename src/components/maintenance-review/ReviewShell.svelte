@@ -10,6 +10,9 @@
   import MaintenanceToolbar from "../maintenance/MaintenanceToolbar.svelte";
   import MaintenanceInbox from "../maintenance/MaintenanceInbox.svelte";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
+  import ActivityFeed from "../maintenance-activity/ActivityFeed.svelte";
+  import ActivityContext from "../maintenance-activity/ActivityContext.svelte";
+  import type { ActivityController } from "../../maintenance/activity/controller.svelte";
   import ReviewWorkspace from "./ReviewWorkspace.svelte";
   import ReviewInspector from "./ReviewInspector.svelte";
   import ReviewConfirmation from "./ReviewConfirmation.svelte";
@@ -18,12 +21,14 @@
   import "./review.css";
   let {
     inbox,
+    activity,
     review,
     profile,
     dark,
     onToggleTheme,
   }: {
     inbox: MaintenanceController;
+    activity: ActivityController;
     review: ReviewController;
     profile: PersonalProfile;
     dark: boolean;
@@ -57,6 +62,10 @@
     if (view !== previousView) {
       previousView = view;
       review.close();
+      if (view === "activity") {
+        review.clearSelection();
+        inbox.closeDetail();
+      }
       shell.mobile.showMain();
     }
   });
@@ -98,7 +107,15 @@
       {profile}
       {dark}
       {onToggleTheme}
+      onRepository={openRepository}
       onConnect={() => {}}
+      onNavigate={(view) => {
+        review.close();
+        if (view === "activity") {
+          review.clearSelection();
+          inbox.closeDetail();
+        }
+      }}
     />
     <AppShell.Main>
       {#if review.workspaceOpen}
@@ -164,6 +181,18 @@
               >{/if}
           </div></AppShell.Toolbar
         >
+      {:else if inbox.view === "activity"}<MaintenanceToolbar
+          controller={inbox}
+          {title}
+          notice="UI preview · fixture activity"
+          onRefresh={() => activity.refresh()}
+          refreshing={activity.refreshing}
+        >
+          {#snippet context(searchToggle)}<ActivityContext
+              controller={activity}
+              controls={searchToggle}
+            />{/snippet}
+        </MaintenanceToolbar>
       {:else}<MaintenanceToolbar
           controller={inbox}
           {title}
@@ -172,6 +201,15 @@
       <AppShell.Body layout="regions"
         >{#if review.workspaceOpen}<ReviewWorkspace
             controller={review}
+          />{:else if inbox.view === "activity"}<ActivityFeed
+            controller={activity}
+            query={{
+              search: inbox.query,
+              repositories: inbox.repositories,
+              statuses: inbox.statuses,
+            }}
+            onOpen={open}
+            onRepository={openRepository}
           />{:else}<MaintenanceInbox
             controller={inbox}
             onConnect={() => {}}

@@ -84,6 +84,30 @@ describe("fixture-only review controller", () => {
       controller.dispose();
     },
   );
+  it("allows a confirmed merge without review permission or approval, while preserving merge permission", async () => {
+    const { controller, port } = fixture();
+    port.data.get("registry")!.overview.canReview = false;
+    await controller.select("registry");
+    expect(controller.canApprove).toBe(false);
+    expect(controller.canMerge).toBe(true);
+    controller.prepare("merge-pr", "registry", "Squash and merge");
+    expect(port.commands).toHaveLength(0);
+    await controller.confirm();
+    expect(port.commands).toHaveLength(1);
+    expect(controller.overview?.state).toBe("merged");
+    expect(controller.canMerge).toBe(false);
+    controller.dispose();
+  });
+  it("presents repository-rule rejection without changing state or replaying", async () => {
+    const { controller, port } = fixture("merge-blocked");
+    await controller.select("registry");
+    controller.prepare("merge-pr", "registry", "Squash and merge");
+    await controller.confirm();
+    expect(controller.feedback?.result.status).toBe("rejected");
+    expect(controller.overview?.state).toBe("open");
+    expect(port.commands).toHaveLength(1);
+    controller.dispose();
+  });
   it("keeps no-check and denied actions unavailable", async () => {
     for (const scenario of ["empty", "permission-denied"] as const) {
       const { port, controller } = fixture(scenario);
@@ -96,6 +120,8 @@ describe("fixture-only review controller", () => {
           "Approve environment",
         );
       expect(controller.canApprove).toBe(false);
+      if (scenario === "permission-denied")
+        expect(controller.canMerge).toBe(false);
       expect(controller.confirmation).toBeNull();
       expect(port.commands).toHaveLength(0);
       controller.dispose();

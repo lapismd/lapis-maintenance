@@ -10,6 +10,9 @@ type Story = StoryObj<typeof MaintenanceDemo>;
 async function openPull(canvasElement: HTMLElement) {
   const c = within(canvasElement);
   await c.findByRole("button", { name: /Open card: Notebook release/ });
+  await userEvent.click(
+    await c.findByRole("button", { name: "Show search and filters" }),
+  );
   await userEvent.type(
     c.getByRole("textbox", { name: "Search maintenance items" }),
     "Publish approved registry",

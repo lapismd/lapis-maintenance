@@ -3,7 +3,8 @@
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Textarea } from "@lapismd/design-core/shadcn/textarea";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
-  import { LoaderCircle } from "@lucide/svelte";
+  import { LoaderCircle, X } from "@lucide/svelte";
+  import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import type { ReviewCommand } from "../../maintenance/review/types";
   let { controller }: { controller: ReviewController } = $props();
@@ -80,7 +81,8 @@
         ><Button
           variant="outline"
           disabled={controller.pending}
-          onclick={() => controller.cancel()}>Cancel</Button
+          onclick={() => controller.cancel()}
+          ><X size={15} aria-hidden="true" />Cancel</Button
         ><Button
           disabled={controller.pending}
           onclick={() => controller.confirm(comment)}
@@ -88,7 +90,9 @@
               size={14}
               class="review-spinner"
               aria-hidden="true"
-            />Submitting…{:else}Simulate {command.label.toLowerCase()}{/if}</Button
+            />Submitting…{:else}<MaintenanceActionIcon
+              kind={command.kind}
+            />Simulate {command.label.toLowerCase()}{/if}</Button
         ></Dialog.Footer
       >
     {/if}

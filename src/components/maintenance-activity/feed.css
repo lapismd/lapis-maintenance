@@ -1,0 +1,98 @@
+.activity-context {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0 0.75rem 0.35rem;
+}
+.activity-context > div:first-child {
+  flex: 1;
+}
+.activity-context h1 {
+  font-size: 1.2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.activity-context p {
+  margin-top: 0.25rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.activity-refreshing {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.7rem;
+  color: var(--muted-foreground);
+}
+.activity-refreshing svg {
+  animation: activity-spin 1s linear infinite;
+}
+@keyframes activity-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-refreshing svg {
+    animation: none;
+  }
+}
+.activity-feed {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--background);
+}
+.activity-feed-content {
+  max-width: 68rem;
+  margin-inline: auto;
+  padding: 0.5rem 2rem 1.5rem;
+}
+.activity-day {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--muted-foreground);
+  padding: 0.75rem 0;
+}
+.activity-day::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.activity-feed-edge {
+  display: grid;
+  justify-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: var(--muted-foreground);
+  font-size: 0.8rem;
+}
+.activity-skeleton {
+  padding: 1.5rem 2rem;
+  display: grid;
+  gap: 2rem;
+}
+.activity-skeleton > div {
+  display: grid;
+  grid-template-columns: 2.25rem 1fr;
+  gap: 0.75rem;
+}
+@container (max-width:42rem) {
+  .activity-feed-content {
+    padding-inline: 1rem;
+  }
+}
+
+.activity-day-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--background);
+}

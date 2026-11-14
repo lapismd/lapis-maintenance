@@ -20,15 +20,22 @@ export const Mobile: Story = {
     await expect(
       c.queryByRole("textbox", { name: "Search maintenance items" }),
     ).not.toBeInTheDocument();
-    const board = c.getByRole("group", { name: /^Maintenance status board/ });
-    const compactHeight = board.getBoundingClientRect().height;
+    const board = () =>
+      c.getByRole("group", { name: /^Maintenance status board/ });
+    const compactHeight = board().getBoundingClientRect().height;
     await expect(compactHeight).toBeGreaterThan(200);
     await userEvent.click(expand);
     const collapse = await c.findByRole("button", {
       name: "Collapse dashboard controls",
     });
     await expect(collapse).toHaveAttribute("aria-expanded", "true");
-    await expect(board.getBoundingClientRect().height).toBeLessThan(
+    await expect(
+      c.queryByRole("textbox", { name: "Search maintenance items" }),
+    ).not.toBeInTheDocument();
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
+    await expect(board().getBoundingClientRect().height).toBeLessThan(
       compactHeight - 80,
     );
     await userEvent.type(
@@ -43,7 +50,7 @@ export const Mobile: Story = {
       c.getByRole("heading", { name: "1 item in view" }),
     ).toBeVisible();
     await waitFor(() =>
-      expect(board.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+      expect(board().getBoundingClientRect().height).toBeGreaterThanOrEqual(
         compactHeight - 2,
       ),
     );

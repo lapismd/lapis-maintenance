@@ -7,7 +7,20 @@
   let {
     controller,
     compact = false,
-  }: { controller: MaintenanceController; compact?: boolean } = $props();
+    onSelectRepository,
+  }: {
+    controller: MaintenanceController;
+    compact?: boolean;
+    onSelectRepository?: (repository?: string) => void;
+  } = $props();
+  let open = $state(false);
+  function select(repository?: string) {
+    if (onSelectRepository) {
+      onSelectRepository(repository);
+      open = false;
+    } else if (repository) controller.toggleRepository(repository);
+    else controller.repositories = [];
+  }
   const label = $derived(
     controller.repositories.length === 0
       ? "All repositories"
@@ -17,7 +30,7 @@
   );
 </script>
 
-<Popover.Root>
+<Popover.Root bind:open>
   <Popover.Trigger>
     {#snippet child({ props })}
       <Button
@@ -46,12 +59,16 @@
         aria-label="Search repositories"
         placeholder="Search repositories…"
       />
-      <CommandView.List aria-label="Repositories" aria-multiselectable="true">
+      <CommandView.List
+        aria-label="Repositories"
+        aria-multiselectable={!onSelectRepository}
+      >
         <CommandView.Empty>No repositories found.</CommandView.Empty>
         <CommandView.Group heading="Repositories">
           <CommandView.Item
+            style="margin-block:0.125rem"
             value="All repositories"
-            onSelect={() => (controller.repositories = [])}
+            onSelect={() => select()}
           >
             {#snippet child({ props })}
               <div
@@ -69,8 +86,9 @@
           </CommandView.Item>
           {#each controller.snapshot?.repositories ?? [] as repo (repo.repository)}
             <CommandView.Item
+              style="margin-block:0.125rem"
               value={repo.repository}
-              onSelect={() => controller.toggleRepository(repo.repository)}
+              onSelect={() => select(repo.repository)}
             >
               {#snippet child({ props })}
                 <div
@@ -99,7 +117,10 @@
           {/each}
         </CommandView.Group>
       </CommandView.List>
-      <CommandView.Footer>Select multiple · Escape to close</CommandView.Footer>
+      <CommandView.Footer
+        >{onSelectRepository ? "Select a repository" : "Select multiple"} · Escape
+        to close</CommandView.Footer
+      >
     </CommandView.Root>
   </Popover.Content>
 </Popover.Root>

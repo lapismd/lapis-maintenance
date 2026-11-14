@@ -28,6 +28,12 @@ export const ToggleControls: Story = {
   render: () => ({ Component: Demo, props: { part: "toolbar" } }),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await expect(
+      c.queryByRole("textbox", { name: "Search maintenance items" }),
+    ).not.toBeInTheDocument();
+    await userEvent.click(
+      c.getByRole("button", { name: "Show search and filters" }),
+    );
     const search = await c.findByRole("textbox", {
       name: "Search maintenance items",
     });

@@ -3,7 +3,7 @@
   import { Skeleton } from "@lapismd/design-core/shadcn/skeleton";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
-  import { CircleAlert, LoaderCircle } from "@lucide/svelte";
+  import { CircleAlert, LoaderCircle, RotateCcw } from "@lucide/svelte";
   import type { ResourceState } from "../../maintenance/review/types";
   import "./review.css";
   let {
@@ -34,7 +34,7 @@
       ><Empty.Description>{state.error}</Empty.Description></Empty.Header
     ><Empty.Content
       ><Button variant="outline" onclick={onRetry}
-        >Retry {label.toLowerCase()}</Button
+        ><RotateCcw size={15} aria-hidden="true" />Retry {label.toLowerCase()}</Button
       ></Empty.Content
     ></Empty.Root
   >
@@ -47,7 +47,10 @@
       />Refreshing {label.toLowerCase()}
     </div>{/if}
   {#if state.error}<p class="review-inline-error" role="alert">
-      {state.error} <button onclick={onRetry}>Retry</button>
+      {state.error}
+      <Button size="sm" variant="ghost" onclick={onRetry}
+        ><RotateCcw size={15} aria-hidden="true" />Retry</Button
+      >
     </p>{/if}
   {@render children()}
 {/if}

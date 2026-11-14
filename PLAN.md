@@ -257,6 +257,8 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
   and repository breadcrumbs open the inbox with the corresponding filter.
 - Overview shows author, branches/revision, description, labels and review/merge
   state. Checks have grouped collapsible linked rows, refresh and merge controls.
+  Merge permission is independent of review approval; GitHub enforces repository
+  rules when a confirmed merge is submitted. PR approval still requires checks.
   Activity is a paginated timeline. File browsing and diffs open on GitHub;
   no local file resources, patch cache or file-review UI are required.
 - A repo-owned controller owns tabs, independent resource states,
@@ -278,8 +280,15 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 
 The main Activity navigation item previews a Community-style timeline rather
 than a Kanban board. A shared local entry component serves PR and workspace
-activity. Header search, multi-repository/status filters and a multi-event-type
-picker select the feed. Typed cursor-page reads belong to a disposable fixture
+activity. A compact header places multi-event types beside a search toggle.
+Search and multi-repository/status filters start hidden on all toolbar views;
+the filter-icon toggle uses accent styling while open and hidden filters retain values.
+Event types show leading icons and trailing ticks for multiple selections.
+Repository icon buttons and sidebar repository selection open the inbox with just
+that repository selected, closing the PR workspace. Status uses colored icon
+chips, details use an eye icon, and explicit success/failure events have subtle
+tints while neutral events stay unboxed. The current date is sticky and changes
+with the visible timeline day. Typed cursor-page reads belong to a disposable fixture
 port; a local controller owns query identity, page state, duplicate prevention,
 stale-response guards and retained refresh/retry data.
 

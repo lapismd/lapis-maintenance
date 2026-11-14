@@ -50,6 +50,9 @@ export const PullRequest: Story = {
   render: () => ({ Component: Demo }),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await userEvent.click(
+      await c.findByRole("button", { name: "Show search and filters" }),
+    );
     await userEvent.type(
       c.getByRole("textbox", { name: "Search maintenance items" }),
       "Version first-party",

@@ -94,9 +94,18 @@ export class MemoryReviewPort implements ReviewReadPort, ReviewCommandPort {
           "The simulated response was interrupted. Inspect the target before continuing; this action will not be replayed.",
         url: data.overview.url,
       };
+    if (
+      command.kind === "merge-pr" &&
+      (this.scenario === "merge-blocked" || !data.overview.canMerge)
+    )
+      return {
+        status: "rejected" as const,
+        message:
+          "GitHub rejected the merge: a required repository rule is not satisfied. The pull request remains open.",
+        url: data.overview.url,
+      };
     if (command.kind === "approve-pr") {
       data.overview.review = "Approved by demo-maintainer";
-      data.overview.canMerge = true;
     }
     if (command.kind === "merge-pr") {
       data.overview.state = "merged";

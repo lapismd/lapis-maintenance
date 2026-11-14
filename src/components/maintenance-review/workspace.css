@@ -47,14 +47,14 @@
 }
 .review-workspace-heading {
   background: var(--card);
-  padding: 1.5rem 2rem 1.2rem;
+  padding: 0.7rem 2rem 0.65rem;
 }
 .review-workspace-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0 0 0.75rem;
+  margin: 0 0 0.5rem;
 }
 .review-workspace-title h1 {
   min-width: 0;
@@ -111,8 +111,8 @@
   height: 100%;
   border-radius: 0;
   padding-inline: 1rem;
-  border: 0;
-  border-bottom: 2px solid transparent;
+  border: 1px solid transparent;
+  border-bottom-width: 2px;
   background: transparent;
   box-shadow: none;
 }
@@ -222,7 +222,7 @@
 }
 @container (max-width:42rem) {
   .review-workspace-heading {
-    padding: 1rem;
+    padding: 0.65rem 1rem;
   }
   .review-workspace-title {
     align-items: flex-start;
@@ -243,4 +243,13 @@
   .review-workspace-meta > span:nth-child(3) {
     display: none;
   }
+}
+
+.review-tabs-list [role="tab"]:hover,
+.review-tabs-list [role="tab"]:focus-visible {
+  background: color-mix(in srgb, var(--primary) 10%, var(--card));
+  border-color: color-mix(in srgb, var(--primary) 30%, var(--border));
+}
+.review-tabs-list [role="tab"][data-state="active"]:is(:hover, :focus-visible) {
+  border-bottom-color: var(--primary);
 }

@@ -51,9 +51,12 @@ export class ReviewController {
   }
   get canMerge() {
     return (
-      this.canApprove &&
-      !!this.overview?.canMerge &&
-      this.resources.checks.data!.every((check) => check.state === "passed")
+      this.overview?.kind === "pull-request" &&
+      this.overview.state === "open" &&
+      !this.overview.draft &&
+      this.overview.canMerge &&
+      !this.resources.overview.loading &&
+      !this.resources.overview.error
     );
   }
   async select(id: string) {

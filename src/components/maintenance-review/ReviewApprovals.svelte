@@ -1,4 +1,5 @@
 <script lang="ts">
+  import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
@@ -25,7 +26,7 @@
   {#if !compact}<header class="review-section-heading">
       <ShieldCheck size={16} aria-hidden="true" />
       <h2>Pending approvals</h2>
-      <Badge variant="secondary"
+      <Badge style="margin-inline-start:auto"
         >{controller.resources.approvals.data?.filter(
           (item) => item.state === "ready",
         ).length ?? 0}</Badge
@@ -99,7 +100,11 @@
                   ? "Approve workflow run"
                   : "Approve environment",
               )}
-            >{approval.kind === "workflow"
+            ><MaintenanceActionIcon
+              kind={approval.kind === "workflow"
+                ? "approve-workflow"
+                : "approve-environment"}
+            />{approval.kind === "workflow"
               ? "Approve workflow run"
               : "Approve environment"}</Button
           >
@@ -112,7 +117,8 @@
                   "reject-environment",
                   approval.id,
                   "Reject environment",
-                )}>Reject</Button
+                )}
+              ><MaintenanceActionIcon kind="reject-environment" />Reject</Button
             >{/if}
         </div>
       </article>
