@@ -1,3 +1,4 @@
+import { canPrepare, canApproveReview, canMergeReview } from "./prepare";
 import {
   emptyReviewState,
   type ReviewOverview,
@@ -29,57 +30,71 @@ export class ReviewController {
   #reads = new Map<string, AbortController>();
   #command?: AbortController;
   constructor(
-    readonly summaries: readonly ReviewOverview[],
+    private source:
+      | readonly ReviewOverview[]
+      | (() => readonly ReviewOverview[]),
     private read: ReviewReadPort,
     private write: ReviewCommandPort,
   ) {}
+  get summaries() {
+    return typeof this.source === "function" ? this.source() : this.source;
+  }
   get overview() {
     return this.resources.overview.data;
+  }
+  get pullRequest() {
+    return this.overview?.kind === "pull-request"
+      ? this.overview
+      : this.overview?.linkedPull;
   }
   get feedback() {
     return this.receipt?.itemId === this.selectedId ? this.receipt : null;
   }
   get canApprove() {
-    return (
-      !!this.overview?.canReview &&
-      this.overview.state === "open" &&
-      !this.overview.draft &&
-      !!this.resources.checks.data?.length &&
-      !this.resources.checks.error &&
-      !this.resources.checks.loading
-    );
+    return canApproveReview(this.pullRequest, this.resources);
   }
   get canMerge() {
-    return (
-      this.overview?.kind === "pull-request" &&
-      this.overview.state === "open" &&
-      !this.overview.draft &&
-      this.overview.canMerge &&
-      !this.resources.overview.loading &&
-      !this.resources.overview.error
-    );
+    return canMergeReview(this.pullRequest, this.resources);
   }
   async select(id: string) {
-    if (this.#disposed || !this.summaries.some((item) => item.id === id))
+    if (
+      this.#disposed ||
+      (!this.read.accepts?.(id) &&
+        !this.summaries.some((item) => item.id === id))
+    )
       return;
-    if (this.selectedId === id) return;
+    if (this.selectedId === id) {
+      await Promise.all([
+        this.load("overview"),
+        this.load("checks"),
+        this.load("approvals"),
+      ]);
+      return;
+    }
     this.#generation++;
     this.#abortReads();
     this.selectedId = id;
     this.tab = "overview";
     this.confirmation = null;
+    const preview = this.read.preview?.(id);
     this.resources = {
       ...emptyReviewState(),
       overview: {
-        data: this.summaries.find((item) => item.id === id),
+        data:
+          preview?.overview ?? this.summaries.find((item) => item.id === id),
         loading: false,
       },
     };
-    await Promise.all([
-      this.load("overview"),
-      this.load("checks"),
-      this.load("approvals"),
-    ]);
+    if (preview)
+      for (const key of ["checks", "approvals"] as const)
+        if (preview[key])
+          this.resources = {
+            ...this.resources,
+            [key]: { data: preview[key], loading: false },
+          };
+    await this.load("overview");
+    if (this.selectedId === id)
+      await Promise.all([this.load("checks"), this.load("approvals")]);
   }
   setTab(tab: ReviewTab) {
     this.tab = tab;
@@ -88,15 +103,21 @@ export class ReviewController {
       void this.load(resource);
   }
   async refresh() {
+    await this.load("overview", undefined, true);
     const resources = new Set<ReviewResource>([
-      "overview",
       "checks",
       "approvals",
       ...(this.tab === "activity" ? [this.tab] : []),
     ] as ReviewResource[]);
-    await Promise.all([...resources].map((resource) => this.load(resource)));
+    await Promise.all(
+      [...resources].map((resource) => this.load(resource, undefined, true)),
+    );
   }
-  async load<K extends ReviewResource>(resource: K, cursor?: string) {
+  async load<K extends ReviewResource>(
+    resource: K,
+    cursor?: string,
+    force = false,
+  ) {
     const id = this.selectedId,
       generation = this.#generation;
     if (!id || this.#disposed) return;
@@ -112,7 +133,17 @@ export class ReviewController {
       },
     };
     try {
-      let data = await this.read.read(id, resource, request.signal, { cursor });
+      let data = await this.read.read(id, resource, request.signal, {
+        cursor,
+        force,
+        onProgress: (data) => {
+          if (this.#current(id, generation, resource, request))
+            this.resources = {
+              ...this.resources,
+              [resource]: { data, loading: true },
+            };
+        },
+      });
       if (!this.#current(id, generation, resource, request)) return;
       if (resource === "activity" && cursor) {
         const page = data as ReviewResources["activity"];
@@ -124,6 +155,15 @@ export class ReviewController {
           ],
         } as ReviewResources[K];
       }
+      if (
+        resource === "overview" &&
+        this.overview?.sha !== (data as ReviewOverview).sha
+      )
+        this.resources = {
+          ...this.resources,
+          checks: { loading: false },
+          approvals: { loading: false },
+        };
       this.resources = {
         ...this.resources,
         [resource]: { data, loading: false },
@@ -133,7 +173,11 @@ export class ReviewController {
       this.resources = {
         ...this.resources,
         [resource]: {
-          ...this.resources[resource],
+          ...(error instanceof Error &&
+          "discardPreview" in error &&
+          error.discardPreview
+            ? {}
+            : this.resources[resource]),
           loading: false,
           error:
             error instanceof Error
@@ -149,13 +193,14 @@ export class ReviewController {
       (item) => item.id === targetId,
     );
     if (
-      kind === "approve-pr"
-        ? !this.canApprove
-        : kind === "merge-pr"
-          ? !this.canMerge
-          : !approval ||
-            approval.state !== "ready" ||
-            (kind === "approve-workflow") !== (approval.kind === "workflow")
+      !canPrepare(
+        kind,
+        targetId === this.pullRequest?.id ? this.pullRequest : this.overview,
+        this.resources.approvals.data,
+        targetId,
+        this.canApprove,
+        this.canMerge,
+      )
     )
       return;
     if (
@@ -167,12 +212,21 @@ export class ReviewController {
       requestId: `review-${++this.#sequence}`,
       itemId: this.overview.id,
       targetId,
+      target:
+        approval?.target ??
+        (targetId === this.pullRequest?.id
+          ? this.pullRequest.target
+          : this.overview.target),
       sha: approval?.sha ?? this.overview.sha,
       kind,
       label,
       runId: approval?.runId,
       attempt: approval?.attempt,
       environment: approval?.environment,
+      mergeMethod:
+        kind === "merge-pr"
+          ? (this.pullRequest?.mergeMethods?.[0] ?? "squash")
+          : undefined,
     };
   }
   cancel() {
@@ -194,7 +248,7 @@ export class ReviewController {
         result = {
           status: "uncertain",
           message:
-            "The simulated response was interrupted. Inspect the target before retrying.",
+            "The response was interrupted. Inspect the target before retrying.",
         };
       }
       if (this.#disposed) return;

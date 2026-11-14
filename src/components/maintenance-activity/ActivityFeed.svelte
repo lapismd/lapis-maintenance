@@ -108,7 +108,7 @@
                   <div
                     role="listitem"
                     aria-posinset={index + 1}
-                    aria-setsize={controller.total}
+                    aria-setsize={controller.totalKnown ? controller.total : -1}
                   >
                     {#if index > 0 && day(event.createdAt) !== day(controller.events[index - 1]!.createdAt)}<h2
                         class="activity-day"
@@ -119,9 +119,11 @@
                       {event}
                       repository={event.repository}
                       status={event.status}
-                      onOpen={() => onOpen(event.itemId)}
+                      onOpen={event.itemId
+                        ? () => onOpen(event.itemId)
+                        : undefined}
                       onRepository={() => onRepository(event.repository)}
-                      connect={index < controller.total - 1}
+                      connect={index < controller.events.length - 1}
                     />
                   </div>
                 {/snippet}
@@ -139,7 +141,7 @@
                 onclick={() => controller.loadMore()}
                 ><History size={15} aria-hidden="true" />Load older activity</Button
               >
-            {:else}<p>All activity loaded</p>{/if}
+            {:else}<p>Available activity loaded</p>{/if}
           </footer>
         {:else}<Empty.Root
             ><Empty.Header

@@ -36,6 +36,8 @@ export interface ActivityPage {
   events: ActivityEvent[];
   nextCursor?: string;
   total: number;
+  totalKnown?: boolean;
+  coverage?: string[];
 }
 /** Query-scoped, read-only cursor pages. Hosts own transport and disposal. */
 export interface ActivityReadPort {
@@ -43,5 +45,6 @@ export interface ActivityReadPort {
     query: ActivityQuery,
     cursor: string | undefined,
     signal: AbortSignal,
+    options?: { force?: boolean },
   ): Promise<ActivityPage>;
 }

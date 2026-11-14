@@ -20,5 +20,5 @@ workflows through the supplied token and owning workflow contracts.
 ### Acceptance details
 
 - Approve/reject only currently pending environments the user may review.
-- Discover workflow_dispatch inputs and require explicit branch/tag and review of the operation; link the resulting run and distinguish publication status.
+- Discover active workflow_dispatch definitions through safe YAML parsing and render required/default/choice/boolean/number/environment inputs; require an explicit branch or tag, bind confirmation to its commit and workflow definition SHA, revalidate input contracts immediately before one POST, reject changed targets, never replay uncertain dispatches and link the identified run or workflow while distinguishing submission from publication.
 - Signing keys and publication credentials remain in owning GitHub workflows.

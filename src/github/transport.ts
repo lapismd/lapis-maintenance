@@ -25,6 +25,7 @@ export class GithubTransport {
   #limiter = new RequestLimiter(4);
   #pending = new Map<string, SharedRead<CachedResponse>>();
   #blockedUntil = 0;
+  #writing: Promise<void> = Promise.resolve();
   #repositoryEpoch = new Map<string, number>();
   invalidateRepository(repository: string) {
     const key = repository.toLowerCase();
@@ -66,6 +67,21 @@ export class GithubTransport {
     });
     options.onObservation?.(value.fetchedAt);
     return value.body as T;
+  }
+  async page<T>(
+    path: string,
+    signal: AbortSignal,
+    options: ReadOptions = {},
+    field?: string,
+  ): Promise<{ items: T[]; next?: string }> {
+    const value = await this.#response(path, signal, options);
+    options.onObservation?.(value.fetchedAt);
+    const items = field
+      ? (value.body as Record<string, unknown>)[field]
+      : value.body;
+    if (!Array.isArray(items))
+      throw new GithubError(0, "GitHub returned an unexpected list response.");
+    return { items: items as T[], next: value.next };
   }
   async pages<T>(
     path: string,
@@ -171,8 +187,23 @@ export class GithubTransport {
               !options.fresh &&
               epoch === (this.#repositoryEpoch.get(repository) ?? 0)
             ) {
-              if (value.cacheable === false) await this.cache.remove(key);
-              else await this.cache.put(key, value);
+              this.#writing = this.#writing
+                .catch(() => {})
+                .then(async () => {
+                  if (
+                    this.#lifetime.signal.aborted ||
+                    epoch !== (this.#repositoryEpoch.get(repository) ?? 0)
+                  )
+                    return;
+                  if (value.cacheable === false) await this.cache.remove(key);
+                  else await this.cache.put(key, value);
+                  if (
+                    this.#lifetime.signal.aborted ||
+                    epoch !== (this.#repositoryEpoch.get(repository) ?? 0)
+                  )
+                    await this.cache.remove(key);
+                })
+                .catch(() => {});
             }
             return value;
           } catch (error) {
@@ -211,5 +242,6 @@ export class GithubTransport {
     await Promise.allSettled(
       [...this.#pending.values()].map((value) => value.promise),
     );
+    await this.#writing;
   }
 }

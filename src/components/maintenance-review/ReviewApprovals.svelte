@@ -35,7 +35,7 @@
   <ReviewResource
     state={controller.resources.approvals}
     label="Approvals"
-    onRetry={() => controller.load("approvals")}
+    onRetry={() => controller.load("approvals", undefined, true)}
   >
     {#each controller.resources.approvals.data ?? [] as approval (approval.id)}
       {@const disabled =

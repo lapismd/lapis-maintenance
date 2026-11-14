@@ -12,7 +12,7 @@
 <ReviewResource
   state={controller.resources.activity}
   label="Activity"
-  onRetry={() => controller.load("activity")}
+  onRetry={() => controller.load("activity", undefined, true)}
 >
   <div class="review-activity">
     <header class="review-section-heading">

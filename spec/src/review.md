@@ -38,5 +38,6 @@
 
 ### Acceptance details
 
+- Session-owned live adapters cache overview, current-head checks, pending approvals and paginated activity independently, showing warm previews synchronously and retaining stale content while revalidating; changed heads clear mismatched checks and optional failures do not remove unrelated capabilities.
 - Read activity with pagination and load it lazily; changed files open through a normal GitHub link without local file reads, patch storage or an embedded viewer.
-- Hash navigation identifies the PR and tab, Back restores the board, and token-partitioned cache/offline boundaries remain intact; inline review drafts/comments and bulk operations stay deferred.
+- The session-owned production shell retains settings, PWA controls, theme/profile and disconnect; hash navigation identifies the PR and tab, Back restores the board, and token-partitioned cache/offline boundaries remain intact; inline review drafts/comments and bulk operations stay deferred.

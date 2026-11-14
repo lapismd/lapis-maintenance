@@ -16,7 +16,9 @@
     <p>
       {controller.pending && !controller.events.length
         ? "Loading activity…"
-        : `${controller.events.length} of ${controller.total} events loaded`}
+        : controller.totalKnown
+          ? `${controller.events.length} of ${controller.total} events loaded`
+          : `${controller.events.length} events loaded`}
     </p>
   </div>
   {#if controller.pending && controller.events.length}<span

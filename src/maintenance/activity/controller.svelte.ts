@@ -17,6 +17,8 @@ export class ActivityController {
   pending = $state(false);
   error = $state<string | null>(null);
   total = $state(0);
+  totalKnown = $state(true);
+  coverage = $state<string[]>([]);
   nextCursor = $state<string | undefined>();
   filterVersion = $state(0);
   scrollOffset = 0;
@@ -47,12 +49,12 @@ export class ActivityController {
     this.nextCursor = undefined;
     this.scrollOffset = 0;
     this.filterVersion++;
-    return this.refresh();
+    return this.refresh(false);
   }
-  refresh(): Promise<void> {
+  refresh(force = true): Promise<void> {
     if (this.#disposed || !this.#key) return Promise.resolve();
     this.#request?.abort();
-    return this.#load(undefined, ++this.#generation);
+    return this.#load(undefined, ++this.#generation, force);
   }
   loadMore(): Promise<void> {
     if (this.#disposed || this.pending || !this.nextCursor)
@@ -62,7 +64,7 @@ export class ActivityController {
   retry(): Promise<void> {
     return this.#failedCursor ? this.loadMore() : this.refresh();
   }
-  async #load(cursor: string | undefined, generation: number) {
+  async #load(cursor: string | undefined, generation: number, force = false) {
     const request = new AbortController();
     this.#request = request;
     this.#mode = cursor ? "page" : "refresh";
@@ -73,6 +75,7 @@ export class ActivityController {
         this.query,
         cursor,
         request.signal,
+        { force },
       );
       if (!this.#current(generation, request)) return;
       this.events = [
@@ -84,6 +87,8 @@ export class ActivityController {
         ).values(),
       ];
       this.total = page.total;
+      this.totalKnown = page.totalKnown ?? true;
+      this.coverage = page.coverage ?? [];
       this.nextCursor = page.nextCursor;
       this.#failedCursor = undefined;
     } catch (error) {

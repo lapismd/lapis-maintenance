@@ -78,6 +78,7 @@ export class RepositoryRefreshes {
       this.cache?.removePrefix(`json:/repos/${repository}/pulls/`),
       this.cache?.removePrefix(`json:/repos/${repository}/actions/runs/`),
       this.cache?.removePrefix(`maintenance-detail:v2:${repository}:`),
+      this.cache?.removePrefix(`review:v1:${repository}:`),
     ]);
     signal.throwIfAborted();
     const result = await readRepository(

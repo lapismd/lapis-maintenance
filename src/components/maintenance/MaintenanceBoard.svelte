@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
+  import { IntentPrefetch } from "../../maintenance/intent-prefetch";
+  import { cardIntent } from "../../maintenance/card-intent";
   import {
     KanbanBoard,
     KanbanActivityView,
@@ -12,8 +15,16 @@
   let {
     controller,
     onOpen,
-  }: { controller: MaintenanceController; onOpen: (id: string) => void } =
-    $props();
+    onPrefetch,
+  }: {
+    controller: MaintenanceController;
+    onOpen: (id: string) => void;
+    onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
+  } = $props();
+  const prefetch = new IntentPrefetch(
+    (id, signal) => onPrefetch?.(id, signal) ?? Promise.resolve(),
+  );
+  onDestroy(() => prefetch.dispose());
   let metadata = $state<Record<string, KanbanColumnMeta>>({});
   let order = $state<string[]>([]);
   const columns = $derived(
@@ -51,7 +62,10 @@
 </script>
 
 {#snippet cardTags({ card }: KanbanCardContext)}
-  <span class="maintenance-card-tags">
+  <span
+    class="maintenance-card-tags"
+    use:cardIntent={{ id: card.id, prefetch }}
+  >
     {#each card.tags ?? [] as tag}<span
         ><Tag size={12} aria-hidden="true" /><Badge
           variant="outline"

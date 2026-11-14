@@ -7,7 +7,10 @@
   import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import type { ReviewCommand } from "../../maintenance/review/types";
-  let { controller }: { controller: ReviewController } = $props();
+  let {
+    controller,
+    live = false,
+  }: { controller: ReviewController; live?: boolean } = $props();
   let comment = $state("");
   let lastCommand = $state.raw<ReviewCommand | null>(null);
   const command = $derived(controller.confirmation ?? lastCommand);
@@ -33,14 +36,20 @@
     {#if command}
       <Dialog.Header
         ><Dialog.Title>{command.label}</Dialog.Title><Dialog.Description
-          >Review the identified target. This Storybook action is simulated
-          entirely in memory.</Dialog.Description
+          >{live
+            ? "This action changes GitHub. The target will be checked again immediately before submission."
+            : "Review the identified target. This Storybook action is simulated entirely in memory."}</Dialog.Description
         ></Dialog.Header
       >
       <Badge variant="secondary" style="width:fit-content"
-        >UI preview · simulated action</Badge
+        >{live ? "GitHub action" : "UI preview · simulated action"}</Badge
       >
       <dl class="review-confirm-facts">
+        {#if ["approve-pr", "merge-pr", "mark-ready", "request-changes", "comment"].includes(command.kind)}<div
+          >
+            <dt>Pull request</dt>
+            <dd>#{controller.pullRequest?.number}</dd>
+          </div>{/if}
         <div>
           <dt>Repository</dt>
           <dd>{controller.overview?.repository}</dd>
@@ -60,17 +69,31 @@
           <dt>Effect</dt>
           <dd>
             {command.kind === "merge-pr"
-              ? "Squash this revision into the base branch."
+              ? command.mergeMethod === "squash"
+                ? "Squash this revision into the base branch."
+                : `Merge this revision into the base branch using ${command.mergeMethod}.`
               : command.kind === "reject-environment"
                 ? "Reject this environment review so its protected job does not proceed."
                 : command.kind === "approve-pr"
                   ? "Record a review approval for this commit."
-                  : "Allow the identified pending workflow or environment to continue. Publication is not confirmed."}
+                  : command.kind === "mark-ready"
+                    ? "Mark this draft ready for review."
+                    : command.kind === "comment"
+                      ? "Submit a review comment on this revision."
+                      : command.kind === "request-changes"
+                        ? "Request changes on this revision."
+                        : command.kind === "rerun-failed"
+                          ? "Start another attempt of failed workflow jobs."
+                          : command.kind === "cancel-run"
+                            ? "Cancel this identified running workflow attempt."
+                            : "Allow the identified pending workflow or environment to continue. Publication is not confirmed."}
           </dd>
         </div>
       </dl>
       <label class="review-comment-label" for="review-comment"
-        >Comment (optional)</label
+        >{command.kind === "comment" || command.kind === "request-changes"
+          ? "Comment (required)"
+          : "Comment (optional)"}</label
       ><Textarea
         id="review-comment"
         bind:value={comment}
@@ -84,7 +107,10 @@
           onclick={() => controller.cancel()}
           ><X size={15} aria-hidden="true" />Cancel</Button
         ><Button
-          disabled={controller.pending}
+          disabled={controller.pending ||
+            (["comment", "request-changes"].includes(command.kind) &&
+              !comment.trim())}
+          aria-label={live ? "Confirm GitHub action" : undefined}
           onclick={() => controller.confirm(comment)}
           >{#if controller.pending}<LoaderCircle
               size={14}
@@ -92,7 +118,8 @@
               aria-hidden="true"
             />Submitting…{:else}<MaintenanceActionIcon
               kind={command.kind}
-            />Simulate {command.label.toLowerCase()}{/if}</Button
+            />{live ? "Confirm" : "Simulate"}
+            {command.label.toLowerCase()}{/if}</Button
         ></Dialog.Footer
       >
     {/if}

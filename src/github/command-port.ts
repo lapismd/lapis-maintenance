@@ -10,6 +10,8 @@ import { GithubWriteError, type GithubWriteTransport } from "./write-transport";
 import type { GithubTransport } from "./transport";
 import { submitReadiness } from "./readiness-command";
 import { submitWorkflow } from "./workflow-commands";
+import { submitDispatch } from "./dispatch-command";
+import type { DispatchReads } from "./dispatch-reads";
 import { validRepository } from "./models";
 
 const rejected = (message: string): CommandResult => ({
@@ -24,6 +26,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
   #requests = new Map<string, Promise<CommandResult>>();
   #uncertain = new Set<string>();
   #busy = false;
+  dispatch?: DispatchReads;
   constructor(
     _client: GithubTransport,
     private writer: GithubWriteTransport,
@@ -72,6 +75,15 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         !/^[0-9a-f]{40,64}$/i.test(command.target.sha)
       )
         return rejected("The command has an invalid repository or revision.");
+      if (command.kind === "dispatch-workflow" && this.dispatch) {
+        // The dispatch preflight itself never writes. The writer marks uncertain network outcomes.
+        return await submitDispatch(
+          this.dispatch,
+          this.writer,
+          command,
+          signal,
+        );
+      }
       if (
         ![
           "mark-ready",
@@ -206,7 +218,9 @@ export class GithubCommandPort implements MaintenanceCommandPort {
             "The outcome is unknown. Inspect GitHub; this action will not be replayed.",
           )
         : rejected(
-            "Could not revalidate the target. Refresh before trying again.",
+            error instanceof Error
+              ? error.message
+              : "Could not revalidate the target. Refresh before trying again.",
           );
     }
   }

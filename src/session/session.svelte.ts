@@ -13,9 +13,11 @@ import {
   MemoryResponseCache,
   type ResponseCache,
 } from "../cache/response-cache";
+import { openSessionCache } from "./session-cache";
 import { openResponseCache } from "../cache/turso-cache";
-import { readCachedView } from "../cache/view-cache";
-import { personalProfile, sessionPartition } from "./session-identity";
+import { personalProfile } from "./session-identity";
+import { LiveWorkspace } from "./live-workspace";
+import { restorePreview } from "./preview-controller";
 import { RestorePorts } from "./restore-ports";
 import type { DeviceStore } from "./device-store";
 interface SessionDependencies {
@@ -28,6 +30,7 @@ export class MaintenanceSession {
     "restoring",
   );
   controller = $state.raw<MaintenanceController | null>(null);
+  live = $state.raw<LiveWorkspace | null>(null);
   profile = $state.raw<PersonalProfile | null>(null);
   selection = $state.raw<RepositorySelection>({
     additions: [],
@@ -50,7 +53,10 @@ export class MaintenanceSession {
     const client = this.#client,
       cache = this.#cache,
       writer = this.#writer,
-      reader = this.#reader;
+      reader = this.#reader,
+      live = this.live;
+    live?.dispose();
+    this.live = null;
     client?.dispose();
     writer?.dispose();
     this.controller?.commands.dispose();
@@ -70,6 +76,7 @@ export class MaintenanceSession {
       await client?.drain();
       await writer?.drain();
       await reader?.drain();
+      await live?.drain();
       try {
         if (clear) await cache?.clear();
       } finally {
@@ -85,7 +92,7 @@ export class MaintenanceSession {
     try {
       const token = this.dependencies.store.token();
       if (token)
-        await this.#connect(
+        await this.connect(
           token,
           true,
           this.dependencies.store.identity?.() ?? undefined,
@@ -97,10 +104,7 @@ export class MaintenanceSession {
         "Saved login could not be restored. Enter a token to reconnect.";
     }
   }
-  async connect(token: string, remember: boolean): Promise<void> {
-    return this.#connect(token, remember);
-  }
-  async #connect(
+  async connect(
     token: string,
     remember: boolean,
     saved?: GithubUser,
@@ -132,8 +136,11 @@ export class MaintenanceSession {
         authFailed = true;
       });
       const openFor = async (identity: GithubUser) => {
-        const result = await (this.dependencies.openCache ?? openResponseCache)(
-          await sessionPartition(identity, token),
+        const result = await openSessionCache(
+          identity,
+          token,
+          this.dependencies.openCache,
+          () => !this.#disposed && generation === this.#generation,
           () => {
             if (generation !== this.#generation || this.#disposed) return;
             this.cacheKind = "Session cache · 5 min";
@@ -141,40 +148,23 @@ export class MaintenanceSession {
               "Persistent cache unavailable; using a memory cache for this session.";
           },
         );
-        if (this.#disposed || generation !== this.#generation) {
-          await result.cache.close();
-          throw new Error("Session replaced");
-        }
         this.#cache = result.cache;
         return result;
       };
       if (saved) {
         opened = await openFor(saved);
-        const preview = await readCachedView(
+        const preview = await restorePreview(
           opened.cache,
           this.selection,
-          Date.now(),
+          () =>
+            !authFailed && !this.#disposed && generation === this.#generation,
         );
-        if (
-          !authFailed &&
-          preview &&
-          generation === this.#generation &&
-          !this.#disposed
-        ) {
-          this.#ports = new RestorePorts(preview, opened.cache, this.selection);
-          const previewController = new MaintenanceController(
-            this.#ports,
-            this.#ports,
-          );
-          await previewController.refresh();
-          if (authFailed || this.#disposed || generation !== this.#generation) {
-            previewController.dispose();
-          } else {
-            this.controller = previewController;
-            this.profile = personalProfile(saved);
-            this.cacheKind = "Cached on this device · Reconnecting";
-            this.notice = "Reconnecting to GitHub. Cached data is read-only.";
-          }
+        if (preview) {
+          this.#ports = preview.ports;
+          this.controller = preview.controller;
+          this.profile = personalProfile(saved);
+          this.cacheKind = "Cached on this device · Reconnecting";
+          this.notice = "Reconnecting to GitHub. Cached data is read-only.";
         }
       }
       const user = await authenticating;
@@ -235,11 +225,22 @@ export class MaintenanceSession {
         },
       );
       this.#ports ??= new RestorePorts(null, opened.cache, this.selection);
-      this.#ports.attach(
+      const commands = new GithubCommandPort(
+        this.#client,
+        this.#writer,
         reader,
-        new GithubCommandPort(this.#client, this.#writer, reader),
       );
+      this.#ports.attach(reader, commands);
       this.controller ??= new MaintenanceController(this.#ports, this.#ports);
+      this.live = new LiveWorkspace(
+        this.#client,
+        reader,
+        commands,
+        this.controller,
+        opened.cache,
+        user.login,
+        () => JSON.stringify(this.selection),
+      );
       this.profile = personalProfile(user);
       this.phase = "connected";
       await this.controller.refresh();

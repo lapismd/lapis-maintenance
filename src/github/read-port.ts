@@ -48,6 +48,18 @@ export class GithubReadPort implements MaintenanceReadPort {
       onDefaults,
     );
   }
+  seed(id: string) {
+    return this.#snapshots.details.get(id);
+  }
+  remember(detail: MaintenanceDetail) {
+    this.#snapshots.details.set(detail.item.id, detail);
+  }
+  version(repository: string) {
+    return this.#snapshots.scopes.version(repository);
+  }
+  hold(repository: string) {
+    return this.#snapshots.holds.get(repository);
+  }
   readSnapshot(
     signal: AbortSignal,
     options: ReadOptions = {},

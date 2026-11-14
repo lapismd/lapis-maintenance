@@ -11,7 +11,7 @@ export async function submitWorkflow(
   signal?: AbortSignal,
 ): Promise<CommandResult> {
   const target = command.target;
-  if (target.kind === "pull-request")
+  if (target.kind !== "workflow" && target.kind !== "deployment")
     return { status: "rejected", message: "Invalid workflow command target." };
   if (
     !Number.isSafeInteger(target.runId) ||

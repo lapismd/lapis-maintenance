@@ -21,6 +21,7 @@
     context,
     onRefresh,
     refreshing,
+    messages,
   }: {
     controller: MaintenanceController;
     title: string;
@@ -31,6 +32,7 @@
     context?: Snippet<[Snippet]>;
     onRefresh?: () => void | Promise<void>;
     refreshing?: boolean;
+    messages?: string[];
   } = $props();
   let searchOpen = $state(false);
   const searchId = $props.id();
@@ -82,6 +84,7 @@
         <MaintenanceStatus
           {controller}
           {notice}
+          {messages}
         />{@render settings?.()}<MaintenanceFreshness {controller} /><Badge
           variant="secondary">{sessionMode === "demo" ? "Demo" : "Live"}</Badge
         >

@@ -28,6 +28,17 @@ export type ActionKind =
   | "reject-deployment"
   | "dispatch-workflow";
 export type Target =
+  | {
+      kind: "dispatch";
+      sha: string;
+      workflowId: number;
+      ref: string;
+      definitionSha: string;
+      defaultDefinitionSha: string;
+      path: string;
+      name: string;
+      url: string;
+    }
   | { kind: "pull-request"; sha: string }
   | { kind: "workflow"; sha: string; runId: number; attempt: number }
   | {

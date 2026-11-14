@@ -74,13 +74,13 @@
       size="icon-sm"
       aria-label="Refresh PR checks"
       disabled={controller.resources.checks.loading}
-      onclick={() => controller.load("checks")}
+      onclick={() => controller.load("checks", undefined, true)}
       ><RefreshCw size={14} aria-hidden="true" /></Button
     >{/snippet}
   <ReviewResource
     state={controller.resources.checks}
     label="Checks"
-    onRetry={() => controller.load("checks")}
+    onRetry={() => controller.load("checks", undefined, true)}
   >
     <div class="review-check-summary">
       <svg class="review-check-ring" viewBox="0 0 36 36" aria-hidden="true"
@@ -164,9 +164,7 @@
       </Collapsible.Root>
     {/each}
   </ReviewResource>
-  {#if controller.overview?.kind === "pull-request"}<div
-      class="review-check-footer"
-    >
+  {#if controller.pullRequest}<div class="review-check-footer">
       <ReviewActions {controller} mode="merge" />
     </div>{/if}
 </RepositoryForgePanel>

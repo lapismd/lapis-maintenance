@@ -3,9 +3,10 @@
   import PwaControls from "../components/session/PwaControls.svelte";
   import OfflineShell from "../components/session/OfflineShell.svelte";
   import {
-    bindHashNavigation,
-    writeViewHash,
-  } from "../session/hash-navigation";
+    bindWorkspaceNavigation,
+    writeWorkspaceHash,
+  } from "../session/workspace-navigation";
+  import ReviewShell from "../components/maintenance-review/ReviewShell.svelte";
   import { onMount } from "svelte";
   import MaintenanceScreen from "../components/maintenance/MaintenanceScreen.svelte";
   import TokenLogin from "../components/session/TokenLogin.svelte";
@@ -16,6 +17,7 @@
     credentialKey,
     sameRememberedToken,
   } from "../session/device-store";
+  import { startReviewRefresh } from "../session/review-refresh";
   import { startVisibleRefresh } from "../session/visible-refresh";
   let { pwa }: { pwa?: PwaController } = $props();
   let offline = $state(!navigator.onLine);
@@ -29,10 +31,15 @@
     if (session.controller) return startVisibleRefresh(session.controller);
   });
   $effect(() => {
-    if (session.controller) return bindHashNavigation(session.controller);
+    if (session.controller && session.live)
+      return bindWorkspaceNavigation(session.controller, session.live.review);
   });
   $effect(() => {
-    if (session.controller) writeViewHash(session.controller.view);
+    if (session.controller && session.live)
+      writeWorkspaceHash(session.controller, session.live.review);
+  });
+  $effect(() => {
+    if (session.live) return startReviewRefresh(session.live.review);
   });
   function reconnect() {
     offline = !navigator.onLine;
@@ -77,6 +84,8 @@
     busy={session.phase === "connecting" ||
       session.phase === "restoring" ||
       session.controller?.commands.busy ||
+      session.live?.review.pending ||
+      session.live?.dispatch.pending ||
       pwa?.installing}
     onInstall={() => {
       void pwa?.install();
@@ -87,23 +96,43 @@
 {#if offline}
   <OfflineShell onReconnect={reconnect} />
 {:else if session.controller && session.profile}
-  <MaintenanceScreen
-    controller={session.controller}
-    profile={session.profile}
-    {dark}
-    sessionMode="github"
-    cacheLabel={session.cacheKind}
-    notice={session.notice}
-    onToggleTheme={() => (dark = !dark)}
-    onConnect={() => {}}
-    onDisconnect={() => {
-      void session.disconnect();
-    }}
-  >
-    {#snippet settings()}{@render pwaControls()}{#if session.phase === "connected"}<RepositorySettings
+  {#if session.live}<ReviewShell
+      inbox={session.controller}
+      activity={session.live.activity}
+      review={session.live.review}
+      dispatch={session.live.dispatch}
+      profile={session.profile}
+      {dark}
+      sessionMode="github"
+      cacheLabel={session.cacheKind}
+      notice={session.notice}
+      onToggleTheme={() => (dark = !dark)}
+      onDisconnect={() => {
+        void session.disconnect();
+      }}
+      onPrefetch={(id, signal) => session.live!.resources.prefetch(id, signal)}
+    >
+      {#snippet settings()}{@render pwaControls()}<RepositorySettings
           {session}
-        />{/if}{/snippet}
-  </MaintenanceScreen>
+        />{/snippet}
+    </ReviewShell>{:else}
+    <MaintenanceScreen
+      controller={session.controller}
+      profile={session.profile}
+      {dark}
+      sessionMode="github"
+      cacheLabel={session.cacheKind}
+      notice={session.notice}
+      onToggleTheme={() => (dark = !dark)}
+      onConnect={() => {}}
+      onDisconnect={() => {
+        void session.disconnect();
+      }}
+    >
+      {#snippet settings()}{@render pwaControls()}{#if session.phase === "connected"}<RepositorySettings
+            {session}
+          />{/if}{/snippet}
+    </MaintenanceScreen>{/if}
 {:else}
   <TokenLogin
     busy={session.phase === "connecting"}

@@ -19,7 +19,7 @@
 <ReviewResource
   state={controller.resources.overview}
   label="Overview"
-  onRetry={() => controller.load("overview")}
+  onRetry={() => controller.load("overview", undefined, true)}
 >
   {#if pr}<div class="review-overview-grid">
       <div class="review-overview-main">
@@ -29,12 +29,6 @@
           </header>
           <div class="review-description-content">
             <p>{pr.description}</p>
-            <h3>Included in this update</h3>
-            <ul>
-              <li>Reviewed first-party package versions</li>
-              <li>Release notes and compatibility metadata</li>
-              <li>Registry-backed lockfile refresh</li>
-            </ul>
             <div class="review-description-note">
               <CircleCheck size={16} aria-hidden="true" /><span
                 >Changes are scoped to the displayed commit. Repository rules

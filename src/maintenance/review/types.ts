@@ -15,7 +15,12 @@ export interface ReviewOverview {
   labels: string[];
   review: string;
   draft: boolean;
-  state: "open" | "merged";
+  state: "open" | "merged" | "closed";
+  target?: import("../types").Target;
+  mergeMethods?: ("merge" | "squash" | "rebase")[];
+  mergeReason?: string;
+  linkedPull?: ReviewOverview;
+  actions?: import("../types").ActionCapability[];
   canReview: boolean;
   actionReason?: string;
   /** Merge permission; GitHub remains authoritative for repository rules. */
@@ -27,6 +32,7 @@ export interface ReviewCheck {
   id: string;
   name: string;
   workflow: string;
+  sha?: string;
   state: "passed" | "failed" | "running" | "queued" | "unknown";
   description: string;
   url?: string;
@@ -44,6 +50,7 @@ export interface ReviewApproval {
   reason: string;
   reviewers?: string[];
   permission: string;
+  target?: import("../types").Target;
 }
 export interface ReviewEvent {
   id: string;
@@ -76,7 +83,12 @@ export type ReviewAction =
   | "merge-pr"
   | "approve-workflow"
   | "approve-environment"
-  | "reject-environment";
+  | "reject-environment"
+  | "mark-ready"
+  | "request-changes"
+  | "comment"
+  | "rerun-failed"
+  | "cancel-run";
 export interface ReviewCommand {
   requestId: string;
   itemId: string;
@@ -88,14 +100,22 @@ export interface ReviewCommand {
   attempt?: number;
   environment?: string;
   comment?: string;
+  target?: import("../types").Target;
+  mergeMethod?: "merge" | "squash" | "rebase";
 }
 /** Hosts own construction, credentials/effects and disposal. No provider code enters presentation. */
 export interface ReviewReadPort {
+  preview?(id: string): Partial<ReviewResources>;
+  accepts?(id: string): boolean;
   read<K extends ReviewResource>(
     id: string,
     resource: K,
     signal: AbortSignal,
-    options?: { cursor?: string },
+    options?: {
+      cursor?: string;
+      force?: boolean;
+      onProgress?: (value: ReviewResources[K]) => void;
+    },
   ): Promise<ReviewResources[K]>;
 }
 export interface ReviewCommandPort {

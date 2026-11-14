@@ -90,3 +90,63 @@ it("clears denied resource previews and rejects results after disposal", async (
     ),
   ).rejects.toThrow();
 });
+it("returns verified resources before slow persistence and drains writes before closing", async () => {
+  const storage = new MemoryResponseCache();
+  let release!: () => void;
+  const gate = new Promise<void>((done) => (release = done)),
+    put = storage.put.bind(storage);
+  vi.spyOn(storage, "put").mockImplementation(async (key, value) => {
+    await gate;
+    await put(key, value);
+  });
+  const resources = new ResourceCache(storage),
+    signal = new AbortController().signal;
+  expect(
+    await resources.read(
+      "slow",
+      () => 0,
+      async () => "verified",
+      signal,
+    ),
+  ).toBe("verified");
+  expect(resources.preview("slow", 0)).toBe("verified");
+  let drained = false;
+  const draining = resources.drain().then(() => (drained = true));
+  await Promise.resolve();
+  expect(drained).toBe(false);
+  release();
+  await draining;
+  expect((await storage.get("slow"))?.body).toBe("verified");
+  resources.dispose();
+});
+it("cannot revive the previous persistent epoch during overlapping refresh reads", async () => {
+  const storage = new MemoryResponseCache(),
+    resources = new ResourceCache(storage),
+    signal = new AbortController().signal;
+  let epoch = 0;
+  await resources.read(
+    "same",
+    () => epoch,
+    async () => "old",
+    signal,
+  );
+  await resources.drain();
+  epoch++;
+  let release!: (value: string) => void;
+  const gate = new Promise<string>((done) => (release = done)),
+    load = vi.fn(() => gate),
+    progress = vi.fn();
+  const first = resources.read("same", () => epoch, load, signal, {
+    onProgress: progress,
+  });
+  const second = resources.read("same", () => epoch, load, signal, {
+    onProgress: progress,
+  });
+  await vi.waitFor(() => expect(load).toHaveBeenCalledTimes(2));
+  expect(progress).not.toHaveBeenCalled();
+  release("new");
+  expect(await first).toBe("new");
+  expect(await second).toBe("new");
+  await resources.drain();
+  resources.dispose();
+});

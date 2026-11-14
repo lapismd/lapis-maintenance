@@ -8,6 +8,8 @@ interface Retained {
 }
 /** Token-partitioned host storage for independently loaded presentation resources. */
 export class ResourceCache {
+  #invalidated = new Set<string>();
+  #epochs = new Map<string, number>();
   #values = new Map<string, Retained>();
   #lifetime = new AbortController();
   #writing: Promise<void> = Promise.resolve();
@@ -35,10 +37,16 @@ export class ResourceCache {
       current = () => epoch === version() && !combined.aborted;
     const combined = AbortSignal.any([signal, this.#lifetime.signal]);
     combined.throwIfAborted();
+    const previousEpoch = this.#epochs.get(key);
+    if (previousEpoch !== undefined && previousEpoch !== epoch)
+      this.#invalidated.add(key);
+    this.#epochs.set(key, epoch);
+    if (this.#epochs.size > 200)
+      this.#epochs.delete(this.#epochs.keys().next().value!);
     let entry = this.#values.get(key);
     if (entry?.version !== epoch || !this.#usable(entry.fetchedAt))
       entry = undefined;
-    if (!entry) {
+    if (!entry && !this.#invalidated.has(key)) {
       const stored = await this.cache?.get(key);
       combined.throwIfAborted();
       if (stored && this.#usable(stored.fetchedAt))
@@ -75,6 +83,7 @@ export class ResourceCache {
         throw new MaintenanceReadError(
           "Resource changed while loading. Refresh it.",
         );
+      this.#remember(key, { value, fetchedAt: observedAt, version: epoch });
       const writing = this.#writing
         .catch(() => {})
         .then(async () => {
@@ -84,19 +93,14 @@ export class ResourceCache {
             await this.cache?.remove(key);
             return;
           }
-          this.#remember(key, { value, fetchedAt: observedAt, version: epoch });
+          this.#invalidated.delete(key);
         });
-      this.#writing = writing;
-      await writing;
-      combined.throwIfAborted();
-      if (!current())
-        throw new MaintenanceReadError(
-          "Resource changed while loading. Refresh it.",
-        );
+      this.#writing = writing.catch(() => {});
       return value;
     } catch (error) {
       if (error instanceof MaintenanceReadError && error.discardPreview) {
         this.#values.delete(key);
+        this.#invalidated.add(key);
         await this.#writing.catch(() => {});
         if (current()) await this.cache?.remove(key);
       }

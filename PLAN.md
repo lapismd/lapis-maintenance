@@ -250,12 +250,12 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 
 ### Revised delivery slices
 
-| Slice                       | Deliverable                                                                                            | Review boundary                                    |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
-| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Implemented locally; UI/interaction review pending |
-| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Authorized 2026-11-14; implementation pending      |
-| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Authorized 2026-11-14; implementation pending      |
-| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Authorized 2026-11-14; implementation pending      |
+| Slice                       | Deliverable                                                                                            | Review boundary                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | UI approved; implemented                  |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Implemented; hosted qualification pending |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Implemented; hosted qualification pending |
+| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Implemented; hosted qualification pending |
 
 ### R1: complete fixture-only UI
 
@@ -357,3 +357,10 @@ partial-data/session/disposal tests and designated disposable live targets.
 Performance acceptance requires zero requests for a fresh reopen and at least
 50% fewer cold requests in a controlled 20-PR fixture. Qualify hosted CI/assets
 and PWA boundaries when live integration/deployment is separately approved.
+
+## 2026-11-14 live implementation checkpoint
+
+All remaining authorized implementation is complete locally, including manual
+dispatch. R2/R3 commits and the live workspace receipt document the regression
+ledger and local gates. Exact-head CI, merged-main Pages delivery and designated
+real environment/dispatch acceptance complete this continuation before handoff.

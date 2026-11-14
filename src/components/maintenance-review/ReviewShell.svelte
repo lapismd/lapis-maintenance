@@ -1,4 +1,5 @@
 <script lang="ts">
+  import type { Snippet } from "svelte";
   import { onDestroy, untrack } from "svelte";
   import { AppShell, AppShellController } from "@lapismd/design-core/shell";
   import { Button } from "@lapismd/design-core/shadcn/button";
@@ -13,6 +14,9 @@
   import ActivityFeed from "../maintenance-activity/ActivityFeed.svelte";
   import ActivityContext from "../maintenance-activity/ActivityContext.svelte";
   import type { ActivityController } from "../../maintenance/activity/controller.svelte";
+  import DispatchDialog from "../maintenance-dispatch/DispatchDialog.svelte";
+  import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
+  import { Play } from "@lucide/svelte";
   import ReviewWorkspace from "./ReviewWorkspace.svelte";
   import ReviewInspector from "./ReviewInspector.svelte";
   import ReviewConfirmation from "./ReviewConfirmation.svelte";
@@ -26,13 +30,27 @@
     profile,
     dark,
     onToggleTheme,
+    dispatch,
+    sessionMode = "demo",
+    notice,
+    cacheLabel,
+    settings,
+    onDisconnect,
+    onPrefetch,
   }: {
+    dispatch?: DispatchController;
     inbox: MaintenanceController;
     activity: ActivityController;
     review: ReviewController;
     profile: PersonalProfile;
     dark: boolean;
     onToggleTheme: () => void;
+    sessionMode?: "demo" | "github";
+    notice?: string;
+    cacheLabel?: string;
+    settings?: Snippet;
+    onDisconnect?: () => void;
+    onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
   } = $props();
   const shell = new AppShellController({
     leftWidth: 224,
@@ -70,7 +88,7 @@
     }
   });
   function open(id: string) {
-    void inbox.select(id);
+    if (sessionMode === "demo") void inbox.select(id);
     void review.select(id);
     shell.right.expand();
     if (shell.mobile.resolvedMode === "mobile") shell.mobile.show("right");
@@ -95,6 +113,19 @@
   });
 </script>
 
+{#snippet liveControls()}{#if dispatch}<Button
+      variant="ghost"
+      size="icon-sm"
+      aria-label="Run workflow"
+      title="Run workflow"
+      onclick={() => {
+        const repository =
+          inbox.repositories.length === 1
+            ? inbox.repositories[0]
+            : inbox.snapshot?.repositories.find((r) => r.available)?.repository;
+        if (repository) void dispatch.show(repository);
+      }}><Play aria-hidden="true" /></Button
+    >{/if}{@render settings?.()}{/snippet}
 <div class="maintenance-app review-ui" data-ui-theme="lapis">
   <AppShell.Root
     controller={shell}
@@ -107,6 +138,8 @@
       {profile}
       {dark}
       {onToggleTheme}
+      {sessionMode}
+      {onDisconnect}
       onRepository={openRepository}
       onConnect={() => {}}
       onNavigate={(view) => {
@@ -164,8 +197,12 @@
                   ? "Draft"
                   : review.overview.state === "merged"
                     ? "Merged"
-                    : "Open"}</Badge
-              >{/if}<Badge variant="secondary">UI preview</Badge><Button
+                    : review.overview.state === "closed"
+                      ? "Closed"
+                      : "Open"}</Badge
+              >{/if}{@render liveControls()}<Badge variant="secondary"
+              >{sessionMode === "github" ? "Live" : "UI preview"}</Badge
+            ><Button
               variant="ghost"
               size="icon-sm"
               aria-label="Refresh pull request"
@@ -184,7 +221,11 @@
       {:else if inbox.view === "activity"}<MaintenanceToolbar
           controller={inbox}
           {title}
-          notice="UI preview · fixture activity"
+          notice={notice ?? "UI preview · fixture activity"}
+          {sessionMode}
+          {cacheLabel}
+          settings={liveControls}
+          messages={activity.coverage}
           onRefresh={() => activity.refresh()}
           refreshing={activity.refreshing}
         >
@@ -196,7 +237,11 @@
       {:else}<MaintenanceToolbar
           controller={inbox}
           {title}
-          notice="UI preview · fixture-only data and simulated actions"
+          notice={notice ??
+            "UI preview · fixture-only data and simulated actions"}
+          {sessionMode}
+          {cacheLabel}
+          settings={liveControls}
         />{/if}
       <AppShell.Body layout="regions"
         >{#if review.workspaceOpen}<ReviewWorkspace
@@ -205,7 +250,11 @@
             controller={activity}
             query={{
               search: inbox.query,
-              repositories: inbox.repositories,
+              repositories:
+                sessionMode === "github" && !inbox.repositories.length
+                  ? (inbox.snapshot?.repositories.map((r) => r.repository) ??
+                    [])
+                  : inbox.repositories,
               statuses: inbox.statuses,
             }}
             onOpen={open}
@@ -214,10 +263,16 @@
             controller={inbox}
             onConnect={() => {}}
             onOpen={open}
+            {onPrefetch}
           />{/if}</AppShell.Body
       >
     </AppShell.Main>
     <ReviewInspector controller={review} onOpen={workspace} />
   </AppShell.Root>
-  <ReviewConfirmation controller={review} />
+  {#if dispatch}<DispatchDialog
+      controller={dispatch}
+      repositories={inbox.snapshot?.repositories.map((r) => r.repository) ?? []}
+      live={sessionMode === "github"}
+    />{/if}
+  <ReviewConfirmation controller={review} live={sessionMode === "github"} />
 </div>

@@ -18,6 +18,9 @@ export interface GithubRepository {
 }
 export interface GithubPull {
   state: "open" | "closed";
+  merged_at?: string | null;
+  additions?: number;
+  deletions?: number;
   number: number;
   title: string;
   body?: string | null;
