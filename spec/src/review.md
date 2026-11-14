@@ -29,6 +29,7 @@
 
 - Lightweight PR summaries use bounded read-only GraphQL batches, scoped partial-error/fallback handling and the shared limiter; complete optional resources load independently and preserve useful cached content.
 - Intent prefetch is delayed, bounded and shares reads without cancellation coupling; persistence and invalidation reject stale writes, while one authoritative action-specific preflight remains immediately before commands.
+- Independent resource caches retain matching stale data during refresh, provide bounded synchronous warm previews, fence writes by resource/repository epoch and serialize persistence; denied/disposed reads clear or reject data and intent-prefetch shares provider work without cancellation coupling.
 - Controlled acceptance proves fresh reopening uses zero GitHub requests and a 20-PR cold inventory uses at least 50% fewer requests, alongside rate-limit, revision, session and disposal coverage.
 
 ## LM-PR-002 — Live PR workspace resources

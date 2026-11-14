@@ -3,6 +3,7 @@ import {
   type MaintenanceCommand,
   type MaintenanceCommandPort,
   type MaintenanceReadPort,
+  type MaintenanceDetail,
   type CommandResult,
 } from "../maintenance/types";
 import { GithubWriteError, type GithubWriteTransport } from "./write-transport";
@@ -26,9 +27,17 @@ export class GithubCommandPort implements MaintenanceCommandPort {
   constructor(
     _client: GithubTransport,
     private writer: GithubWriteTransport,
-    private reader: MaintenanceReadPort,
+    private reader: MaintenanceReadPort & {
+      readCommandTarget?: (
+        command: MaintenanceCommand,
+        signal: AbortSignal,
+      ) => Promise<MaintenanceDetail>;
+    },
   ) {}
-  execute(command: MaintenanceCommand): Promise<CommandResult> {
+  execute(
+    command: MaintenanceCommand,
+    signal = new AbortController().signal,
+  ): Promise<CommandResult> {
     const existing = this.#requests.get(command.requestId);
     if (existing) return existing;
     if (this.#busy)
@@ -41,7 +50,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         ),
       );
     this.#busy = true;
-    const pending = this.#execute(command)
+    const pending = this.#execute(command, signal)
       .then((result) => {
         if (result.status === "uncertain") this.#uncertain.add(key);
         return result;
@@ -52,7 +61,10 @@ export class GithubCommandPort implements MaintenanceCommandPort {
     this.#requests.set(command.requestId, pending);
     return pending;
   }
-  async #execute(command: MaintenanceCommand): Promise<CommandResult> {
+  async #execute(
+    command: MaintenanceCommand,
+    signal: AbortSignal,
+  ): Promise<CommandResult> {
     let submitted = false;
     try {
       if (
@@ -75,11 +87,11 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         ].includes(command.kind)
       )
         return rejected("This release action is not enabled yet.");
-      const detail = await this.reader.readDetails(
-        command.itemId,
-        new AbortController().signal,
-        { fresh: true },
-      );
+      const detail = this.reader.readCommandTarget
+        ? await this.reader.readCommandTarget(command, signal)
+        : await this.reader.readDetails(command.itemId, signal, {
+            fresh: true,
+          });
       if (
         detail.item.id !== command.itemId ||
         detail.item.repository !== command.repository ||
@@ -91,6 +103,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         return rejected(
           "Target or permissions changed. Refresh and review the action again.",
         );
+      signal.throwIfAborted();
       const root = `/repos/${command.repository}`;
       const url = detail.item.url;
       if (
@@ -98,7 +111,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         command.target.kind === "deployment"
       ) {
         submitted = true;
-        return await submitWorkflow(this.writer, command, detail);
+        return await submitWorkflow(this.writer, command, detail, signal);
       }
       if (
         command.target.kind !== "pull-request" ||
@@ -113,10 +126,15 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         if (!method || !detail.mergeMethods?.includes(method))
           return rejected("Choose an allowed repository merge method.");
         submitted = true;
-        const result = await this.writer.submit(`${pull}/merge`, "PUT", {
-          sha: command.target.sha,
-          merge_method: method,
-        });
+        const result = await this.writer.submit(
+          `${pull}/merge`,
+          "PUT",
+          {
+            sha: command.target.sha,
+            merge_method: method,
+          },
+          signal,
+        );
         const body = result.body as { merged?: boolean } | undefined;
         return body?.merged === true
           ? {
@@ -134,7 +152,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
       }
       if (command.kind === "mark-ready") {
         submitted = true;
-        return await submitReadiness(this.writer, detail);
+        return await submitReadiness(this.writer, detail, signal);
       }
       const event = {
         "approve-pr": "APPROVE",
@@ -146,11 +164,16 @@ export class GithubCommandPort implements MaintenanceCommandPort {
       if ((event !== "APPROVE" && !body) || body.length > 65_536)
         return rejected("Enter a review comment of at most 65,536 characters.");
       submitted = true;
-      const result = await this.writer.submit(`${pull}/reviews`, "POST", {
-        event,
-        commit_id: command.target.sha,
-        ...(body ? { body } : {}),
-      });
+      const result = await this.writer.submit(
+        `${pull}/reviews`,
+        "POST",
+        {
+          event,
+          commit_id: command.target.sha,
+          ...(body ? { body } : {}),
+        },
+        signal,
+      );
       const review = result.body as
         | { id?: number; state?: string; commit_id?: string }
         | undefined;

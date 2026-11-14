@@ -214,7 +214,15 @@ it("discovers defaults/coordinator, preserves holds and access gaps, and ignores
   const approval = snapshot.items.find((value) => value.kind === "approval")!;
   expect(approval.reasons.join(" ")).toContain("cannot approve");
   expect(approval.actions.every((action) => !action.available)).toBe(true);
-  expect(send.mock.calls.every((call) => call[1]?.method === "GET")).toBe(true);
+  expect(
+    send.mock.calls.every(
+      ([url, init]) =>
+        init?.method === "GET" ||
+        (String(url).endsWith("/graphql") &&
+          init?.method === "POST" &&
+          /^query\b/.test(JSON.parse(String(init.body)).query)),
+    ),
+  ).toBe(true);
 });
 it("keeps incomplete PR checks unavailable and honors explicit exclusions", async () => {
   const { reader, selection } = fixture(true);

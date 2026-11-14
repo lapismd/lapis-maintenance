@@ -141,8 +141,12 @@ export interface CommandResult {
   message: string;
   url?: string;
 }
+/** Command adapters own one fresh provider preflight; UI controllers never duplicate it. */
 export interface MaintenanceCommandPort {
-  execute(command: MaintenanceCommand): Promise<CommandResult>;
+  execute(
+    command: MaintenanceCommand,
+    signal?: AbortSignal,
+  ): Promise<CommandResult>;
 }
 export interface ActionReceipt extends CommandResult {
   command: MaintenanceCommand;

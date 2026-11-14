@@ -1,5 +1,7 @@
 import {
   targetKey,
+  type MaintenanceCommand,
+  MaintenanceReadError,
   type MaintenanceReadPort,
   type MaintenanceSnapshot,
   type MaintenanceDetail,
@@ -10,6 +12,7 @@ import {
   type GithubTransport,
   type ReadOptions,
 } from "./transport";
+import { readCommandTarget } from "./command-preflight";
 import { readItemDetails } from "./item-details";
 import type { ResponseCache } from "../cache/response-cache";
 import { readCachedDetail, saveCachedDetail } from "../cache/detail-cache";
@@ -50,6 +53,21 @@ export class GithubReadPort implements MaintenanceReadPort {
     options: ReadOptions = {},
   ): Promise<MaintenanceSnapshot> {
     return this.#snapshots.readSnapshot(signal, options);
+  }
+  readCommandTarget(command: MaintenanceCommand, signal: AbortSignal) {
+    const existing = this.#snapshots.details.get(command.itemId);
+    if (!existing || !this.actor)
+      throw new MaintenanceReadError(
+        "The authenticated target is unavailable. Refresh first.",
+      );
+    return readCommandTarget(
+      this.client,
+      existing.item,
+      this.actor,
+      this.#snapshots.holds.get(existing.item.repository),
+      command,
+      signal,
+    );
   }
   refreshRepository(repository: string, signal: AbortSignal) {
     return this.#snapshots.scopes.refresh(repository, signal);

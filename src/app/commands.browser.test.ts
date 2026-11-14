@@ -36,6 +36,12 @@ it("uses the production session for a confirmed, SHA-bound merge and refreshes t
         path = url.pathname;
       if (url.origin !== "https://api.github.com")
         return nativeFetch(input, init);
+      if (path === "/graphql") {
+        const query = JSON.parse(String(init?.body)).query;
+        expect(query.trimStart()).toMatch(/^query\b/);
+        expect(query).not.toMatch(/\bmutation\b/);
+        return Response.json({ errors: [{ message: "Use REST fixture" }] });
+      }
       if (init?.method !== "GET") {
         mutations.push(init!);
         expect(path).toBe(`/repos/${repository}/pulls/71/merge`);

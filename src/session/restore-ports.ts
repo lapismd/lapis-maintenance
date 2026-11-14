@@ -84,8 +84,8 @@ export class RestorePorts
     if (!this.#read) throw new MaintenanceReadError(pending);
     return this.#read.refreshRepository(repo, signal);
   };
-  execute: MaintenanceCommandPort["execute"] = async (command) =>
+  execute: MaintenanceCommandPort["execute"] = async (command, signal) =>
     this.#write
-      ? this.#write.execute(command)
+      ? this.#write.execute(command, signal)
       : { status: "rejected", message: pending };
 }

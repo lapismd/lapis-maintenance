@@ -10,7 +10,7 @@ import {
   type GithubTransport,
   type ReadOptions,
 } from "./transport";
-import { readPull } from "./pull-reads";
+import { readPullSummaries } from "./pull-summaries";
 import { readWorkflow } from "./workflow-reads";
 import { associateRun } from "./run-association";
 import { readWorkflowInventory } from "./workflow-inventory";
@@ -41,6 +41,15 @@ export async function readRepository(
       throw pulls.reason;
     gaps.push("Pull requests unavailable.");
   }
+  const summaries = readPullSummaries(
+    client,
+    repository,
+    prs,
+    signal,
+    options,
+    entry.holdReason,
+    access,
+  );
   const inventory = readWorkflowInventory(
     client,
     repository,
@@ -52,19 +61,7 @@ export async function readRepository(
     (value) => ({ status: "fulfilled" as const, value }),
     (reason) => ({ status: "rejected" as const, reason }),
   );
-  const pullResults = await Promise.allSettled(
-    prs.map((pr) =>
-      readPull(
-        client,
-        repository,
-        pr,
-        signal,
-        options,
-        entry.holdReason,
-        access,
-      ),
-    ),
-  );
+  const pullResults = await summaries;
   for (const result of pullResults) {
     if (result.status === "fulfilled") {
       details.push(result.value);

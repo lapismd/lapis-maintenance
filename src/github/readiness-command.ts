@@ -4,17 +4,23 @@ import type { GithubWriteTransport } from "./write-transport";
 export async function submitReadiness(
   writer: GithubWriteTransport,
   detail: MaintenanceDetail,
+  signal?: AbortSignal,
 ): Promise<CommandResult> {
   if (!detail.nodeId || !detail.item.draft)
     return {
       status: "rejected",
       message: "The identified PR is no longer a verified draft. Refresh it.",
     };
-  const result = await writer.submit("/graphql", "POST", {
-    query:
-      "mutation Ready($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft headRefOid } } }",
-    variables: { id: detail.nodeId },
-  });
+  const result = await writer.submit(
+    "/graphql",
+    "POST",
+    {
+      query:
+        "mutation Ready($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft headRefOid } } }",
+      variables: { id: detail.nodeId },
+    },
+    signal,
+  );
   const body = result.body as
     | {
         data?: {

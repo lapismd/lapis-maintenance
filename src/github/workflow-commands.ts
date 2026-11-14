@@ -8,6 +8,7 @@ export async function submitWorkflow(
   writer: GithubWriteTransport,
   command: MaintenanceCommand,
   detail: MaintenanceDetail,
+  signal?: AbortSignal,
 ): Promise<CommandResult> {
   const target = command.target;
   if (target.kind === "pull-request")
@@ -41,11 +42,16 @@ export async function submitWorkflow(
         status: "rejected",
         message: "The deployment review comment is too long.",
       };
-    await writer.submit(`${root}/pending_deployments`, "POST", {
-      environment_ids: [target.environmentId],
-      state: command.kind === "approve-deployment" ? "approved" : "rejected",
-      comment,
-    });
+    await writer.submit(
+      `${root}/pending_deployments`,
+      "POST",
+      {
+        environment_ids: [target.environmentId],
+        state: command.kind === "approve-deployment" ? "approved" : "rejected",
+        comment,
+      },
+      signal,
+    );
     return {
       status: "accepted",
       message: `GitHub accepted the environment ${command.kind === "approve-deployment" ? "approval" : "rejection"}. Workflow completion and publication are not confirmed.`,
@@ -60,6 +66,8 @@ export async function submitWorkflow(
   await writer.submit(
     `${root}/${command.kind === "rerun-failed" ? "rerun-failed-jobs" : command.kind === "approve-run" ? "approve" : "cancel"}`,
     "POST",
+    undefined,
+    signal,
   );
   return {
     status: "accepted",
