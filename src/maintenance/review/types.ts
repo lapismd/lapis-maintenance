@@ -48,6 +48,7 @@ export interface ReviewEvent {
   id: string;
   kind: "comment" | "review" | "commit" | "deployment";
   actor: string;
+  avatarUrl?: string;
   title: string;
   body: string;
   time: string;

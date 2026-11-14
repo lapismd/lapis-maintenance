@@ -1,14 +1,8 @@
 <script lang="ts">
   import { Button } from "@lapismd/design-core/shadcn/button";
+  import { Avatar } from "@lapismd/design-core/shadcn/avatar";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
-  import {
-    MessageSquare,
-    GitCommitHorizontal,
-    GitPullRequestArrow,
-    ShieldCheck,
-    Activity,
-    ExternalLink,
-  } from "@lucide/svelte";
+  import { Activity, ExternalLink } from "@lucide/svelte";
   import ReviewResource from "./ReviewResource.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import "./review.css";
@@ -29,27 +23,26 @@
     <ol class="review-timeline" aria-label="Pull request activity">
       {#each controller.resources.activity.data?.items ?? [] as event (event.id)}<li
         >
-          <span class="review-timeline-icon" data-kind={event.kind}
-            >{#if event.kind === "commit"}<GitCommitHorizontal
-                size={17}
-                aria-hidden="true"
-              />{:else if event.kind === "review"}<GitPullRequestArrow
-                size={17}
-                aria-hidden="true"
-              />{:else if event.kind === "deployment"}<ShieldCheck
-                size={17}
-                aria-hidden="true"
-              />{:else}<MessageSquare size={17} aria-hidden="true" />{/if}</span
+          <span class="review-timeline-avatar"
+            ><Avatar
+              src={event.avatarUrl}
+              name={event.actor}
+              style="--ui-avatar-size:2.25rem"
+              decorative
+            /></span
           >
           <article>
             <header>
-              <strong>{event.actor}</strong><span>{event.title}</span><a
-                href={event.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open activity: ${event.title}`}
-                ><ExternalLink size={12} aria-hidden="true" /></a
-              ><small>{event.time}</small>
+              <div class="review-timeline-byline">
+                <strong>{event.actor}</strong><span>{event.title}</span><a
+                  href={event.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Open activity: ${event.title}`}
+                  ><ExternalLink size={12} aria-hidden="true" /></a
+                >
+              </div>
+              <small>{event.time}</small>
             </header>
             <p>{event.body}</p>
           </article>

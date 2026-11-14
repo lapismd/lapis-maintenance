@@ -205,9 +205,6 @@
   margin: 0;
   overflow-wrap: anywhere;
 }
-.review-details-link {
-  margin: 0 1rem 1rem;
-}
 @container (max-width:60rem) {
   .review-overview-grid {
     grid-template-columns: minmax(0, 1fr);

@@ -14,25 +14,25 @@
   <h1 class="maintenance-sr-only">{title}</h1>
   <div class="maintenance-summary" aria-label="Repository summary">
     <div>
-      <span>Tracked items</span><strong
-        ><Inbox size={24} aria-hidden="true" />{controller.counts.total}</strong
+      <span title="Tracked items">Items</span><strong
+        ><Inbox size={20} aria-hidden="true" />{controller.counts.total}</strong
       >
     </div>
     <div>
-      <span>Approval waits</span><strong
-        ><ShieldCheck size={24} aria-hidden="true" />{controller.counts
+      <span title="Approval waits">Approvals</span><strong
+        ><ShieldCheck size={20} aria-hidden="true" />{controller.counts
           .approvals}</strong
       >
     </div>
     <div>
-      <span>Failed builds</span><strong
-        ><CircleX size={24} aria-hidden="true" />{controller.counts
+      <span title="Failed builds">Failures</span><strong
+        ><CircleX size={20} aria-hidden="true" />{controller.counts
           .failures}</strong
       >
     </div>
     <div>
-      <span>Reviews & drafts</span><strong
-        ><GitPullRequest size={24} aria-hidden="true" />{controller.counts
+      <span title="Reviews and drafts">Reviews</span><strong
+        ><GitPullRequest size={20} aria-hidden="true" />{controller.counts
           .reviews}</strong
       >
     </div>

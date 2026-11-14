@@ -1,4 +1,5 @@
 import { snapshotFixture } from "../fixtures";
+import { reviewAvatars } from "./avatars";
 import type {
   ReviewResources,
   ReviewOverview,
@@ -52,6 +53,7 @@ const events = (pr: ReviewOverview): ReviewEvent[] => [
     id: "opened",
     kind: "commit",
     actor: pr.author,
+    avatarUrl: reviewAvatars.automation,
     title: "opened this pull request",
     body: "Updated package versions, changelogs and the registry lockfile.",
     time: "2 hours ago",
@@ -61,6 +63,7 @@ const events = (pr: ReviewOverview): ReviewEvent[] => [
     id: "checks",
     kind: "comment",
     actor: "github-actions[bot]",
+    avatarUrl: reviewAvatars.actions,
     title: "reported the current checks",
     body: "Types, unit tests and package acceptance passed for the displayed revision.",
     time: "1 hour ago",
@@ -70,6 +73,7 @@ const events = (pr: ReviewOverview): ReviewEvent[] => [
     id: "review",
     kind: "review",
     actor: "stevejuma",
+    avatarUrl: reviewAvatars.maintainer,
     title: "reviewed the release notes",
     body: "The dependency cohort looks good. Waiting for the final maintainer approval before merging.",
     time: "24 minutes ago",
@@ -79,6 +83,7 @@ const events = (pr: ReviewOverview): ReviewEvent[] => [
     id: "deploy",
     kind: "deployment",
     actor: "github-actions[bot]",
+    avatarUrl: reviewAvatars.actions,
     title: "requested an environment review",
     body: "The protected publication job is waiting for an eligible reviewer.",
     time: "10 minutes ago",

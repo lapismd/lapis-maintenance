@@ -99,8 +99,7 @@
   line-height: 1.5;
 }
 .review-feedback a,
-.review-external,
-.review-details-link {
+.review-external {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -202,6 +201,13 @@
 }
 .review-inspector-footer > .review-pr-actions {
   padding: 0.65rem 0.75rem 0;
+}
+.review-inspector-footer > .review-approvals-compact:has(.review-approval) {
+  margin-top: 0.65rem;
+  border-top: 1px solid var(--border);
+}
+.review-card-header-link {
+  margin-inline-start: auto;
 }
 .review-confirm-facts {
   display: grid;

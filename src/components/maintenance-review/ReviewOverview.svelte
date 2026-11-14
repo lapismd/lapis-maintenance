@@ -1,12 +1,8 @@
 <script lang="ts">
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import {
-    CircleCheck,
-    GitBranch,
-    GitCommitHorizontal,
-    ExternalLink,
-  } from "@lucide/svelte";
+  import { CircleCheck, GitBranch, GitCommitHorizontal } from "@lucide/svelte";
+  import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ReviewResource from "./ReviewResource.svelte";
   import ReviewApprovals from "./ReviewApprovals.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
@@ -66,6 +62,14 @@
           <header class="review-section-heading">
             <GitBranch size={16} aria-hidden="true" />
             <h2>Pull request details</h2>
+            <a
+              class="maintenance-icon-link review-card-header-link"
+              href={pr.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open pull request on GitHub"
+              title="Open pull request on GitHub"><GitHubIcon /></a
+            >
           </header>
           <dl class="review-metadata">
             <div>
@@ -107,16 +111,6 @@
               </dd>
             </div>
           </dl>
-          <a
-            class="review-details-link"
-            href={pr.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            >Open pull request on GitHub<ExternalLink
-              size={12}
-              aria-hidden="true"
-            /></a
-          >
         </section>
         <ReviewApprovals {controller} />
       </div>

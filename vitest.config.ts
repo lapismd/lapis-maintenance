@@ -38,6 +38,7 @@ export default mergeConfig(
             include: [
               "@lapismd/design-core/diff",
               "@lapismd/design-core/shadcn/tabs",
+              "@lapismd/design-core/shadcn/avatar",
             ],
           },
           test: {

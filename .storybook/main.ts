@@ -21,6 +21,7 @@ const config: StorybookConfig = {
         ...(config.optimizeDeps?.include ?? []),
         "@lapismd/design-core/diff",
         "@lapismd/design-core/shadcn/tabs",
+        "@lapismd/design-core/shadcn/avatar",
       ],
     },
   }),

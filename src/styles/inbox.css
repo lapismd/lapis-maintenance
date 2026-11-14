@@ -35,28 +35,31 @@
   background: var(--card);
 }
 .maintenance-summary > div {
-  padding: 0.9rem 1.1rem;
+  padding: 0.55rem 0.5rem;
+  min-width: 0;
   display: grid;
   align-content: center;
   justify-items: center;
   text-align: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
 }
 .maintenance-summary > div + div {
   border-inline-start: 1px solid var(--border);
 }
 .maintenance-summary span {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.72rem;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.68rem;
   color: var(--muted-foreground);
 }
 .maintenance-summary strong {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  font-size: 1.45rem;
+  gap: 0.35rem;
+  font-size: 1.2rem;
   font-weight: 600;
   line-height: 1.15;
   letter-spacing: -0.03em;
