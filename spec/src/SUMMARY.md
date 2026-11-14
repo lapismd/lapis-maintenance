@@ -7,6 +7,7 @@
 - [GitHub and token sessions](github.md)
 - [Local read cache](cache.md)
 - [Write actions](actions.md)
+- [Maintenance review follow-up](review.md)
 - [Hosting and offline](hosting.md)
 - [Slice tracker](slices.md)
 - [Verification](verification.md)

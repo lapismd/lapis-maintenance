@@ -217,3 +217,107 @@ browser-storage fallback when isolation is unavailable. Qualify the shared UI
 runtime floor upstream to keep long checks separate from merge controls, then
 consume the npm release. See `spec/records/2026-11-11-cached-reload.md` for the
 failure ledger and qualification; Slice 4 remains unapproved.
+
+## GitHub and PR follow-up — revised 2026-11-14
+
+The user revised the T3-inspired plan: **the first deliverable is UI in
+Storybook only, and new components stay in this repository for now**. This
+supersedes the proposed action-fixes-first sequence. Each later slice requires
+separate approval. The existing live application keeps its current behavior.
+
+### Intended product and findings
+
+Retain Svelte, Design Core AppShell, Repository UI primitives, direct browser
+GitHub requests, remembered token sessions and token-partitioned Turso caches.
+T3 Code supplies patterns for batched GraphQL summaries, independent resources,
+conditional refresh, 150ms intent prefetch and exact fork/head approval checks.
+Preserve provenance and MIT attribution for later code adaptations.
+
+Maintenance already has persistent caches, ETags and interactive priority, but
+inventory reads checks/statuses/reviews separately per PR. Approval checks only
+conclusion, environment actions are intentionally gated, check/job URLs are
+discarded, and controller plus adapter duplicate preflight reads. Existing
+focused tests pass 30/30. Live fixes have not been implemented in this follow-up.
+
+### Revised delivery slices
+
+| Slice                       | Deliverable                                                                                            | Review boundary                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
+| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Authorized now; stop for UI/interaction review |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Planned; separate approval required            |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Planned; separate approval required            |
+| R4 — Live PR workspace      | Activity/files/diff adapters, resource caching, routes and hosted acceptance                           | Planned; separate approval required            |
+
+### R1: complete fixture-only UI
+
+- Keep quick details in the joined inspector; Open PR view enters main-panel
+  Overview, Checks, Activity and Files tabs. Back retains filters/selection.
+  Preserve shell navigation, theme/profile, Kanban, resizing and responsiveness.
+- Overview shows author, branches/revision, description, labels and review/merge
+  state. Checks have grouped collapsible linked rows, refresh and merge controls.
+  Activity is a paginated timeline. Files has search, statistics, selection and
+  the public diff renderer, with explicit binary/oversized/unavailable states.
+- A repo-owned controller owns tabs, selected file, independent resource states,
+  refresh, confirmation and feedback. Hosts own read/command ports and disposal;
+  stories own invented data and simulate latency, pagination and effects.
+- Distinguish fork workflow approval from environment approve/reject. Show exact
+  repository/run/attempt/revision/environment and concrete permission/reviewer,
+  timer, stale-target and uncertain-result feedback. Confirmations identify the
+  effect and submissions are explicitly simulated. No real token, network,
+  persistence, write, app route, live-shell integration or backend is added.
+- Workflow/check titles and result links open their identified targets in a new
+  tab. Card bodies still open details; action buttons retain confirmation.
+  Render the same local components in complete-screen and standalone stories.
+- Cover loading, retained refresh, empty/error, denied, pending approval,
+  accepted/stale/uncertain, light/dark and narrow states. Keep registry
+  dependencies unchanged and make no sibling or upstream API changes.
+
+### R2: live actions and links after approval
+
+Recognize action-required status/conclusion, public-fork identity, unambiguous
+current PR/head and run attempt. Revalidate immediately before approval.
+Environment review uses current pending-deployment/actor eligibility and exact
+run/attempt/environment confirmation. Explain Actions versus Deployments write,
+unverified access versus confirmed denial, unrelated resource failures and
+bounded GitHub rejection details. Preserve target links, individual confirmed
+commands, duplicate prevention and uncertain outcomes without replay. PR approval
+still requires reported checks; merge rules remain authoritative. Dispatch stays
+deferred. The reviewed components remain local until separately requested.
+
+### R3: faster reads after approval
+
+Measure cold/warm requests and selected-detail/action timing. Read lightweight
+PR summaries in read-only GraphQL batches of at most 25 through the four-slot
+limiter, with per-PR partial errors and scoped REST fallback. Load full checks
+and reviews for selection or validation; load optional resources independently.
+Track/drain asynchronous persistence without delaying verified reads or allowing
+invalidated data back. Keep five-minute inventory refresh; selected pending
+checks may refresh at 45 seconds while visible. Prefetch one hovered/focused
+card after 150ms; pass-over does no work, and cancellation cannot harm another
+subscriber. Retain cache bounds, token and offline boundaries. Put one fresh,
+action-specific preflight in the command adapter immediately before writing;
+remove duplicate validation only with complete safety regression evidence.
+
+### R4: live PR resources after approval
+
+Connect the reviewed screen to paginated conversation/review activity, changed
+files and selected patches. Verify base/head identities around mutable file
+reads and reject mixed revisions. Load tabs lazily and cache new resources
+separately, preserving cached boards. Add PR identity/tab hash routes with Back
+restoring the board. Preserve explicit binary, oversized and truncated states.
+Inline review drafts/comments, bulk operations and dispatch remain deferred.
+
+### Verification and review gates
+
+Commit this revised plan and canonical foundation before UI code. For R1 run
+focused controller/Storybook journeys, component and shell accessibility, types,
+architecture, repository tests, app/static Storybook builds and specifications.
+Inspect populated light/dark/narrow screens in a cold Storybook process. Leave
+stories visual-pending without screenshot comparisons or baseline updates.
+Commit the verified UI and stop for review; do not push to auto-deploying main.
+
+Later slices add mocked permission/stale/uncertain-write cases, pagination,
+partial-data/session/disposal tests and designated disposable live targets.
+Performance acceptance requires zero requests for a fresh reopen and at least
+50% fewer cold requests in a controlled 20-PR fixture. Qualify hosted CI/assets
+and PWA boundaries when live integration/deployment is separately approved.

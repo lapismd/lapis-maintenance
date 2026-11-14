@@ -5,6 +5,18 @@ Apply the parent workspace guidance. This repository owns the maintenance UI,
 controller, adapters, and hosting configuration; shared component fixes belong
 to their owning Design Core or Agent/Repository UI package.
 
+## Current follow-up boundary — 2026-11-14
+
+The T3-inspired follow-up starts with **Storybook UI only**, as the user
+requested after reviewing the plan. Keep new components and the controller in
+this repository for now, composing public Design Core/Repository UI primitives.
+Do not modify or publish shared dependencies for this preview. Mount the new
+screen only in fixture stories with disposable in-memory ports. Leave the live
+application, GitHub adapters, action policies, persistence and navigation
+unchanged. Demonstrate the PR workspace, linked checks/workflows and approval
+states; stop for explicit review before any live implementation. Remaining
+follow-up slices are planned, not authorized by this UI slice.
+
 - `PLAN.md` records the complete approved plan and slice gates. Implement only
   the current authorized slice. Slice 1 is approved. Slice 2 authorizes token
   login, remembered local credentials, live read-only GitHub adapters and a

@@ -9,3 +9,12 @@
 | 4 — Release actions | Not authorized        | Planned             | Pending                  |
 | 5 — Pages hosting   | Authorized 2026-11-10 | Implemented         | Pending                  |
 | 5 — PWA acceptance  | Authorized 2026-11-11 | Implemented         | Pending                  |
+
+## GitHub and PR follow-up
+
+| Slice                   | Authorization         | Delivery | Review                       |
+| ----------------------- | --------------------- | -------- | ---------------------------- |
+| R1 — Local Storybook UI | Authorized 2026-11-14 | Pending  | Required before live changes |
+| R2 — Live actions/links | Not authorized        | Planned  | Pending                      |
+| R3 — Faster reads       | Not authorized        | Planned  | Pending                      |
+| R4 — Live PR workspace  | Not authorized        | Planned  | Pending                      |
