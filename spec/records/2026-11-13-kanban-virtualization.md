@@ -92,8 +92,8 @@ Installed-registry checks pass formatting, architecture, Svelte/TypeScript
 interaction/accessibility cases, seven PWA cases, app/static Storybook builds
 and canonical specification checks. After the readiness correction, the full
 95-case Storybook lane, static catalog, quality and specification checks pass
-again with zero functional or accessibility failures. Hosted deployment remains
-pending below.
+again with zero functional or accessibility failures. Hosted deployment and
+live acceptance pass as recorded below.
 
 Fresh registry downloads match npm's SHA-512 integrity for both packages and
 have provenance metadata. Core's SHA-256 matches the verified release artifact
@@ -107,3 +107,32 @@ Registry latest spec-validator is still 0.2.0. The actual
 availability warnings. `pnpm spec:search --semantic` executes the documented
 rg fallback because the system QMD binary is absent. No global tooling is
 installed or changed.
+
+## Hosted and manual acceptance — 2026-11-14
+
+The user confirmed **"Stable now"** after fullscreen scrolling and hovering in
+Brave's local wide-shell story with the virtualization fix active. This closes
+the reported flicker reproduction; the exact graphics-engine trigger remains
+unconfirmed.
+
+Product revision `693eab6d7a8024a1f6489fd3231583b822a70981` passed the complete
+[hosted check and Pages deployment](https://github.com/lapismd/lapis-maintenance/actions/runs/43532187741).
+The initial delay was a queued hosted runner; both jobs subsequently completed
+successfully. The downloaded exact Pages artifact matches the live index,
+service worker, manifest and both installation icons.
+
+Live production acceptance passes cross-origin isolation, installation (no
+installability errors), offline cold reload and online reconnect. CacheStorage
+contains 236 public assets, excludes Storybook and API/query URLs, and the
+unauthenticated/offline journey issues zero GitHub API requests.
+
+The hosted fixture-only fullscreen story passes at 1280px and 1800px, both at
+DPR 2. Its 130-item board retains all 123 Activity items while mounting seven
+lane cards at the final position. Scrolling to the first and last cards,
+hovering cards/header/navigation and activating both cards preserves the board
+count and joined inspector; no page errors are reported. This probe initially
+targeted a running card as the first row (two local probe failures); the
+controller correctly orders cancelled work first. The probe was corrected to
+the actual first cancelled card, retaining first/last visibility, selection,
+mounted-count and error assertions, and passes locally and on Pages without
+further product changes.
