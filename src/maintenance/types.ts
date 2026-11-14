@@ -79,11 +79,17 @@ export interface MaintenanceSnapshot {
 export interface MaintenanceDetail {
   item: MaintenanceItem;
   description: string;
+  holdReason?: string;
+  nodeId?: string;
   checks: {
+    id?: string;
+    url?: string;
+    workflow?: string;
     name: string;
     state: "passed" | "failed" | "running" | "unknown";
     description?: string;
   }[];
+  checksComplete?: boolean;
   review?: string;
   workflow?: string;
   environment?: string;

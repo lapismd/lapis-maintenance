@@ -53,17 +53,13 @@ export function pullActions(
     active &&
     !pr.draft &&
     canPush(access) &&
-    !detail.coverage?.length &&
-    detail.checks.length > 0 &&
-    detail.checks.every((check) => check.state === "passed") &&
-    detail.item.status !== "blocked" &&
-    pr.mergeable === true &&
-    pr.mergeable_state === "clean" &&
+    !detail.holdReason &&
     !!detail.mergeMethods?.length;
   return kinds.map(([kind, label]) => {
     if (
       kind === "approve-pr" &&
-      (!detail.checks.length || detail.coverage?.length)
+      (!detail.checks.length ||
+        !(detail.checksComplete ?? !detail.coverage?.length))
     )
       return capability(
         kind,
@@ -76,7 +72,7 @@ export function pullActions(
         kind,
         label,
         eligible,
-        "Merge requires repository write access, an allowed merge method, complete successful checks and clean GitHub merge eligibility; holds and repository rules remain authoritative.",
+        "Merge requires an open non-draft PR, repository write access and an allowed merge method; explicit holds remain in force and GitHub applies checks, approval and merge-queue rules.",
       );
     if (kind === "mark-ready")
       return capability(
@@ -109,7 +105,7 @@ export function workflowAction(
   if (!access) return futureAction(kind, label);
   const valid =
     kind === "approve-run"
-      ? run.conclusion === "action_required"
+      ? run.status === "action_required" || run.conclusion === "action_required"
       : kind === "cancel-run"
         ? ["queued", "in_progress", "waiting", "pending", "requested"].includes(
             run.status,

@@ -7,8 +7,9 @@ export function checkSnapshot(
   return {
     sha: detail.item.target.sha,
     complete:
-      !detail.coverage?.length &&
-      !detail.checks.some((check) => check.state === "unknown"),
+      detail.checksComplete ??
+      (!detail.coverage?.length &&
+        !detail.checks.some((check) => check.state === "unknown")),
     items: detail.checks.map((check, index) => ({
       id: `${index}:${check.name}`,
       ...check,

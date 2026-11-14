@@ -7,7 +7,9 @@ import {
 } from "../maintenance/types";
 import { GithubWriteError, type GithubWriteTransport } from "./write-transport";
 import type { GithubTransport } from "./transport";
-import { validRepository, type GithubPull } from "./models";
+import { submitReadiness } from "./readiness-command";
+import { submitWorkflow } from "./workflow-commands";
+import { validRepository } from "./models";
 
 const rejected = (message: string): CommandResult => ({
   status: "rejected",
@@ -22,7 +24,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
   #uncertain = new Set<string>();
   #busy = false;
   constructor(
-    private client: GithubTransport,
+    _client: GithubTransport,
     private writer: GithubWriteTransport,
     private reader: MaintenanceReadPort,
   ) {}
@@ -68,6 +70,8 @@ export class GithubCommandPort implements MaintenanceCommandPort {
           "rerun-failed",
           "cancel-run",
           "approve-run",
+          "approve-deployment",
+          "reject-deployment",
         ].includes(command.kind)
       )
         return rejected("This release action is not enabled yet.");
@@ -89,31 +93,12 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         );
       const root = `/repos/${command.repository}`;
       const url = detail.item.url;
-      if (command.target.kind === "workflow") {
-        const target = command.target;
-        if (
-          command.itemId !== `run:${command.repository}:${target.runId}` ||
-          !Number.isSafeInteger(target.runId) ||
-          !Number.isSafeInteger(target.attempt) ||
-          target.attempt < 1 ||
-          !["rerun-failed", "cancel-run", "approve-run"].includes(command.kind)
-        )
-          return rejected("Invalid workflow command target.");
+      if (
+        command.target.kind === "workflow" ||
+        command.target.kind === "deployment"
+      ) {
         submitted = true;
-        await this.writer.submit(
-          `${root}/actions/runs/${target.runId}/${command.kind === "rerun-failed" ? "rerun-failed-jobs" : command.kind === "approve-run" ? "approve" : "cancel"}`,
-          "POST",
-        );
-        return {
-          status: "accepted",
-          message:
-            command.kind === "approve-run"
-              ? "GitHub accepted workflow approval. CI is not yet complete."
-              : command.kind === "rerun-failed"
-                ? "GitHub accepted the rerun request. The new attempt is not yet complete."
-                : "GitHub accepted cancellation. The workflow may take time to stop.",
-          url,
-        };
+        return await submitWorkflow(this.writer, command, detail);
       }
       if (
         command.target.kind !== "pull-request" ||
@@ -148,68 +133,8 @@ export class GithubCommandPort implements MaintenanceCommandPort {
               );
       }
       if (command.kind === "mark-ready") {
-        const pr = await this.client.read<GithubPull>(
-          pull,
-          new AbortController().signal,
-          { fresh: true },
-        );
-        if (
-          pr.state !== "open" ||
-          !pr.draft ||
-          pr.head.sha !== command.target.sha ||
-          !pr.node_id
-        )
-          return rejected(
-            "The draft or revision changed. Refresh and review it again.",
-          );
         submitted = true;
-        const result = await this.writer.submit("/graphql", "POST", {
-          query:
-            "mutation Ready($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft headRefOid } } }",
-          variables: { id: pr.node_id },
-        });
-        const body = result.body as
-          | {
-              data?: {
-                markPullRequestReadyForReview?: {
-                  pullRequest?: { isDraft: boolean; headRefOid: string };
-                };
-              };
-              errors?: { type?: string; extensions?: { code?: string } }[];
-            }
-          | undefined;
-        const updated = body?.data?.markPullRequestReadyForReview?.pullRequest;
-        if (
-          !updated &&
-          body?.errors?.length &&
-          body.errors.every((error) =>
-            [
-              "FORBIDDEN",
-              "UNAUTHORIZED",
-              "NOT_FOUND",
-              "INSUFFICIENT_SCOPES",
-              "GRAPHQL_VALIDATION_FAILED",
-            ].includes(error.type ?? error.extensions?.code ?? ""),
-          )
-        )
-          return rejected(
-            "GitHub rejected readiness. Check token permissions and the current PR state.",
-          );
-        if (
-          body?.errors?.length ||
-          !updated ||
-          updated.headRefOid !== command.target.sha
-        )
-          return uncertain(
-            "Readiness was not confirmed for the displayed revision. Inspect GitHub; this action will not be replayed.",
-          );
-        return updated.isDraft
-          ? rejected("GitHub still reports this PR as a draft.")
-          : {
-              status: "completed",
-              message: "The PR is ready for review.",
-              url,
-            };
+        return await submitReadiness(this.writer, detail);
       }
       const event = {
         "approve-pr": "APPROVE",

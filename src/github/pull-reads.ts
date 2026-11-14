@@ -61,6 +61,8 @@ export async function readPull(
       (check) => check.head_sha === pr.head.sha,
     ))
       checks.push({
+        id: String(check.id),
+        url: check.html_url ?? check.details_url,
         name: check.name,
         state:
           check.status !== "completed"
@@ -90,6 +92,8 @@ export async function readPull(
         latest.set(status.context, status);
     for (const status of latest.values())
       checks.push({
+        id: String(status.id),
+        url: status.target_url ?? undefined,
         name: status.context,
         state:
           status.state === "success"
@@ -190,8 +194,14 @@ export async function readPull(
   };
   const detail: MaintenanceDetail = {
     item,
+    holdReason: hold,
+    nodeId: pr.node_id,
     description: pr.body?.trim() || reasons.join("\n\n"),
     checks,
+    checksComplete:
+      runs.status === "fulfilled" &&
+      statuses.status === "fulfilled" &&
+      !checks.some((check) => check.state === "unknown"),
     review: `${approvals} current-revision approval(s)${changes ? "; changes requested" : ""}. Required reviews and merge rules are evaluated by GitHub.`,
     ref: pr.head.ref,
     baseRef: pr.base.ref,

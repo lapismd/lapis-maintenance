@@ -29,16 +29,22 @@ const detail = {
   coverage: [],
   mergeMethods: ["squash"],
 } as unknown as MaintenanceDetail;
-it("permits only clean checked PRs using repository merge methods", () => {
+it("allows merge attempts independently of approval/check gates while respecting explicit holds and permissions", () => {
   expect(mergeMethods(access.repository)).toEqual(["squash"]);
-  expect(
-    pullActions(pull, detail, access).find((a) => a.kind === "merge-pr")
-      ?.available,
-  ).toBe(true);
   for (const value of [
-    { ...detail, coverage: ["Checks unavailable"] },
+    detail,
+    { ...detail, coverage: ["Reviews unavailable"] },
     { ...detail, checks: [{ name: "CI", state: "failed" as const }] },
-    { ...detail, item: { ...detail.item, status: "blocked" as const } },
+    { ...detail, checks: [] },
+  ]) {
+    expect(
+      pullActions({ ...pull, mergeable_state: "blocked" }, value, access).find(
+        (a) => a.kind === "merge-pr",
+      )?.available,
+    ).toBe(true);
+  }
+  for (const value of [
+    { ...detail, holdReason: "Explicit repository hold" },
     { ...detail, mergeMethods: [] },
   ])
     expect(
@@ -46,7 +52,7 @@ it("permits only clean checked PRs using repository merge methods", () => {
         ?.available,
     ).toBe(false);
   expect(
-    pullActions({ ...pull, mergeable_state: "blocked" }, detail, access).find(
+    pullActions({ ...pull, state: "closed" }, detail, access).find(
       (a) => a.kind === "merge-pr",
     )?.available,
   ).toBe(false);

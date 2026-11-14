@@ -1,10 +1,7 @@
 import type { MaintenanceDetail } from "../maintenance/types";
+import { approvalWaiting, workflowApproval } from "./workflow-authority";
 import { category, type GithubEnvironment, type GithubRun } from "./models";
-import {
-  futureAction,
-  workflowAction,
-  type GithubAccess,
-} from "./action-policy";
+import { workflowAction, type GithubAccess } from "./action-policy";
 import {
   GithubError,
   type GithubTransport,
@@ -18,6 +15,7 @@ export async function readWorkflow(
   options: ReadOptions,
   access?: GithubAccess,
 ): Promise<MaintenanceDetail[]> {
+  const approval = approvalWaiting(run);
   const failed = [
     "failure",
     "timed_out",
@@ -32,18 +30,17 @@ export async function readWorkflow(
       title: run.display_title || run.name,
       kind: "workflow",
       category: category(run.name, repository),
-      status:
-        run.conclusion === "action_required"
-          ? "approval-wait"
-          : running
-            ? "running"
-            : run.conclusion === "cancelled"
-              ? "cancelled"
-              : failed
-                ? "failed"
-                : run.conclusion === "success" || run.conclusion === "skipped"
-                  ? "passed"
-                  : "unavailable",
+      status: approval
+        ? "approval-wait"
+        : running
+          ? "running"
+          : run.conclusion === "cancelled"
+            ? "cancelled"
+            : failed
+              ? "failed"
+              : run.conclusion === "success" || run.conclusion === "skipped"
+                ? "passed"
+                : "unavailable",
       updatedAt: run.updated_at,
       url: run.html_url,
       target: {
@@ -55,14 +52,22 @@ export async function readWorkflow(
       reasons: [
         `${run.name} · attempt ${run.run_attempt} · ${run.conclusion ?? run.status}`,
       ],
-      actions:
-        run.conclusion === "action_required"
-          ? [workflowAction("approve-run", run, access)]
-          : running
-            ? [workflowAction("cancel-run", run, access)]
-            : failed
-              ? [workflowAction("rerun-failed", run, access)]
-              : [],
+      actions: approval
+        ? [
+            await workflowApproval(
+              client,
+              repository,
+              run,
+              signal,
+              options,
+              access,
+            ),
+          ]
+        : running
+          ? [workflowAction("cancel-run", run, access)]
+          : failed
+            ? [workflowAction("rerun-failed", run, access)]
+            : [],
     },
     description: `Latest observed attempt of ${run.name}.`,
     workflow: run.name,
@@ -70,6 +75,8 @@ export async function readWorkflow(
     checks: [
       {
         name: run.name,
+        url: run.html_url,
+        workflow: run.name,
         state: running
           ? "running"
           : failed
@@ -116,8 +123,25 @@ export async function readWorkflow(
             ),
           ],
           actions: [
-            futureAction("approve-deployment", "Approve deployment"),
-            futureAction("reject-deployment", "Reject deployment"),
+            ...(["approve-deployment", "reject-deployment"] as const).map(
+              (kind) => ({
+                kind,
+                label:
+                  kind === "approve-deployment"
+                    ? "Approve deployment"
+                    : "Reject deployment",
+                available:
+                  !!access &&
+                  !access.repository.archived &&
+                  !access.repository.disabled &&
+                  wait.current_user_can_approve,
+                reason: !access
+                  ? "Connect an authenticated session to review this environment."
+                  : wait.current_user_can_approve
+                    ? undefined
+                    : `GitHub reports this user cannot review the pending environment${wait.wait_timer ? `; protection timer: ${wait.wait_timer} minute(s)` : ""}. Required reviewer and environment rules remain authoritative.`,
+              }),
+            ),
           ],
         },
         environment: wait.environment.name,

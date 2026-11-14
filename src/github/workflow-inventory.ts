@@ -1,3 +1,4 @@
+import { approvalWaiting } from "./workflow-authority";
 import type { GithubPull, GithubRun } from "./models";
 import {
   GithubError,
@@ -40,7 +41,7 @@ export async function readWorkflowInventory(
     },
     {
       query: "status=action_required",
-      matches: (run: GithubRun) => run.conclusion === "action_required",
+      matches: approvalWaiting,
     },
   ];
   const results = await Promise.allSettled(

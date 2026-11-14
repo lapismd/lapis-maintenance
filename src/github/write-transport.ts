@@ -1,3 +1,4 @@
+import { writeFailure } from "./write-errors";
 /** Uncached, non-retrying writes. The session owns credentials and disposal. */
 export class GithubWriteError extends Error {
   constructor(
@@ -67,7 +68,7 @@ export class GithubWriteTransport {
     if (!response.ok)
       throw new GithubWriteError(
         response.status >= 500 || response.status === 408,
-        `GitHub did not complete the action (HTTP ${response.status}). Check token permissions, repository rules and the current target.`,
+        await writeFailure(response, url),
       );
     const text = await response.text().catch(() => {
       throw new GithubWriteError(

@@ -1,3 +1,4 @@
+import { approvalWaiting } from "./workflow-authority";
 import type { MaintenanceDetail } from "../maintenance/types";
 import type { GithubTransport, ReadOptions } from "./transport";
 import type { GithubRun } from "./models";
@@ -24,7 +25,7 @@ export async function readWorkflowApprovals(
       latest.set(run.workflow_id, run);
   const results = await Promise.all(
     [...latest.values()]
-      .filter((run) => run.conclusion === "action_required")
+      .filter(approvalWaiting)
       .map((run) =>
         readWorkflow(
           client,

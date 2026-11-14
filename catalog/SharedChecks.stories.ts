@@ -72,7 +72,7 @@ export const LinkedPullRequest: Story = {
     const c = await inspect(canvasElement, /Open card: Desktop CI/);
     await expect(
       c.getByRole("button", { name: "Squash and merge" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     await expect(
       c.getByRole("button", { name: "Float PR details" }),
     ).toBeVisible();

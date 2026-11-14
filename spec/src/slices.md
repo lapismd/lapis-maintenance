@@ -15,6 +15,6 @@
 | Slice                   | Authorization         | Delivery    | Review                               |
 | ----------------------- | --------------------- | ----------- | ------------------------------------ |
 | R1 — Local Storybook UI | Authorized 2026-11-14 | Implemented | Approved for continuation 2026-11-14 |
-| R2 — Live actions/links | Authorized 2026-11-14 | In progress | Combined green-head delivery         |
+| R2 — Live actions/links | Authorized 2026-11-14 | Implemented | Combined green-head delivery         |
 | R3 — Faster reads       | Authorized 2026-11-14 | In progress | Combined green-head delivery         |
 | R4 — Live PR workspace  | Authorized 2026-11-14 | In progress | Combined green-head delivery         |

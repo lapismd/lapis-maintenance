@@ -17,7 +17,7 @@
 
 ### Acceptance details
 
-- Fork approval checks status/conclusion, public-fork origin, unambiguous current PR/head identity and run attempt; environment approve/reject revalidates the pending environment and actor eligibility.
+- Fork approval checks status/conclusion, public-fork origin, unambiguous current PR/head identity and run attempt; environment approve/reject revalidates the pending environment and GitHub actor eligibility without requiring the actor to have repository push permission.
 - Each disabled action explains its actual blocker, unrelated resource failures do not remove valid authority, and GitHub rejection details distinguish Actions and Deployments permissions without replaying uncertain writes.
 - Workflow/job/check titles and results link to actual targets, retaining explicit mutation confirmation and card-to-inspector navigation; manual workflow dispatch follows LM-REL-001.
 
