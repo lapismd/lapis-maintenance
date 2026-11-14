@@ -103,6 +103,20 @@ export const MergeMethodDropdown: Story = {
     await userEvent.click(
       await c.findByRole("button", { name: "Choose merge method" }),
     );
+    const options = await page.findAllByRole("menuitemradio");
+    for (const option of options) {
+      const doc = canvasElement.ownerDocument;
+      const walker = doc.createTreeWalker(option, NodeFilter.SHOW_TEXT);
+      const lines = new Set<number>();
+      for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+        if (!node.textContent?.trim()) continue;
+        const range = doc.createRange();
+        range.selectNodeContents(node);
+        for (const rect of range.getClientRects())
+          lines.add(Math.round(rect.top));
+      }
+      await expect(lines.size).toBe(1);
+    }
     await userEvent.click(
       await page.findByRole("menuitemradio", { name: "Rebase and merge" }),
     );
@@ -116,5 +130,45 @@ export const MergeMethodDropdown: Story = {
     const dialog = within(await page.findByRole("dialog"));
     await waitFor(() => expect(dialog.getByText(/using rebase/)).toBeVisible());
     await userEvent.click(dialog.getByRole("button", { name: "Cancel" }));
+  },
+};
+
+export const AutoMerge: Story = {
+  render,
+  args: { scenario: "auto-merge" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    const auto = await c.findByRole("button", { name: "Enable auto-merge" });
+    await waitFor(() => expect(auto).toBeEnabled());
+    await userEvent.click(auto);
+    const dialog = within(await page.findByRole("dialog"));
+    await waitFor(() =>
+      expect(
+        dialog.getByText(/automatically.*squash.*required checks/i),
+      ).toBeVisible(),
+    );
+    await userEvent.click(
+      dialog.getByRole("button", { name: "Simulate enable auto-merge" }),
+    );
+    const disable = await c.findByRole("button", {
+      name: "Disable auto-merge",
+    });
+    await expect(c.getByText(/^Auto-merge enabled ·/)).toBeVisible();
+    await waitFor(() =>
+      expect(
+        page.queryByRole("dialog", { hidden: true }),
+      ).not.toBeInTheDocument(),
+    );
+    await waitFor(() => expect(disable).toBeEnabled());
+    await userEvent.click(disable);
+    const cancel = within(await page.findByRole("dialog"));
+    await waitFor(() =>
+      expect(cancel.getByText(/Stop GitHub.*automatically/)).toBeVisible(),
+    );
+    await userEvent.click(
+      cancel.getByRole("button", { name: "Simulate disable auto-merge" }),
+    );
+    await c.findByRole("button", { name: "Enable auto-merge" });
   },
 };

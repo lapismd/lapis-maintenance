@@ -8,6 +8,7 @@ import {
 } from "../maintenance/types";
 import { GithubWriteError, type GithubWriteTransport } from "./write-transport";
 import type { GithubTransport } from "./transport";
+import { submitAutoMerge } from "./auto-merge-command";
 import { submitReadiness } from "./readiness-command";
 import { submitWorkflow } from "./workflow-commands";
 import { submitDispatch } from "./dispatch-command";
@@ -91,6 +92,8 @@ export class GithubCommandPort implements MaintenanceCommandPort {
           "request-changes",
           "comment",
           "merge-pr",
+          "enable-auto-merge",
+          "disable-auto-merge",
           "rerun-failed",
           "cancel-run",
           "approve-run",
@@ -133,6 +136,13 @@ export class GithubCommandPort implements MaintenanceCommandPort {
       )
         return rejected("Invalid PR command target.");
       const pull = `${root}/pulls/${detail.item.number}`;
+      if (
+        command.kind === "enable-auto-merge" ||
+        command.kind === "disable-auto-merge"
+      ) {
+        submitted = true;
+        return await submitAutoMerge(this.writer, command, detail, signal);
+      }
       if (command.kind === "merge-pr") {
         const method = command.inputs.mergeMethod;
         if (!method || !detail.mergeMethods?.includes(method))

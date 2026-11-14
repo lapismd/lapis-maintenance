@@ -73,7 +73,10 @@
             size="sm"
             onclick={onOpen}
             ><Maximize2 size={14} aria-hidden="true" />Open PR view</Button
-          >{/if}<ReviewFeedback {controller} /><ReviewChecks {controller} />
+          >{/if}<ReviewFeedback {controller} /><ReviewChecks
+          {controller}
+          collapseGroups
+        />
       </div>{/if}
   </AppShell.Sidebar.Body>
   <AppShell.Sidebar.Footer style="padding:0"

@@ -103,3 +103,32 @@ it("limits workflow operations to the current eligible state and writer role", (
     }).available,
   ).toBe(false);
 });
+
+it("keeps auto-merge independent of approvals and permits stopping a held PR schedule", () => {
+  const writer = {
+    ...access,
+    repository: { ...access.repository, allow_auto_merge: true },
+  };
+  const pr = { ...pull, node_id: "PR_one" };
+  const noChecks = { ...detail, checks: [] };
+  expect(
+    pullActions(pr, noChecks, writer).find(
+      (a) => a.kind === "enable-auto-merge",
+    )?.available,
+  ).toBe(true);
+  expect(
+    pullActions(
+      pr,
+      { ...noChecks, holdReason: "Explicit repository hold" },
+      writer,
+    ).find((a) => a.kind === "enable-auto-merge")?.available,
+  ).toBe(false);
+  const scheduled = { ...pr, auto_merge: { merge_method: "squash" as const } };
+  expect(
+    pullActions(
+      scheduled,
+      { ...noChecks, holdReason: "Explicit repository hold" },
+      writer,
+    ).find((a) => a.kind === "disable-auto-merge")?.available,
+  ).toBe(true);
+});

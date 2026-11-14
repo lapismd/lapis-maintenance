@@ -8,6 +8,7 @@ export interface GithubUser {
 export interface GithubRepository {
   full_name: string;
   default_branch: string;
+  allow_auto_merge?: boolean;
   allow_squash_merge?: boolean;
   allow_merge_commit?: boolean;
   allow_rebase_merge?: boolean;
@@ -19,6 +20,10 @@ export interface GithubRepository {
 export interface GithubPull {
   state: "open" | "closed";
   merged_at?: string | null;
+  auto_merge?: {
+    merge_method: "merge" | "squash" | "rebase";
+    enabled_by?: { login: string };
+  } | null;
   additions?: number;
   deletions?: number;
   number: number;

@@ -38,6 +38,7 @@ export function overviewOf(
     actionReason: capability("approve-pr")?.reason,
     mergeReason: capability("merge-pr")?.reason,
     mergeMethods: detail.mergeMethods,
+    autoMerge: detail.autoMerge,
     actions: item.actions,
     additions: pull?.additions ?? 0,
     deletions: pull?.deletions ?? 0,

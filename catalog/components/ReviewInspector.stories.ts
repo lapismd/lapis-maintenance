@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/svelte-vite";
-import { expect, within, waitFor } from "storybook/test";
+import { expect, within, waitFor, userEvent } from "storybook/test";
 import Component from "../../src/components/maintenance-review/ReviewInspector.svelte";
 import Demo from "../review/ReviewDemo.svelte";
 export default {
@@ -55,5 +55,40 @@ export const LongContent: Story = {
         pane.getBoundingClientRect().right + 1,
       );
     }
+  },
+};
+
+export const CollapsedCheckGroups: Story = {
+  render,
+  args: { scenario: "failed-checks" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const failed = await c.findByRole("button", { name: "1 Failed checks" });
+    await expect(failed).toHaveAttribute("aria-expanded", "false");
+    const passed = c.getByRole("button", { name: "3 Passed checks" });
+    await expect(passed).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      c.getByRole("button", { name: "Squash and merge" }),
+    ).toBeVisible();
+  },
+};
+
+export const AutoMergeInBothViews: Story = {
+  render,
+  args: { scenario: "auto-merge" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const button = await c.findByRole("button", { name: "Enable auto-merge" });
+    await waitFor(() => expect(button).toBeEnabled());
+    await userEvent.click(c.getByRole("button", { name: "Open PR view" }));
+    await c.findByRole("heading", {
+      name: "Publish approved registry updates #63",
+    });
+    const main = within(canvasElement.querySelector("main")!);
+    await waitFor(() =>
+      expect(
+        main.getByRole("button", { name: "Enable auto-merge" }),
+      ).toBeEnabled(),
+    );
   },
 };

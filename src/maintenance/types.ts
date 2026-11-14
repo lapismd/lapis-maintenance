@@ -21,6 +21,8 @@ export type ActionKind =
   | "request-changes"
   | "comment"
   | "merge-pr"
+  | "enable-auto-merge"
+  | "disable-auto-merge"
   | "rerun-failed"
   | "cancel-run"
   | "approve-run"
@@ -106,6 +108,7 @@ export interface MaintenanceDetail {
   environment?: string;
   ref?: string;
   baseRef?: string;
+  autoMerge?: { method: "merge" | "squash" | "rebase"; enabledBy?: string };
   mergeable?: boolean;
   mergeMethods?: ("merge" | "squash" | "rebase")[];
   coverage?: string[];

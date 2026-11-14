@@ -7,6 +7,7 @@ import type {
   ReviewEvent,
 } from "../../src/maintenance/review/types";
 export type ReviewScenario =
+  | "auto-merge"
   | "merge-options"
   | "long-inspector"
   | "ready"
@@ -109,6 +110,16 @@ export function reviewFixture(
   const pr = structuredClone(overview),
     root = `https://github.com/${pr.repository}`,
     failing = scenario === "failed-checks" || pr.id === "failure";
+  if (scenario === "auto-merge")
+    pr.mergeMethods = ["squash", "merge", "rebase"];
+  if (scenario === "auto-merge")
+    pr.actions = [
+      {
+        kind: "enable-auto-merge",
+        label: "Enable auto-merge",
+        available: true,
+      },
+    ];
   if (scenario === "merge-options" || scenario === "long-inspector")
     pr.mergeMethods = ["squash", "merge", "rebase"];
   if (scenario === "long-inspector") {

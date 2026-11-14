@@ -13,6 +13,8 @@ const actionLabels: Record<ActionKind, string> = {
   "request-changes": "Request changes",
   comment: "Leave review comment",
   "merge-pr": "Merge PR",
+  "enable-auto-merge": "Enable auto-merge",
+  "disable-auto-merge": "Disable auto-merge",
   "rerun-failed": "Rerun failed jobs",
   "cancel-run": "Cancel workflow",
   "approve-run": "Approve workflow run",

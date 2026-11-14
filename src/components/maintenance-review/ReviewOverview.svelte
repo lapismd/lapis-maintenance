@@ -10,6 +10,7 @@
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ReviewResource from "./ReviewResource.svelte";
   import ReviewApprovals from "./ReviewApprovals.svelte";
+  import ReviewActions from "./ReviewActions.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import "./review.css";
   let { controller }: { controller: ReviewController } = $props();
@@ -37,24 +38,29 @@
             </div>
           </div>
         </article>
-        <div class="review-card review-status-card">
-          <CircleCheck size={20} aria-hidden="true" />
-          <div>
-            <strong
-              >{controller.resources.checks.data?.every(
-                (check) => check.state === "passed",
-              ) && controller.resources.checks.data.length
-                ? "Current checks have passed"
-                : "Current checks need attention"}</strong
+        <div class="review-card">
+          <div class="review-status-card">
+            <CircleCheck size={20} aria-hidden="true" />
+            <div>
+              <strong
+                >{controller.resources.checks.data?.every(
+                  (check) => check.state === "passed",
+                ) && controller.resources.checks.data.length
+                  ? "Current checks have passed"
+                  : "Current checks need attention"}</strong
+              >
+              <p class="review-muted">{pr.review}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onclick={() => controller.setTab("checks")}
+              ><ListChecks size={15} aria-hidden="true" />View checks</Button
             >
-            <p class="review-muted">{pr.review}</p>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onclick={() => controller.setTab("checks")}
-            ><ListChecks size={15} aria-hidden="true" />View checks</Button
-          >
+          <div class="review-check-footer">
+            <ReviewActions {controller} mode="merge" />
+          </div>
         </div>
       </div>
       <div class="review-overview-aside">

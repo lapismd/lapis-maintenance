@@ -7,7 +7,7 @@ import type { RepositorySelection } from "../github/models";
 import type { ResponseCache } from "./response-cache";
 import { viewKey } from "./view-cache";
 const key = (selection: RepositorySelection, id: string) =>
-  `maintenance-detail:v3:${id.split(":")[1]}:${viewKey(selection)}:${id}`;
+  `maintenance-detail:v4:${id.split(":")[1]}:${viewKey(selection)}:${id}`;
 export async function readCachedDetail(
   cache: ResponseCache | undefined,
   selection: RepositorySelection,
