@@ -37,6 +37,8 @@ export default mergeConfig(
           optimizeDeps: {
             include: [
               "@lapismd/design-core/shadcn/tabs",
+              "@lapismd/design-core/shadcn/button-group",
+              "@lapismd/design-core/shadcn/dropdown-menu",
               "@lapismd/design-core/shadcn/avatar",
               "@lapismd/design-core/shadcn/breadcrumb",
               "@tanstack/svelte-virtual",

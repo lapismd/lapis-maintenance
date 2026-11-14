@@ -52,8 +52,8 @@ it("scoped refresh invalidates only its repository and survives an older global 
   );
   const signal = new AbortController().signal;
   const initial = await reader.readSnapshot(signal);
-  const oldKey = "maintenance-detail:v2:owner/a:old";
-  const otherKey = "maintenance-detail:v2:owner/b:other";
+  const oldKey = "maintenance-detail:v3:owner/a:old";
+  const otherKey = "maintenance-detail:v3:owner/b:other";
   for (const key of [oldKey, otherKey])
     await cache.put(key, { body: {}, fetchedAt: Date.now() });
   let release!: () => void;

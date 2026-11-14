@@ -55,10 +55,19 @@
         >
         <h2>{pr.title}</h2>
         <div class="review-button-row">
-          <Badge variant="outline">{pr.draft ? "Draft" : pr.review}</Badge><code
-            >{pr.sha.slice(0, 8)}</code
-          >
+          <Badge variant="outline"
+            >{pr.draft
+              ? "Draft"
+              : pr.kind !== "pull-request"
+                ? "Workflow"
+                : pr.state === "merged"
+                  ? "Merged"
+                  : pr.state === "closed"
+                    ? "Closed"
+                    : "Open"}</Badge
+          ><code>{pr.sha.slice(0, 8)}</code>
         </div>
+        <p class="review-muted review-inspector-summary">{pr.review}</p>
         {#if pr.kind === "pull-request"}<Button
             variant="outline"
             size="sm"

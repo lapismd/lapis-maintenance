@@ -8,7 +8,7 @@ import {
 } from "./transport";
 export const approvalWaiting = (run: GithubRun) =>
   run.status === "action_required" || run.conclusion === "action_required";
-/** Fork approval is distinct from environment review; unknown provenance never authorizes it. */
+/** GitHub can require PR-run approval for fork and same-repository automation branches. */
 export async function workflowApproval(
   client: GithubTransport,
   repository: string,
@@ -22,7 +22,7 @@ export async function workflowApproval(
   const denied = (reason: string) => ({ ...action, available: false, reason });
   if (run.event !== "pull_request" || access.repository.private !== false)
     return denied(
-      "Fork workflow approval requires a verified public repository and pull_request event.",
+      "PR workflow approval requires a verified public repository and pull_request event.",
     );
   try {
     let pr: GithubPull | undefined;
@@ -62,18 +62,17 @@ export async function workflowApproval(
       !base ||
       head.private !== false ||
       base.private !== false ||
-      head.full_name.toLowerCase() === repository.toLowerCase() ||
       base.full_name.toLowerCase() !== repository.toLowerCase()
     )
       return denied(
-        "This workflow is not verified as a pull request from a public fork into this repository.",
+        "The public PR source or base repository could not be verified for this workflow target.",
       );
     return action;
   } catch (error) {
     signal.throwIfAborted();
     if (error instanceof GithubError && error.status === 401) throw error;
     return denied(
-      `Public fork provenance could not be verified: ${error instanceof Error ? error.message : "PR read failed."}`,
+      `The workflow PR revision could not be verified: ${error instanceof Error ? error.message : "PR read failed."}`,
     );
   }
 }

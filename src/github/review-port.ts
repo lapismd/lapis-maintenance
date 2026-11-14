@@ -45,7 +45,7 @@ export class GithubReviewPort implements ReviewReadPort {
       );
     return {
       repository,
-      key: `review:v1:${repository}:${id}:${this.selection()}:${JSON.stringify(seed?.item.target ?? null)}:${resource}:${cursor ?? ""}`,
+      key: `review:v2:${repository}:${id}:${this.selection()}:${JSON.stringify(seed?.item.target ?? null)}:${resource}:${cursor ?? ""}`,
     };
   }
   preview(id: string): Partial<ReviewResources> {

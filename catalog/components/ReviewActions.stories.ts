@@ -89,3 +89,32 @@ export const RepositoryRuleRejection: Story = {
     await waitFor(() => expect(merge).toBeEnabled());
   },
 };
+
+export const MergeMethodDropdown: Story = {
+  render,
+  args: { scenario: "merge-options" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    await c.findByRole("button", { name: "Squash and merge" });
+    await expect(
+      c.queryByRole("button", { name: "Create merge commit" }),
+    ).not.toBeInTheDocument();
+    await userEvent.click(
+      await c.findByRole("button", { name: "Choose merge method" }),
+    );
+    await userEvent.click(
+      await page.findByRole("menuitemradio", { name: "Rebase and merge" }),
+    );
+    await waitFor(() =>
+      expect(
+        page.queryByRole("menu", { hidden: true }),
+      ).not.toBeInTheDocument(),
+    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
+    await userEvent.click(c.getByRole("button", { name: "Rebase and merge" }));
+    const dialog = within(await page.findByRole("dialog"));
+    await waitFor(() => expect(dialog.getByText(/using rebase/)).toBeVisible());
+    await userEvent.click(dialog.getByRole("button", { name: "Cancel" }));
+  },
+};
