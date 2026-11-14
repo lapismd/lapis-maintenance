@@ -6,6 +6,7 @@ import type { MaintenanceCommandPort } from "../maintenance/types";
 import type { GithubReadPort } from "./read-port";
 import type { GithubReviewPort } from "./review-port";
 import type { MaintenanceController } from "../maintenance/controller.svelte";
+import { retainedCommandTarget } from "./review-target";
 export class GithubReviewCommands implements ReviewCommandPort {
   constructor(
     private reader: GithubReadPort,
@@ -21,12 +22,13 @@ export class GithubReviewCommands implements ReviewCommandPort {
     );
     const targetId = command.targetId || command.itemId;
     const detail =
-      this.reader.seed(targetId) ?? this.reader.seed(command.itemId);
+      this.reader.seed(targetId) ?? retainedCommandTarget(command, overview);
     if (!detail || overview.sha !== command.sha)
       return {
         status: "rejected" as const,
         message: "The displayed revision changed. Refresh before submitting.",
       };
+    this.reader.remember(detail);
     const kind =
       (
         {

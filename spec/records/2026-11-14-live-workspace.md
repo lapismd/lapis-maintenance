@@ -43,7 +43,7 @@ publication or repository permission and uses a designated review environment.
 - Controlled 20-PR inventory: 86 REST requests versus 27 batched requests,
   a 68.6% reduction with identical classified statuses/targets. Fresh resource
   reopening uses zero provider requests, including synchronous retained checks.
-- Final unit lane: 162 passed; browser lane: 17 passed, including real persistent
+- Final unit lane: 164 passed; browser lane: 17 passed, including real persistent
   browser caches, remembered sessions, live confirmed merge and hash Back.
 - Full Storybook interaction/accessibility: 170 passed; cold populated light,
   dark and narrow views inspected on a fresh process at port 7515. Visible check
@@ -68,3 +68,18 @@ measurement and designated environment/dispatch acceptance are the remaining
 release qualification steps, performed after this local implementation commit.
 Positive cross-user/fork approval requires a genuinely eligible external target;
 mocked authority coverage does not claim a second account or invented wait.
+
+## Cached-target handoff regression
+
+Final audit found that an independently cached approval could outlive its
+inventory row. The bridge now restores only the immutable PR/run/environment
+identity with empty capabilities; the single command adapter still supplies
+fresh authority. Regressions cover restored environment identity, directly
+routed PRs and rejection of cross-repository/malformed identities. The focused
+preflight/restore set passes 3 tests; the complete unit lane now passes 164.
+
+An authenticated read-only probe against PR #2 at 9fffc99d measured five cold
+requests in 1,076 ms, zero fresh-reopen requests in 0.07 ms, one linked check,
+11 timeline entries and a successful one-request GraphQL summary. These are
+one-run measurements, not a latency guarantee; controlled request-count and
+persistent-browser regressions remain the acceptance gates.
