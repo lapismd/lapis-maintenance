@@ -7,15 +7,15 @@ to their owning Design Core or Agent/Repository UI package.
 
 ## Current follow-up boundary — 2026-11-14
 
-The T3-inspired follow-up starts with **Storybook UI only**, as the user
-requested after reviewing the plan. Keep new components and the controller in
-this repository for now, composing public Design Core/Repository UI primitives.
-Do not modify or publish shared dependencies for this preview. Mount the new
-screen only in fixture stories with disposable in-memory ports. Leave the live
-application, GitHub adapters, action policies, persistence and navigation
-unchanged. Demonstrate the PR workspace, linked checks/workflows and approval
-states; stop for explicit review before any live implementation. Remaining
-follow-up slices are planned, not authorized by this UI slice.
+The user approved continuing the reviewed UI into the real application on
+2026-11-14 and explicitly requested implementation of the remaining plan,
+pushing and merging when green. R2–R4 are authorized together; separate slice
+review stops no longer apply to this follow-up. Keep components in this
+repository, replace fixture ports with live adapters, preserve session/cache and
+command authority boundaries, and qualify hosted CI and Pages after merging.
+Automatic and published Storybook stays fixture-only; the local live story is
+for manual acceptance. The user also explicitly included the original release slice and manual workflow
+dispatch in this continuation.
 
 - `PLAN.md` records the complete approved plan and slice gates. Implement only
   the current authorized slice. Slice 1 is approved. Slice 2 authorizes token
@@ -24,7 +24,7 @@ follow-up slices are planned, not authorized by this UI slice.
   PR/CI writes through the live app/story; stop before Slice 4 release actions.
   The user also explicitly authorized publishing required dependencies, pushing
   the completed changes and deploying the live app to GitHub Pages. The user authorized Slice 5 PWA installation/offline work on 2026-11-11;
-  Slice 4 release actions remain unapproved.
+  Slice 4 environment reviews and manual dispatch are now authorized.
 - Search with `pnpm spec:search --semantic "topic"` before reading specs;
   use the CLI's executed rg fallback only when QMD is unavailable.
 - Update the owning requirement and verification evidence with protected code.

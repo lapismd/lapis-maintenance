@@ -15,9 +15,18 @@ Slice 1 was approved and Slice 2 authorized on 2026-11-10. The subsequent reques
 for write access in the live story explicitly authorizes Slice 3 implementation.
 The user also authorized dependency publication, pushing and Pages hosting;
 The user authorized Slice 5 PWA implementation on 2026-11-11.
-Slice 4 release actions remain planned and unapproved.
+The 2026-11-14 continuation authorizes Slice 4, including manual dispatch.
 Slice 2 remembers a token on this device,
 shows token login without a valid session, and uses Turso WASM to cache reads.
+
+### Continuation authorized 2026-11-14
+
+The user approved the reviewed UI and requested the remaining real implementation,
+push and merge when green. This supersedes the R2–R4 separate approval stops:
+workflow/environment action fixes, faster reads and the live PR/activity workspace
+are authorized together. Keep components local, preserve all data/credential and
+write-preflight boundaries, then validate, push a PR, merge its exact green head
+and verify Pages/PWA deployment. The user explicitly included all remaining items and manual workflow dispatch.
 
 ## Repository and specification foundation
 
@@ -222,8 +231,8 @@ failure ledger and qualification; Slice 4 remains unapproved.
 
 The user revised the T3-inspired plan: **the first deliverable is UI in
 Storybook only, and new components stay in this repository for now**. This
-supersedes the proposed action-fixes-first sequence. Each later slice requires
-separate approval. The existing live application keeps its current behavior.
+supersedes the proposed action-fixes-first sequence; the continuation authorization
+above now permits implementing the remaining live follow-up slices.
 
 ### Intended product and findings
 
@@ -244,9 +253,9 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 | Slice                       | Deliverable                                                                                            | Review boundary                                    |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
 | R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Implemented locally; UI/interaction review pending |
-| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Planned; separate approval required                |
-| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Planned; separate approval required                |
-| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Planned; separate approval required                |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Authorized 2026-11-14; implementation pending      |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Authorized 2026-11-14; implementation pending      |
+| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Authorized 2026-11-14; implementation pending      |
 
 ### R1: complete fixture-only UI
 
@@ -309,8 +318,7 @@ run/attempt/environment confirmation. Explain Actions versus Deployments write,
 unverified access versus confirmed denial, unrelated resource failures and
 bounded GitHub rejection details. Preserve target links, individual confirmed
 commands, duplicate prevention and uncertain outcomes without replay. PR approval
-still requires reported checks; merge rules remain authoritative. Dispatch stays
-deferred. The reviewed components remain local until separately requested.
+still requires reported checks; merge rules remain authoritative. Manual dispatch follows the original Slice 4 contract. The reviewed components remain local until separately requested.
 
 ### R3: faster reads after approval
 
@@ -332,8 +340,8 @@ Connect the reviewed screen and workspace timeline to paginated conversation/rev
 activity lazily and cache it separately, preserving cached boards. Add PR
 identity/tab hash routes with Back restoring the board. Files and diffs remain
 on GitHub through a direct changed-files link; do not add file APIs, patch
-caching or an embedded file viewer. Inline review drafts/comments, bulk
-operations and dispatch remain deferred.
+caching or an embedded file viewer. Inline review drafts/comments and bulk operations remain deferred; the original
+Slice 4 manual dispatch is now authorized as part of this continuation.
 
 ### Verification and review gates
 
