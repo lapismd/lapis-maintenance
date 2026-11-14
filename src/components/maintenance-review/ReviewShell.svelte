@@ -3,6 +3,7 @@
   import { AppShell, AppShellController } from "@lapismd/design-core/shell";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
+  import * as Breadcrumb from "@lapismd/design-core/shadcn/breadcrumb";
   import { ArrowLeft, RefreshCw } from "@lucide/svelte";
   import type { PersonalProfile } from "@lapismd/repository-ui/settings";
   import MaintenanceNavigation from "../maintenance/MaintenanceNavigation.svelte";
@@ -69,6 +70,17 @@
     review.workspaceOpen = true;
     shell.mobile.showMain();
   }
+  function back() {
+    review.close();
+    shell.mobile.showMain();
+  }
+  function openRepository(repository?: string) {
+    inbox.repositories = repository ? [repository] : [];
+    inbox.view = "inbox";
+    inbox.closeDetail();
+    review.clearSelection();
+    back();
+  }
   onDestroy(() => {
     void shell.dispose();
   });
@@ -94,16 +106,43 @@
           ><div class="review-main-toolbar">
             <AppShell.Sidebar.Toggle side="left" /><Button
               variant="ghost"
-              size="sm"
-              onclick={() => {
-                review.close();
-                shell.mobile.showMain();
-              }}><ArrowLeft size={15} aria-hidden="true" />Back to inbox</Button
-            ><span class="review-toolbar-divider">/</span><span
-              class="review-toolbar-title"
-              >Pull request #{review.overview?.number}</span
-            ><span class="maintenance-toolbar-spacer"></span><Badge
-              variant="secondary">UI preview</Badge
+              size="icon-sm"
+              class="review-back-button"
+              aria-label="Back to inbox"
+              title="Back to inbox"
+              onclick={back}><ArrowLeft size={15} aria-hidden="true" /></Button
+            ><Breadcrumb.Root class="review-pr-breadcrumbs">
+              <Breadcrumb.List
+                style="flex-wrap:nowrap;gap:0.3rem;font-size:0.75rem"
+              >
+                <Breadcrumb.Item class="review-pr-breadcrumb-item"
+                  ><Button
+                    variant="ghost"
+                    size="sm"
+                    class="review-breadcrumb-control"
+                    onclick={() => openRepository()}
+                    title="All repositories">All repositories</Button
+                  ></Breadcrumb.Item
+                >
+                <Breadcrumb.Separator />
+                <Breadcrumb.Item class="review-pr-breadcrumb-item"
+                  ><Button
+                    variant="ghost"
+                    size="sm"
+                    class="review-breadcrumb-control"
+                    onclick={() => openRepository(review.overview?.repository)}
+                    title={review.overview?.repository}
+                    >{review.overview?.repository}</Button
+                  ></Breadcrumb.Item
+                >
+                <Breadcrumb.Separator />
+                <Breadcrumb.Item class="review-pr-breadcrumb-item"
+                  ><Breadcrumb.Page class="review-pr-breadcrumb-page"
+                    >Pull request #{review.overview?.number}</Breadcrumb.Page
+                  ></Breadcrumb.Item
+                >
+              </Breadcrumb.List>
+            </Breadcrumb.Root><Badge variant="secondary">UI preview</Badge
             ><Button
               variant="ghost"
               size="icon-sm"

@@ -7,8 +7,6 @@ import {
   type ReviewResources,
   type ReviewTab,
   type ReviewState,
-  type ReviewPatch,
-  type ResourceState,
   type ReviewAction,
   type ReviewCommand,
 } from "./types";
@@ -18,9 +16,6 @@ export class ReviewController {
   tab = $state<ReviewTab>("overview");
   workspaceOpen = $state(false);
   resources = $state.raw<ReviewState>(emptyReviewState());
-  fileQuery = $state("");
-  selectedPath = $state<string | null>(null);
-  patch = $state.raw<ResourceState<ReviewPatch>>({ loading: false });
   confirmation = $state.raw<ReviewCommand | null>(null);
   pending = $state(false);
   receipt = $state.raw<{
@@ -33,7 +28,6 @@ export class ReviewController {
   #disposed = false;
   #reads = new Map<string, AbortController>();
   #command?: AbortController;
-  #patches = new Map<string, ReviewPatch>();
   constructor(
     readonly summaries: readonly ReviewOverview[],
     private read: ReviewReadPort,
@@ -44,11 +38,6 @@ export class ReviewController {
   }
   get feedback() {
     return this.receipt?.itemId === this.selectedId ? this.receipt : null;
-  }
-  get files() {
-    return (this.resources.files.data ?? []).filter((file) =>
-      file.path.toLowerCase().includes(this.fileQuery.toLowerCase()),
-    );
   }
   get canApprove() {
     return (
@@ -75,9 +64,6 @@ export class ReviewController {
     this.#abortReads();
     this.selectedId = id;
     this.tab = "overview";
-    this.fileQuery = "";
-    this.selectedPath = null;
-    this.patch = { loading: false };
     this.confirmation = null;
     this.resources = {
       ...emptyReviewState(),
@@ -103,7 +89,7 @@ export class ReviewController {
       "overview",
       "checks",
       "approvals",
-      ...(this.tab === "activity" || this.tab === "files" ? [this.tab] : []),
+      ...(this.tab === "activity" ? [this.tab] : []),
     ] as ReviewResource[]);
     await Promise.all([...resources].map((resource) => this.load(resource)));
   }
@@ -139,10 +125,6 @@ export class ReviewController {
         ...this.resources,
         [resource]: { data, loading: false },
       };
-      if (resource === "files" && !this.selectedPath) {
-        const first = this.files[0];
-        if (first) await this.selectFile(first.path);
-      }
     } catch (error) {
       if (!this.#current(id, generation, resource, request)) return;
       this.resources = {
@@ -155,40 +137,6 @@ export class ReviewController {
               ? error.message
               : "This section could not be loaded.",
         },
-      };
-    }
-  }
-  async selectFile(path: string) {
-    const id = this.selectedId,
-      generation = this.#generation;
-    if (!id || this.#disposed || !this.files.some((file) => file.path === path))
-      return;
-    this.#reads.get("patch")?.abort();
-    this.selectedPath = path;
-    const cached = this.#patches.get(`${id}:${path}`);
-    this.patch = { data: cached, loading: !cached };
-    if (cached) return;
-    const request = new AbortController();
-    this.#reads.set("patch", request);
-    try {
-      const data = await this.read.patch(id, path, request.signal);
-      if (
-        !this.#current(id, generation, "patch", request) ||
-        this.selectedPath !== path
-      )
-        return;
-      this.#patches.set(`${id}:${path}`, data);
-      if (this.#patches.size > 50)
-        this.#patches.delete(this.#patches.keys().next().value!);
-      this.patch = { data, loading: false };
-    } catch (error) {
-      if (!this.#current(id, generation, "patch", request)) return;
-      this.patch = {
-        loading: false,
-        error:
-          error instanceof Error
-            ? error.message
-            : "The patch could not be loaded.",
       };
     }
   }
@@ -269,7 +217,6 @@ export class ReviewController {
     this.#disposed = true;
     this.#abortReads();
     this.#command?.abort();
-    this.#patches.clear();
   }
   #abortReads() {
     for (const request of this.#reads.values()) request.abort();

@@ -20,7 +20,7 @@ disposable in-memory ports, without real credentials or network effects.
 ### Acceptance details
 
 - Scenarios cover populated, loading, refreshing, empty, disconnected, partial-access, rate-limit, stale-target and uncertain-result states, plus a fixture-only 130-card wide shell and standalone board for manual fullscreen scroll/hover diagnosis without GitHub, credentials or persistent caches.
-- Fixtures cover dependencies, compatibility drafts, versioning, registry publication, failed builds, protected approvals and explicit repository holds; R1 previews repository-owned PR workspace, overview, inspector, actions, approval, activity, files and linked-check components through complete-screen and standalone fixture stories, with live integration awaiting separate review under LM-PR-001.
+- Fixtures cover dependencies, compatibility drafts, versioning, registry publication, failed builds, protected approvals and explicit repository holds; R1 previews repository-owned PR workspace, overview, inspector, actions, approval, activity and linked-check components with files linked to GitHub through complete-screen and standalone fixture stories, with live integration awaiting separate review under LM-PR-001.
 - Simulated connections, permissions and outcomes exercise real controls with explicit action confirmation, pending-review explanations and merge enabled only after refreshed eligibility.
 - Type, controller, Storybook interaction/accessibility and static build checks pass before slice review; Slice 2 additionally exposes a manual local-development production-app story with login, cache and disconnect, excluded from static builds and automated runs, without token args or play functions.
 

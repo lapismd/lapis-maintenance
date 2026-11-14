@@ -36,9 +36,9 @@ export default mergeConfig(
           plugins: [storybookTest({ configDir: ".storybook" })],
           optimizeDeps: {
             include: [
-              "@lapismd/design-core/diff",
               "@lapismd/design-core/shadcn/tabs",
               "@lapismd/design-core/shadcn/avatar",
+              "@lapismd/design-core/shadcn/breadcrumb",
             ],
           },
           test: {

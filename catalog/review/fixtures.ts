@@ -5,7 +5,6 @@ import type {
   ReviewOverview,
   ReviewApproval,
   ReviewEvent,
-  ReviewPatch,
 } from "../../src/maintenance/review/types";
 export type ReviewScenario =
   | "ready"
@@ -216,73 +215,8 @@ export function reviewFixture(
       items: scenario === "empty" ? [] : events(pr).slice(0, 3),
       next: scenario === "empty" ? undefined : "older",
     },
-    files:
-      scenario === "empty"
-        ? []
-        : [
-            {
-              path: "package.json",
-              state: "modified",
-              additions: 4,
-              deletions: 4,
-              url: `${pr.url}/files#diff-package`,
-            },
-            {
-              path: ".changeset/quiet-lapis.md",
-              state: "added",
-              additions: 8,
-              deletions: 0,
-              url: `${pr.url}/files#diff-changeset`,
-            },
-            {
-              path: "pnpm-lock.yaml",
-              state: "modified",
-              additions: 116,
-              deletions: 30,
-              url: `${pr.url}/files#diff-lock`,
-            },
-            {
-              path: "assets/release-preview.png",
-              state: "binary",
-              additions: 0,
-              deletions: 0,
-              url: `${pr.url}/files#diff-image`,
-            },
-            {
-              path: "generated/catalog.json",
-              state: "omitted",
-              additions: 1280,
-              deletions: 640,
-              url: `${pr.url}/files#diff-catalog`,
-            },
-          ],
   };
 }
 export function olderEvents(overview: ReviewOverview) {
   return { items: events(overview).slice(3) };
-}
-export function patchFixture(path: string): ReviewPatch {
-  if (path.endsWith(".png"))
-    return {
-      path,
-      explanation:
-        "Binary file. Open this change on GitHub to inspect the image.",
-    };
-  if (path.startsWith("generated/"))
-    return {
-      path,
-      explanation:
-        "This generated patch exceeds the preview limit. Open the complete change on GitHub.",
-    };
-  if (path.endsWith(".md"))
-    return {
-      path,
-      patch:
-        '@@ -0,0 +1,8 @@\n+---\n+"@lapismd/lapis-notes": patch\n+---\n+\n+Refresh the reviewed first-party dependency cohort.\n+\n+Keep package metadata and release notes aligned.\n+Registry qualification passed.',
-    };
-  return {
-    path,
-    patch:
-      '@@ -10,8 +10,8 @@\n   "dependencies": {\n-    "@lapismd/design-core": "^0.12.4",\n-    "@lapismd/repository-ui": "^0.2.1",\n+    "@lapismd/design-core": "^0.13.1",\n+    "@lapismd/repository-ui": "^0.2.2",\n     "svelte": "^5.57.3"\n   },\n   "devDependencies": {\n     "@lapismd/spec-validator": "^0.2.0"',
-  };
 }

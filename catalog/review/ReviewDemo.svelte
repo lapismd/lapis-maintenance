@@ -5,7 +5,6 @@
   import ReviewChecks from "../../src/components/maintenance-review/ReviewChecks.svelte";
   import ReviewApprovals from "../../src/components/maintenance-review/ReviewApprovals.svelte";
   import ReviewActivity from "../../src/components/maintenance-review/ReviewActivity.svelte";
-  import ReviewFiles from "../../src/components/maintenance-review/ReviewFiles.svelte";
   import ReviewConfirmation from "../../src/components/maintenance-review/ReviewConfirmation.svelte";
   import ReviewFeedback from "../../src/components/maintenance-review/ReviewFeedback.svelte";
   import ReviewOverview from "../../src/components/maintenance-review/ReviewOverview.svelte";
@@ -25,7 +24,6 @@
     workspace = true,
     theme = "light",
     width,
-    file,
   }: {
     part?:
       | "shell"
@@ -33,7 +31,6 @@
       | "checks"
       | "approvals"
       | "activity"
-      | "files"
       | "confirmation"
       | "overview"
       | "actions";
@@ -43,7 +40,6 @@
     workspace?: boolean;
     theme?: "light" | "dark";
     width?: number;
-    file?: string;
   } = $props();
   const port = untrack(() => new MemoryReviewPort(scenario));
   const review = untrack(
@@ -76,16 +72,10 @@
   onMount(() => {
     void inbox.refresh().then(() => inbox.select(selected));
     const selecting = review.select(selected);
-    review.setTab(
-      part === "files" || part === "activity" || part === "checks" ? part : tab,
-    );
+    review.setTab(part === "activity" || part === "checks" ? part : tab);
     review.workspaceOpen = workspace;
-    void selecting.then(async () => {
+    void selecting.then(() => {
       if (scenario === "refreshing") void review.refresh();
-      if (file) {
-        if (!review.resources.files.data) await review.load("files");
-        await review.selectFile(file);
-      }
       if (part === "confirmation")
         review.prepare(
           "approve-environment",
@@ -117,18 +107,13 @@
   {:else if part === "workspace"}<ReviewWorkspace
       controller={review}
     /><ReviewConfirmation controller={review} />
-  {:else}<div
-      class="review-component-surface"
-      class:review-component-files={part === "files"}
-    >
+  {:else}<div class="review-component-surface">
       <ReviewFeedback controller={review} />
       {#if part === "checks"}<ReviewChecks
           controller={review}
         />{:else if part === "approvals" || part === "confirmation"}<ReviewApprovals
           controller={review}
         />{:else if part === "activity"}<ReviewActivity
-          controller={review}
-        />{:else if part === "files"}<ReviewFiles
           controller={review}
         />{:else if part === "overview"}<ReviewOverview
           controller={review}

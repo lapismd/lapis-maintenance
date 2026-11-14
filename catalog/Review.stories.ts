@@ -25,18 +25,17 @@ export const Workspace: Story = {
       name: "Publish approved registry updates",
       level: 1,
     });
-    await userEvent.click(c.getByRole("tab", { name: /^Files/ }));
-    const file = await c.findByRole("button", {
-      name: "View diff: package.json",
-    });
-    await expect(file).toHaveAttribute("aria-pressed", "true");
-    await userEvent.click(
-      c.getByRole("button", { name: "View diff: assets/release-preview.png" }),
-    );
-    await c.findByRole("heading", { name: "Preview unavailable" });
     await expect(
-      c.getByRole("link", { name: "View change on GitHub" }),
-    ).toHaveAttribute("target", "_blank");
+      c.queryByRole("tab", { name: /^Files/ }),
+    ).not.toBeInTheDocument();
+    const files = c.getByRole("link", { name: "Files on GitHub" });
+    await expect(files).toHaveAttribute(
+      "href",
+      "https://github.com/lapismd/plugin-registry/pull/63/files",
+    );
+    await expect(files).toHaveAttribute("target", "_blank");
+    await userEvent.click(c.getByRole("tab", { name: /^Activity$/ }));
+    await c.findByRole("list", { name: "Pull request activity" });
     await userEvent.click(c.getByRole("tab", { name: /^Overview$/ }));
   },
 };
@@ -66,6 +65,41 @@ export const Inbox: Story = {
     await userEvent.clear(
       c.getByRole("textbox", { name: "Search maintenance items" }),
     );
+  },
+};
+export const BreadcrumbNavigation: Story = {
+  render,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const navigation = within(
+      await c.findByRole("navigation", { name: "breadcrumb" }),
+    );
+    await userEvent.click(
+      navigation.getByRole("button", { name: "lapismd/plugin-registry" }),
+    );
+    await c.findByRole("button", {
+      name: "Filter repositories: plugin-registry",
+    });
+    await c.findByRole("heading", { name: "1 item in view" });
+    const expand = c.queryByRole("button", { name: "Expand 1 Needs review" });
+    if (expand) await userEvent.click(expand);
+    await userEvent.click(
+      c.getByRole("button", {
+        name: /Open card: Publish approved registry updates/,
+      }),
+    );
+    await userEvent.click(
+      await c.findByRole("button", { name: "Open PR view" }),
+    );
+    await userEvent.click(
+      within(
+        await c.findByRole("navigation", { name: "breadcrumb" }),
+      ).getByRole("button", { name: "All repositories" }),
+    );
+    await c.findByRole("button", {
+      name: "Filter repositories: All repositories",
+    });
+    await c.findByRole("heading", { name: "10 items in view" });
   },
 };
 export const WorkflowApproval: Story = {
@@ -133,7 +167,6 @@ export const Checks: Story = {
   },
 };
 export const Activity: Story = { render, args: { tab: "activity" } };
-export const Files: Story = { render, args: { tab: "files" } };
 export const PermissionDenied: Story = {
   render,
   args: { scenario: "permission-denied" },
@@ -145,7 +178,7 @@ export const Loading: Story = {
 export const Refreshing: Story = { render, args: { scenario: "refreshing" } };
 export const Empty: Story = {
   render,
-  args: { scenario: "empty", tab: "files" },
+  args: { scenario: "empty", tab: "activity" },
 };
 export const ActivityError: Story = {
   render,
@@ -165,4 +198,4 @@ export const ActivityError: Story = {
 export const StaleTarget: Story = { render, args: { scenario: "stale" } };
 export const Uncertain: Story = { render, args: { scenario: "uncertain" } };
 export const Dark: Story = { render, args: { theme: "dark", tab: "checks" } };
-export const Narrow: Story = { render, args: { width: 390, tab: "files" } };
+export const Narrow: Story = { render, args: { width: 390, tab: "activity" } };

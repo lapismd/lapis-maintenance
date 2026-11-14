@@ -246,18 +246,20 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 | R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Implemented locally; UI/interaction review pending |
 | R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Planned; separate approval required                |
 | R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Planned; separate approval required                |
-| R4 — Live PR workspace      | Activity/files/diff adapters, resource caching, routes and hosted acceptance                           | Planned; separate approval required                |
+| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Planned; separate approval required                |
 
 ### R1: complete fixture-only UI
 
 - Keep quick details in the joined inspector; Open PR view enters main-panel
-  Overview, Checks, Activity and Files tabs. Back retains filters/selection.
-  Preserve shell navigation, theme/profile, Kanban, resizing and responsiveness.
+  Overview, Checks and Activity tabs, plus a Files on GitHub link. Back retains filters/selection.
+  Preserve shell navigation, theme/profile, Kanban, resizing and responsiveness;
+  a circular icon-only Back preserves board context, while All repositories
+  and repository breadcrumbs open the inbox with the corresponding filter.
 - Overview shows author, branches/revision, description, labels and review/merge
   state. Checks have grouped collapsible linked rows, refresh and merge controls.
-  Activity is a paginated timeline. Files has search, statistics, selection and
-  the public diff renderer, with explicit binary/oversized/unavailable states.
-- A repo-owned controller owns tabs, selected file, independent resource states,
+  Activity is a paginated timeline. File browsing and diffs open on GitHub;
+  no local file resources, patch cache or file-review UI are required.
+- A repo-owned controller owns tabs, independent resource states,
   refresh, confirmation and feedback. Hosts own read/command ports and disposal;
   stories own invented data and simulate latency, pagination and effects.
 - Distinguish fork workflow approval from environment approve/reject. Show exact
@@ -300,12 +302,12 @@ remove duplicate validation only with complete safety regression evidence.
 
 ### R4: live PR resources after approval
 
-Connect the reviewed screen to paginated conversation/review activity, changed
-files and selected patches. Verify base/head identities around mutable file
-reads and reject mixed revisions. Load tabs lazily and cache new resources
-separately, preserving cached boards. Add PR identity/tab hash routes with Back
-restoring the board. Preserve explicit binary, oversized and truncated states.
-Inline review drafts/comments, bulk operations and dispatch remain deferred.
+Connect the reviewed screen to paginated conversation/review activity. Load
+activity lazily and cache it separately, preserving cached boards. Add PR
+identity/tab hash routes with Back restoring the board. Files and diffs remain
+on GitHub through a direct changed-files link; do not add file APIs, patch
+caching or an embedded file viewer. Inline review drafts/comments, bulk
+operations and dispatch remain deferred.
 
 ### Verification and review gates
 

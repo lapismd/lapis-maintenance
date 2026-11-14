@@ -6,13 +6,13 @@
     CircleCheck,
     Activity,
     Files,
+    ExternalLink,
     Bot,
     GitBranch,
   } from "@lucide/svelte";
   import ReviewOverview from "./ReviewOverview.svelte";
   import ReviewChecks from "./ReviewChecks.svelte";
   import ReviewActivity from "./ReviewActivity.svelte";
-  import ReviewFiles from "./ReviewFiles.svelte";
   import ReviewActions from "./ReviewActions.svelte";
   import ReviewFeedback from "./ReviewFeedback.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
@@ -49,6 +49,16 @@
         ><code>{pr.base}</code><span class="review-additions"
           >+{pr.additions}</span
         ><span class="review-deletions">−{pr.deletions}</span>
+        <a
+          class="review-external"
+          href={`${pr.url}/files`}
+          target="_blank"
+          rel="noopener noreferrer"
+          ><Files size={14} aria-hidden="true" />Files on GitHub<ExternalLink
+            size={12}
+            aria-hidden="true"
+          /></a
+        >
       </div>
     </header>
     <ReviewFeedback {controller} />
@@ -67,8 +77,6 @@
           ></Tabs.Trigger
         ><Tabs.Trigger value="activity"
           ><Activity size={14} aria-hidden="true" />Activity</Tabs.Trigger
-        ><Tabs.Trigger value="files"
-          ><Files size={14} aria-hidden="true" />Files</Tabs.Trigger
         ></Tabs.List
       >
       <Tabs.Content value="overview" class="review-tab-content"
@@ -81,11 +89,6 @@
       >
       <Tabs.Content value="activity" class="review-tab-content"
         ><ReviewActivity {controller} /></Tabs.Content
-      >
-      <Tabs.Content
-        value="files"
-        class="review-tab-content review-files-content"
-        ><ReviewFiles {controller} /></Tabs.Content
       >
     </Tabs.Root>
   {/if}

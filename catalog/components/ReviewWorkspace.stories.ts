@@ -13,4 +13,3 @@ const render: Story["render"] = (args) => ({
 export const Overview: Story = { render };
 export const Checks: Story = { render, args: { tab: "checks" } };
 export const Activity: Story = { render, args: { tab: "activity" } };
-export const Files: Story = { render, args: { tab: "files" } };

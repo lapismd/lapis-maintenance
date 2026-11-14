@@ -8,7 +8,6 @@ import type {
 import {
   reviewSummaries,
   reviewFixture,
-  patchFixture,
   olderEvents,
   type ReviewScenario,
 } from "./fixtures";
@@ -70,12 +69,6 @@ export class MemoryReviewPort implements ReviewReadPort, ReviewCommandPort {
         ? olderEvents(data.overview)
         : data[resource],
     ) as ReviewResources[K];
-  }
-  async patch(id: string, path: string, signal: AbortSignal) {
-    await pause(this.delay, signal);
-    if (!this.data.get(id)?.files.some((file) => file.path === path))
-      throw Error("This file is no longer in the selected revision.");
-    return patchFixture(path);
   }
   async execute(command: ReviewCommand, signal: AbortSignal) {
     this.commands.push(structuredClone(command));

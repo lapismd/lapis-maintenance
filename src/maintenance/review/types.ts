@@ -1,5 +1,5 @@
 import type { CommandResult } from "../types";
-export type ReviewTab = "overview" | "checks" | "activity" | "files";
+export type ReviewTab = "overview" | "checks" | "activity";
 export interface ReviewOverview {
   id: string;
   kind: "pull-request" | "workflow" | "approval";
@@ -54,18 +54,6 @@ export interface ReviewEvent {
   time: string;
   url: string;
 }
-export interface ReviewFile {
-  path: string;
-  state: "modified" | "added" | "renamed" | "binary" | "omitted";
-  additions: number;
-  deletions: number;
-  url: string;
-}
-export interface ReviewPatch {
-  path: string;
-  patch?: string;
-  explanation?: string;
-}
 export interface ReviewPage {
   items: ReviewEvent[];
   next?: string;
@@ -75,7 +63,6 @@ export interface ReviewResources {
   checks: ReviewCheck[];
   approvals: ReviewApproval[];
   activity: ReviewPage;
-  files: ReviewFile[];
 }
 export type ReviewResource = keyof ReviewResources;
 export type ResourceState<T> = { data?: T; loading: boolean; error?: string };
@@ -108,7 +95,6 @@ export interface ReviewReadPort {
     signal: AbortSignal,
     options?: { cursor?: string },
   ): Promise<ReviewResources[K]>;
-  patch(id: string, path: string, signal: AbortSignal): Promise<ReviewPatch>;
 }
 export interface ReviewCommandPort {
   execute(command: ReviewCommand, signal: AbortSignal): Promise<CommandResult>;
@@ -118,5 +104,4 @@ export const emptyReviewState = (): ReviewState => ({
   checks: { loading: false },
   approvals: { loading: false },
   activity: { loading: false },
-  files: { loading: false },
 });

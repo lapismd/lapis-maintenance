@@ -13,10 +13,10 @@ describe("fixture-only review controller", () => {
     const { port, controller } = fixture();
     await controller.select("registry");
     expect(port.reads.has("registry:activity")).toBe(false);
-    controller.setTab("files");
-    await vi.waitFor(() => expect(controller.patch.data).toBeDefined());
-    controller.fileQuery = "package";
-    expect(controller.files.map((file) => file.path)).toEqual(["package.json"]);
+    controller.setTab("activity");
+    await vi.waitFor(() =>
+      expect(controller.resources.activity.data).toBeDefined(),
+    );
     await controller.refresh();
     expect(port.commands).toHaveLength(0);
     controller.dispose();
@@ -36,17 +36,13 @@ describe("fixture-only review controller", () => {
     expect(controller.resources.activity.data?.items).toHaveLength(3);
     controller.dispose();
   });
-  it("appends activity pages and reopens known patches without another read", async () => {
+  it("appends activity pages without writes", async () => {
     const { port, controller } = fixture();
-    const patch = vi.spyOn(port, "patch");
     await controller.select("registry");
     await controller.load("activity");
     await controller.load("activity", controller.resources.activity.data?.next);
     expect(controller.resources.activity.data?.items).toHaveLength(5);
-    await controller.load("files");
-    await controller.selectFile(".changeset/quiet-lapis.md");
-    await controller.selectFile("package.json");
-    expect(patch).toHaveBeenCalledTimes(2);
+    expect(port.commands).toHaveLength(0);
     controller.dispose();
   });
   it("requires explicit confirmation and prevents duplicate simulated submissions", async () => {
@@ -116,7 +112,6 @@ describe("fixture-only review controller", () => {
         id === "registry" && resource === "checks"
           ? (late as never)
           : port.read(id, resource, signal, options),
-      patch: port.patch.bind(port),
     };
     const controller = new ReviewController(port.summaries, read, port);
     const previous = controller.select("registry");
