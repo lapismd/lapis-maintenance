@@ -8,6 +8,7 @@ import {
 interface Job {
   id: number;
   name: string;
+  html_url?: string;
   status: string;
   conclusion: string | null;
   steps?: { name: string; conclusion: string | null }[];
@@ -30,11 +31,14 @@ export async function loadWorkflowJobs(
     );
     if (!jobs.length) return;
     const checks: MaintenanceDetail["checks"] = jobs.map((job) => ({
+      id: String(job.id),
+      url: job.html_url ?? `${run.html_url}/job/${job.id}`,
+      workflow: run.name,
       name: job.name,
       state:
         job.status !== "completed"
           ? "running"
-          : job.conclusion === "success"
+          : ["success", "skipped", "neutral"].includes(job.conclusion ?? "")
             ? "passed"
             : [
                   "failure",

@@ -8,6 +8,7 @@
   let {
     controller,
     onConnect,
+    onPrefetch,
     onOpen = (id: string) => {
       void controller.select(id);
     },
@@ -15,6 +16,7 @@
     controller: MaintenanceController;
     onConnect: () => void;
     onOpen?: (id: string) => void;
+    onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
   } = $props();
 </script>
 
@@ -58,6 +60,7 @@
     {:else if controller.snapshot}<MaintenanceBoard
         {controller}
         {onOpen}
+        {onPrefetch}
       />{/if}
   {/if}
 </div>

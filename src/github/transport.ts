@@ -1,20 +1,11 @@
-import { MaintenanceReadError } from "../maintenance/types";
 import type { MaintenanceSnapshot } from "../maintenance/types";
 import type { CachedResponse, ResponseCache } from "../cache/response-cache";
 import { RequestLimiter, type ReadPriority } from "./request-limiter";
-export class GithubError extends MaintenanceReadError {
-  constructor(
-    public status: number,
-    message: string,
-    public retryAt?: number,
-  ) {
-    super(
-      message,
-      retryAt ? "rate-limit" : "unavailable",
-      !retryAt && [401, 403, 404].includes(status),
-    );
-  }
-}
+import { GithubError } from "./read-errors";
+import { fetchReadResponse } from "./read-response";
+import { subscribeRead, type SharedRead } from "./shared-read";
+import { validRepository } from "./models";
+export { GithubError } from "./read-errors";
 export interface ReadOptions {
   priority?: ReadPriority;
   force?: boolean;
@@ -24,14 +15,17 @@ export interface ReadOptions {
   onObservation?: (validatedAt: number) => void;
   onProgress?: (snapshot: MaintenanceSnapshot) => void;
 }
+interface Query {
+  repository: string;
+  query: string;
+  variables: Record<string, unknown>;
+}
 export class GithubTransport {
   #lifetime = new AbortController();
   #limiter = new RequestLimiter(4);
-  #pending = new Map<
-    string,
-    { promise: Promise<CachedResponse>; signal: AbortSignal }
-  >();
+  #pending = new Map<string, SharedRead<CachedResponse>>();
   #blockedUntil = 0;
+  #writing: Promise<void> = Promise.resolve();
   #repositoryEpoch = new Map<string, number>();
   invalidateRepository(repository: string) {
     const key = repository.toLowerCase();
@@ -53,14 +47,50 @@ export class GithubTransport {
     options.onObservation?.(value.fetchedAt);
     return value.body as T;
   }
+  /** A separate query-only path; mutations can only use the non-retrying writer. */
+  async query<T>(
+    repository: string,
+    query: string,
+    variables: Record<string, unknown>,
+    signal: AbortSignal,
+    options: ReadOptions = {},
+  ): Promise<T> {
+    if (!validRepository(repository) || !/^\s*query\b/.test(query))
+      throw new GithubError(
+        0,
+        "Only named read-only GraphQL queries are allowed here.",
+      );
+    const value = await this.#response("/graphql", signal, options, {
+      repository,
+      query,
+      variables,
+    });
+    options.onObservation?.(value.fetchedAt);
+    return value.body as T;
+  }
+  async page<T>(
+    path: string,
+    signal: AbortSignal,
+    options: ReadOptions = {},
+    field?: string,
+  ): Promise<{ items: T[]; next?: string }> {
+    const value = await this.#response(path, signal, options);
+    options.onObservation?.(value.fetchedAt);
+    const items = field
+      ? (value.body as Record<string, unknown>)[field]
+      : value.body;
+    if (!Array.isArray(items))
+      throw new GithubError(0, "GitHub returned an unexpected list response.");
+    return { items: items as T[], next: value.next };
+  }
   async pages<T>(
     path: string,
     signal: AbortSignal,
     options: ReadOptions = {},
     field?: string,
   ): Promise<T[]> {
-    const all: T[] = [];
-    const seen = new Set<string>();
+    const all: T[] = [],
+      seen = new Set<string>();
     let next: string | undefined = path;
     while (next) {
       if (seen.has(next) || seen.size >= 100)
@@ -88,23 +118,28 @@ export class GithubTransport {
     path: string,
     signal: AbortSignal,
     options: ReadOptions,
+    query?: Query,
   ): Promise<CachedResponse> {
     const url = new URL(path, "https://api.github.com");
     if (url.origin !== "https://api.github.com" || url.username || url.password)
       throw new GithubError(0, "Refused an unexpected API origin.");
-    const key = `${options.accept ?? "json"}:${url.pathname}${url.search}`;
-    const repository =
-      url.pathname
-        .match(/^\/repos\/([^/]+\/[^/]+)(?:\/|$)/)?.[1]
-        ?.toLowerCase() ?? "";
+    const repository = (
+      query?.repository ??
+      url.pathname.match(/^\/repos\/([^/]+\/[^/]+)(?:\/|$)/)?.[1] ??
+      ""
+    ).toLowerCase();
+    const key = query
+      ? `json:/repos/${query.repository}/graphql:${JSON.stringify([query.query, query.variables])}`
+      : `${options.accept ?? "json"}:${url.pathname}${url.search}`;
     const epoch = this.#repositoryEpoch.get(repository) ?? 0;
     const priority =
       options.priority ?? (options.fresh ? "interactive" : "background");
-    const combined = AbortSignal.any([signal, this.#lifetime.signal]);
-    combined.throwIfAborted();
+    const consumer = AbortSignal.any([signal, this.#lifetime.signal]);
+    consumer.throwIfAborted();
     const cached = options.fresh ? undefined : await this.cache.get(key);
+    consumer.throwIfAborted();
     if (epoch !== (this.#repositoryEpoch.get(repository) ?? 0))
-      return this.#response(path, signal, options);
+      return this.#response(path, signal, options, query);
     if (
       cached &&
       !options.force &&
@@ -120,8 +155,10 @@ export class GithubTransport {
     const pendingKey = `${key}:${options.fresh ? "fresh" : "cached"}:${epoch}`;
     let entry = this.#pending.get(pendingKey);
     if (!entry || entry.signal.aborted) {
+      const abort = new AbortController(),
+        network = AbortSignal.any([abort.signal, this.#lifetime.signal]);
       const pending = this.#limiter.run(
-        combined,
+        network,
         async () => {
           if (this.now() < this.#blockedUntil)
             throw new GithubError(
@@ -129,93 +166,73 @@ export class GithubTransport {
               "GitHub requests are paused until the rate limit resets.",
               this.#blockedUntil,
             );
-          const headers: Record<string, string> = {
-            Authorization: `Bearer ${this.token}`,
-            Accept: options.accept ?? "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
-          };
-          if (cached?.etag && !options.fresh)
-            headers["If-None-Match"] = cached.etag;
-          const response = await this.send(url.href, {
-            method: "GET",
-            headers,
-            signal: AbortSignal.any([combined, AbortSignal.timeout(30_000)]),
-            cache: "no-store",
-            credentials: "omit",
-          });
-          combined.throwIfAborted();
-          if (response.status === 401) this.onUnauthorized();
-          if (!response.ok && response.status !== 304) {
-            const retry = response.headers.get("retry-after");
-            if (
-              response.status === 429 ||
-              retry ||
-              response.headers.get("x-ratelimit-remaining") === "0"
-            ) {
-              const reset =
-                Number(response.headers.get("x-ratelimit-reset")) * 1000;
-              this.#blockedUntil = Math.max(
-                this.now() + 60_000,
-                Number.isFinite(reset) ? reset : 0,
-                retry && Number.isFinite(Number(retry))
-                  ? this.now() + Number(retry) * 1000
-                  : retry && Number.isFinite(Date.parse(retry))
-                    ? Date.parse(retry)
-                    : 0,
-              );
-              throw new GithubError(
-                response.status,
-                `GitHub rate limit reached. Refresh after ${new Date(this.#blockedUntil).toISOString()}.`,
-                this.#blockedUntil,
-              );
-            }
-            if (
-              response.status === 401 ||
-              response.status === 403 ||
-              response.status === 404
-            )
-              await this.cache.remove(key);
-            throw new GithubError(
-              response.status,
-              response.status === 401
-                ? "GitHub rejected this token. Sign in again."
-                : `GitHub data unavailable (HTTP ${response.status}). Check token permissions and repository access.`,
+          try {
+            const value = await fetchReadResponse(
+              this.send,
+              this.token,
+              url.href,
+              network,
+              this.now,
+              options.accept,
+              cached,
+              options.fresh,
+              query,
+              this.onUnauthorized,
+              (until) => {
+                this.#blockedUntil = until;
+              },
             );
+            network.throwIfAborted();
+            if (
+              !options.fresh &&
+              epoch === (this.#repositoryEpoch.get(repository) ?? 0)
+            ) {
+              this.#writing = this.#writing
+                .catch(() => {})
+                .then(async () => {
+                  if (
+                    this.#lifetime.signal.aborted ||
+                    epoch !== (this.#repositoryEpoch.get(repository) ?? 0)
+                  )
+                    return;
+                  if (value.cacheable === false) await this.cache.remove(key);
+                  else await this.cache.put(key, value);
+                  if (
+                    this.#lifetime.signal.aborted ||
+                    epoch !== (this.#repositoryEpoch.get(repository) ?? 0)
+                  )
+                    await this.cache.remove(key);
+                })
+                .catch(() => {});
+            }
+            return value;
+          } catch (error) {
+            if (error instanceof GithubError && error.discardPreview)
+              await this.cache.remove(key);
+            throw error;
           }
-          const value: CachedResponse =
-            response.status === 304 && cached
-              ? { ...cached, fetchedAt: this.now() }
-              : {
-                  body: await response.json(),
-                  fetchedAt: this.now(),
-                  etag: response.headers.get("etag") ?? undefined,
-                  next: response.headers
-                    .get("link")
-                    ?.match(/<([^>]+)>;\s*rel="next"/)?.[1],
-                };
-          combined.throwIfAborted();
-          if (
-            !options.fresh &&
-            epoch === (this.#repositoryEpoch.get(repository) ?? 0)
-          )
-            await this.cache.put(key, value);
-          return value;
         },
         priority,
       );
-      entry = { promise: pending, signal: combined };
+      entry = {
+        promise: pending,
+        signal: network,
+        abort,
+        subscribers: 0,
+        settled: false,
+      };
       this.#pending.set(pendingKey, entry);
+      const current = entry;
       void pending
         .finally(() => {
-          if (this.#pending.get(pendingKey)?.promise === pending)
+          current.settled = true;
+          if (this.#pending.get(pendingKey) === current)
             this.#pending.delete(pendingKey);
         })
         .catch(() => {});
     }
     if (priority === "interactive") this.#limiter.promote(entry.signal);
-    const value = await entry.promise;
-    combined.throwIfAborted();
-    return value;
+    return subscribeRead(entry, consumer);
   }
   dispose() {
     this.#lifetime.abort();
@@ -225,5 +242,6 @@ export class GithubTransport {
     await Promise.allSettled(
       [...this.#pending.values()].map((value) => value.promise),
     );
+    await this.#writing;
   }
 }

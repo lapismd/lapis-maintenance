@@ -208,9 +208,28 @@ export class MemoryMaintenancePort
     await pause(this.delay, signal);
     return structuredClone(detail);
   }
-  async execute(command: MaintenanceCommand): Promise<CommandResult> {
+  async execute(
+    command: MaintenanceCommand,
+    signal = new AbortController().signal,
+  ): Promise<CommandResult> {
+    const fresh = await this.readDetails(command.itemId, signal, {
+      fresh: true,
+    });
+    if (
+      fresh.item.repository !== command.repository ||
+      targetKey(fresh.item.target) !== targetKey(command.target) ||
+      !fresh.item.actions.some(
+        (action) => action.kind === command.kind && action.available,
+      )
+    )
+      return {
+        status: "rejected",
+        message:
+          "Target or permissions changed. Refresh and review before confirming again.",
+      };
+    signal.throwIfAborted();
     this.commands.push(structuredClone(command));
-    await pause(this.delay);
+    await pause(this.delay, signal);
     const item = this.snapshot.items.find((i) => i.id === command.itemId);
     if (!item || targetKey(item.target) !== targetKey(command.target))
       return {

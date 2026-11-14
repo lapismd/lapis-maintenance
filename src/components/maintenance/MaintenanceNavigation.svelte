@@ -27,6 +27,8 @@
     profile,
     sessionMode = "demo",
     onDisconnect,
+    onNavigate,
+    onRepository,
   }: {
     controller: MaintenanceController;
     shell: AppShellController;
@@ -36,6 +38,8 @@
     profile: PersonalProfile;
     sessionMode?: "demo" | "github";
     onDisconnect?: () => void;
+    onNavigate?: (view: View) => void;
+    onRepository?: (repository?: string) => void;
   } = $props();
   const compact = $derived(
     shell.mobile.resolvedMode === "desktop" &&
@@ -87,9 +91,14 @@
             {controller}
             {shell}
             {compact}
+            {onNavigate}
           />{/each}
       </nav>
-      <MaintenanceRepositories {controller} {compact} /></Tooltip.Provider
+      <MaintenanceRepositories
+        {controller}
+        {compact}
+        {onRepository}
+      /></Tooltip.Provider
     >
   </AppShell.Sidebar.Body>
   <AppShell.Sidebar.Footer style="padding-inline:0"

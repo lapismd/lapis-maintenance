@@ -3,11 +3,16 @@ import {
   type MaintenanceCommand,
   type MaintenanceCommandPort,
   type MaintenanceReadPort,
+  type MaintenanceDetail,
   type CommandResult,
 } from "../maintenance/types";
 import { GithubWriteError, type GithubWriteTransport } from "./write-transport";
 import type { GithubTransport } from "./transport";
-import { validRepository, type GithubPull } from "./models";
+import { submitReadiness } from "./readiness-command";
+import { submitWorkflow } from "./workflow-commands";
+import { submitDispatch } from "./dispatch-command";
+import type { DispatchReads } from "./dispatch-reads";
+import { validRepository } from "./models";
 
 const rejected = (message: string): CommandResult => ({
   status: "rejected",
@@ -21,12 +26,21 @@ export class GithubCommandPort implements MaintenanceCommandPort {
   #requests = new Map<string, Promise<CommandResult>>();
   #uncertain = new Set<string>();
   #busy = false;
+  dispatch?: DispatchReads;
   constructor(
-    private client: GithubTransport,
+    _client: GithubTransport,
     private writer: GithubWriteTransport,
-    private reader: MaintenanceReadPort,
+    private reader: MaintenanceReadPort & {
+      readCommandTarget?: (
+        command: MaintenanceCommand,
+        signal: AbortSignal,
+      ) => Promise<MaintenanceDetail>;
+    },
   ) {}
-  execute(command: MaintenanceCommand): Promise<CommandResult> {
+  execute(
+    command: MaintenanceCommand,
+    signal = new AbortController().signal,
+  ): Promise<CommandResult> {
     const existing = this.#requests.get(command.requestId);
     if (existing) return existing;
     if (this.#busy)
@@ -39,7 +53,7 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         ),
       );
     this.#busy = true;
-    const pending = this.#execute(command)
+    const pending = this.#execute(command, signal)
       .then((result) => {
         if (result.status === "uncertain") this.#uncertain.add(key);
         return result;
@@ -50,7 +64,10 @@ export class GithubCommandPort implements MaintenanceCommandPort {
     this.#requests.set(command.requestId, pending);
     return pending;
   }
-  async #execute(command: MaintenanceCommand): Promise<CommandResult> {
+  async #execute(
+    command: MaintenanceCommand,
+    signal: AbortSignal,
+  ): Promise<CommandResult> {
     let submitted = false;
     try {
       if (
@@ -58,6 +75,15 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         !/^[0-9a-f]{40,64}$/i.test(command.target.sha)
       )
         return rejected("The command has an invalid repository or revision.");
+      if (command.kind === "dispatch-workflow" && this.dispatch) {
+        // The dispatch preflight itself never writes. The writer marks uncertain network outcomes.
+        return await submitDispatch(
+          this.dispatch,
+          this.writer,
+          command,
+          signal,
+        );
+      }
       if (
         ![
           "mark-ready",
@@ -68,14 +94,16 @@ export class GithubCommandPort implements MaintenanceCommandPort {
           "rerun-failed",
           "cancel-run",
           "approve-run",
+          "approve-deployment",
+          "reject-deployment",
         ].includes(command.kind)
       )
         return rejected("This release action is not enabled yet.");
-      const detail = await this.reader.readDetails(
-        command.itemId,
-        new AbortController().signal,
-        { fresh: true },
-      );
+      const detail = this.reader.readCommandTarget
+        ? await this.reader.readCommandTarget(command, signal)
+        : await this.reader.readDetails(command.itemId, signal, {
+            fresh: true,
+          });
       if (
         detail.item.id !== command.itemId ||
         detail.item.repository !== command.repository ||
@@ -87,33 +115,15 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         return rejected(
           "Target or permissions changed. Refresh and review the action again.",
         );
+      signal.throwIfAborted();
       const root = `/repos/${command.repository}`;
       const url = detail.item.url;
-      if (command.target.kind === "workflow") {
-        const target = command.target;
-        if (
-          command.itemId !== `run:${command.repository}:${target.runId}` ||
-          !Number.isSafeInteger(target.runId) ||
-          !Number.isSafeInteger(target.attempt) ||
-          target.attempt < 1 ||
-          !["rerun-failed", "cancel-run", "approve-run"].includes(command.kind)
-        )
-          return rejected("Invalid workflow command target.");
+      if (
+        command.target.kind === "workflow" ||
+        command.target.kind === "deployment"
+      ) {
         submitted = true;
-        await this.writer.submit(
-          `${root}/actions/runs/${target.runId}/${command.kind === "rerun-failed" ? "rerun-failed-jobs" : command.kind === "approve-run" ? "approve" : "cancel"}`,
-          "POST",
-        );
-        return {
-          status: "accepted",
-          message:
-            command.kind === "approve-run"
-              ? "GitHub accepted workflow approval. CI is not yet complete."
-              : command.kind === "rerun-failed"
-                ? "GitHub accepted the rerun request. The new attempt is not yet complete."
-                : "GitHub accepted cancellation. The workflow may take time to stop.",
-          url,
-        };
+        return await submitWorkflow(this.writer, command, detail, signal);
       }
       if (
         command.target.kind !== "pull-request" ||
@@ -128,10 +138,15 @@ export class GithubCommandPort implements MaintenanceCommandPort {
         if (!method || !detail.mergeMethods?.includes(method))
           return rejected("Choose an allowed repository merge method.");
         submitted = true;
-        const result = await this.writer.submit(`${pull}/merge`, "PUT", {
-          sha: command.target.sha,
-          merge_method: method,
-        });
+        const result = await this.writer.submit(
+          `${pull}/merge`,
+          "PUT",
+          {
+            sha: command.target.sha,
+            merge_method: method,
+          },
+          signal,
+        );
         const body = result.body as { merged?: boolean } | undefined;
         return body?.merged === true
           ? {
@@ -148,68 +163,8 @@ export class GithubCommandPort implements MaintenanceCommandPort {
               );
       }
       if (command.kind === "mark-ready") {
-        const pr = await this.client.read<GithubPull>(
-          pull,
-          new AbortController().signal,
-          { fresh: true },
-        );
-        if (
-          pr.state !== "open" ||
-          !pr.draft ||
-          pr.head.sha !== command.target.sha ||
-          !pr.node_id
-        )
-          return rejected(
-            "The draft or revision changed. Refresh and review it again.",
-          );
         submitted = true;
-        const result = await this.writer.submit("/graphql", "POST", {
-          query:
-            "mutation Ready($id: ID!) { markPullRequestReadyForReview(input: {pullRequestId: $id}) { pullRequest { isDraft headRefOid } } }",
-          variables: { id: pr.node_id },
-        });
-        const body = result.body as
-          | {
-              data?: {
-                markPullRequestReadyForReview?: {
-                  pullRequest?: { isDraft: boolean; headRefOid: string };
-                };
-              };
-              errors?: { type?: string; extensions?: { code?: string } }[];
-            }
-          | undefined;
-        const updated = body?.data?.markPullRequestReadyForReview?.pullRequest;
-        if (
-          !updated &&
-          body?.errors?.length &&
-          body.errors.every((error) =>
-            [
-              "FORBIDDEN",
-              "UNAUTHORIZED",
-              "NOT_FOUND",
-              "INSUFFICIENT_SCOPES",
-              "GRAPHQL_VALIDATION_FAILED",
-            ].includes(error.type ?? error.extensions?.code ?? ""),
-          )
-        )
-          return rejected(
-            "GitHub rejected readiness. Check token permissions and the current PR state.",
-          );
-        if (
-          body?.errors?.length ||
-          !updated ||
-          updated.headRefOid !== command.target.sha
-        )
-          return uncertain(
-            "Readiness was not confirmed for the displayed revision. Inspect GitHub; this action will not be replayed.",
-          );
-        return updated.isDraft
-          ? rejected("GitHub still reports this PR as a draft.")
-          : {
-              status: "completed",
-              message: "The PR is ready for review.",
-              url,
-            };
+        return await submitReadiness(this.writer, detail, signal);
       }
       const event = {
         "approve-pr": "APPROVE",
@@ -221,11 +176,16 @@ export class GithubCommandPort implements MaintenanceCommandPort {
       if ((event !== "APPROVE" && !body) || body.length > 65_536)
         return rejected("Enter a review comment of at most 65,536 characters.");
       submitted = true;
-      const result = await this.writer.submit(`${pull}/reviews`, "POST", {
-        event,
-        commit_id: command.target.sha,
-        ...(body ? { body } : {}),
-      });
+      const result = await this.writer.submit(
+        `${pull}/reviews`,
+        "POST",
+        {
+          event,
+          commit_id: command.target.sha,
+          ...(body ? { body } : {}),
+        },
+        signal,
+      );
       const review = result.body as
         | { id?: number; state?: string; commit_id?: string }
         | undefined;
@@ -258,7 +218,9 @@ export class GithubCommandPort implements MaintenanceCommandPort {
             "The outcome is unknown. Inspect GitHub; this action will not be replayed.",
           )
         : rejected(
-            "Could not revalidate the target. Refresh before trying again.",
+            error instanceof Error
+              ? error.message
+              : "Could not revalidate the target. Refresh before trying again.",
           );
     }
   }

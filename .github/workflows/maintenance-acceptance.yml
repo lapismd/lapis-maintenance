@@ -1,0 +1,42 @@
+name: Maintenance action acceptance
+run-name: Maintenance acceptance · ${{ inputs.marker }}
+on:
+  workflow_dispatch:
+    inputs:
+      marker:
+        description: Unique acceptance marker (no credentials)
+        type: string
+        required: true
+      mode:
+        description: Harmless acceptance operation
+        type: choice
+        options: [verify]
+        default: verify
+        required: true
+      environment:
+        description: Designated disposable review environment
+        type: environment
+        required: true
+      extra_validation:
+        description: Exercise a boolean input
+        type: boolean
+        default: false
+      sample_count:
+        description: Exercise a numeric input
+        type: number
+        default: 1
+permissions: {}
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Confirm harmless acceptance
+        env:
+          ACCEPTANCE_MARKER: ${{ inputs.marker }}
+          SAMPLE_COUNT: ${{ inputs.sample_count }}
+          EXTRA_VALIDATION: ${{ inputs.extra_validation }}
+        run: |
+          printf 'Acceptance marker: %s\n' "$ACCEPTANCE_MARKER"
+          printf 'Sample count: %s, extra validation: %s\n' "$SAMPLE_COUNT" "$EXTRA_VALIDATION"

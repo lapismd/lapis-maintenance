@@ -30,12 +30,7 @@
       const allowed = (kind: ActionKind) =>
         !failedRefresh &&
         value.item.actions.some((a) => a.kind === kind && a.available) &&
-        !controller.commands.blocked(value.item, kind) &&
-        (kind !== "merge-pr" ||
-          (checkSnapshot(value).complete &&
-            value.checks.length > 0 &&
-            value.checks.every((check) => check.state === "passed") &&
-            !["blocked", "draft"].includes(value.item.status)));
+        !controller.commands.blocked(value.item, kind);
       const record: RepositoryPullRequestRecord = {
         id: value.item.id,
         number: value.item.number ?? 1,

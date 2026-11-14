@@ -14,8 +14,14 @@
   let {
     controller,
     notice = "",
-  }: { controller: MaintenanceController; notice?: string } = $props();
+    messages: suppliedMessages = [],
+  }: {
+    controller: MaintenanceController;
+    notice?: string;
+    messages?: string[];
+  } = $props();
   const entries = $derived.by(() => [
+    ...suppliedMessages.map((message) => ({ message, kind: "warning" })),
     ...(notice ? [{ message: notice, kind: "info" }] : []),
     ...(controller.snapshot?.repositories
       .filter((repo) => repo.holdReason)

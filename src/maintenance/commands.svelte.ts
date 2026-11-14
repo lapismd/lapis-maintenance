@@ -20,16 +20,14 @@ export class MaintenanceCommands {
   busy = $state(false);
   #disposed = false;
   #sequence = 0;
-  #read: MaintenanceReadPort;
+  #attempt?: AbortController;
   #write: MaintenanceCommandPort;
   #refresh: (command: MaintenanceCommand) => Promise<void>;
-  #validation?: AbortController;
   constructor(
-    read: MaintenanceReadPort,
+    _read: MaintenanceReadPort,
     write: MaintenanceCommandPort,
     refresh: (command: MaintenanceCommand) => Promise<void>,
   ) {
-    this.#read = read;
     this.#write = write;
     this.#refresh = refresh;
   }
@@ -72,50 +70,23 @@ export class MaintenanceCommands {
       inputs: { ...this.confirmation.command.inputs, ...inputs },
     };
     this.busy = true;
-    this.#validation = new AbortController();
+    this.confirmation = null;
+    this.#attempt = new AbortController();
     try {
-      const fresh = await this.#read.readDetails(
-        command.itemId,
-        this.#validation.signal,
-        { fresh: true },
-      );
-      if (this.#disposed) return;
-      if (
-        fresh.item.repository !== command.repository ||
-        targetKey(fresh.item.target) !== targetKey(command.target) ||
-        !fresh.item.actions.some((a) => a.kind === command.kind && a.available)
-      ) {
-        this.#record(command, {
-          status: "rejected",
-          message:
-            "Target or permissions changed. Refresh and review before confirming again.",
-        });
-        this.confirmation = null;
-        await this.#refresh(command);
-        return;
-      }
-      this.confirmation = null;
-      let result;
+      let result: CommandResult;
       try {
-        result = await this.#write.execute(command);
+        result = await this.#write.execute(command, this.#attempt.signal);
       } catch {
         result = {
-          status: "uncertain" as const,
+          status: "uncertain",
           message:
             "The outcome is unknown. Inspect GitHub before requesting this action again.",
         };
       }
       if (this.#disposed) return;
       this.#record(command, result);
-      await this.#refresh(command);
-    } catch (error) {
-      if (!this.#disposed) {
-        this.#record(command, {
-          status: "rejected",
-          message: `Could not validate the target: ${error instanceof Error ? error.message : "Read failed"}`,
-        });
-        this.confirmation = null;
-      }
+      // A refresh failure cannot change the already recorded remote outcome.
+      await this.#refresh(command).catch(() => {});
     } finally {
       if (!this.#disposed) this.busy = false;
     }
@@ -125,7 +96,7 @@ export class MaintenanceCommands {
   }
   dispose(): void {
     this.#disposed = true;
-    this.#validation?.abort();
+    this.#attempt?.abort();
     this.confirmation = null;
     this.busy = false;
   }

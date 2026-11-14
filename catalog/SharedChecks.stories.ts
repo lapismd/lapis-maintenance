@@ -50,6 +50,9 @@ export const PullRequest: Story = {
   render: () => ({ Component: Demo }),
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
+    await userEvent.click(
+      await c.findByRole("button", { name: "Show search and filters" }),
+    );
     await userEvent.type(
       c.getByRole("textbox", { name: "Search maintenance items" }),
       "Version first-party",
@@ -69,7 +72,7 @@ export const LinkedPullRequest: Story = {
     const c = await inspect(canvasElement, /Open card: Desktop CI/);
     await expect(
       c.getByRole("button", { name: "Squash and merge" }),
-    ).toBeDisabled();
+    ).toBeEnabled();
     await expect(
       c.getByRole("button", { name: "Float PR details" }),
     ).toBeVisible();

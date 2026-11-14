@@ -28,6 +28,7 @@ function fixture(kind: MaintenanceCommand["kind"] = "merge-pr", status = 200) {
       number: workflow ? undefined : 7,
       title: "Update",
       kind: workflow ? "workflow" : "pull-request",
+      draft: kind === "mark-ready",
       category: "dependency",
       status: "passed",
       updatedAt: "now",
@@ -36,6 +37,7 @@ function fixture(kind: MaintenanceCommand["kind"] = "merge-pr", status = 200) {
       target: command.target,
       actions: [{ kind, label: "Action", available: true }],
     },
+    nodeId: kind === "mark-ready" ? "PR_one" : undefined,
     description: "PR",
     checks: [{ name: "CI", state: "passed" }],
     mergeMethods: ["squash"],
@@ -190,13 +192,15 @@ it("rejects changed workflow attempts and disposed write sessions", async () => 
   expect(closed.send).not.toHaveBeenCalled();
 });
 it("marks a freshly revalidated draft ready with its node ID", async () => {
-  const { port, command, send } = fixture("mark-ready");
+  const { port, command, send, readDetails } = fixture("mark-ready");
   expect((await port.execute(command)).status).toBe("completed");
-  expect(send.mock.calls.map((call) => call[1]?.method)).toEqual([
-    "GET",
-    "POST",
-  ]);
-  expect(JSON.parse(String(send.mock.calls[1]![1]?.body))).toMatchObject({
+  expect(readDetails).toHaveBeenCalledWith(
+    command.itemId,
+    expect.any(AbortSignal),
+    { fresh: true },
+  );
+  expect(send.mock.calls.map((call) => call[1]?.method)).toEqual(["POST"]);
+  expect(JSON.parse(String(send.mock.calls[0]![1]?.body))).toMatchObject({
     variables: { id: "PR_one" },
   });
 });

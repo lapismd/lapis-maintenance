@@ -104,17 +104,15 @@
   .maintenance-board {
     margin-inline: -1rem;
   }
-  .maintenance-summary {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
   .maintenance-summary > div {
-    padding: 0.65rem 0.8rem;
+    padding: 0.45rem 0.3rem;
   }
-  .maintenance-summary > div:nth-child(3) {
-    border-inline-start: 0;
+  .maintenance-summary span {
+    font-size: 0.65rem;
   }
-  .maintenance-summary > div:nth-child(n + 3) {
-    border-block-start: 1px solid var(--border);
+  .maintenance-summary strong {
+    font-size: 1.05rem;
+    gap: 0.25rem;
   }
   .maintenance-breadcrumb {
     font-size: 0.7rem;

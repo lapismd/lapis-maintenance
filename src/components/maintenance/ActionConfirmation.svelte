@@ -3,6 +3,7 @@
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Input } from "@lapismd/design-core/shadcn/input";
   import { Textarea } from "@lapismd/design-core/shadcn/textarea";
+  import { X, Check, LoaderCircle } from "@lucide/svelte";
   import { untrack } from "svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
@@ -43,7 +44,11 @@
     <Dialog.Header
       ><Dialog.Title>{confirmation?.label ?? "Confirm action"}</Dialog.Title
       ><Dialog.Description
-        >{sessionMode === "github"
+        >{#if controller.commands.busy}<LoaderCircle
+            size={15}
+            aria-hidden="true"
+          />{:else}<Check size={15} aria-hidden="true" />{/if}{sessionMode ===
+        "github"
           ? "This action changes GitHub. The target will be checked again immediately before submission."
           : "Confirm this operation against the displayed target. This fixture session simulates the result."}</Dialog.Description
       ></Dialog.Header
@@ -84,13 +89,17 @@
     {/if}
     <Dialog.Footer
       ><Button variant="ghost" onclick={() => controller.commands.cancel()}
-        >Cancel</Button
+        ><X size={15} aria-hidden="true" />Cancel</Button
       ><Button
         disabled={controller.commands.busy ||
           !!(needsBody && !body.trim()) ||
           (confirmation?.command.kind === "dispatch-workflow" && !ref.trim())}
         onclick={() => controller.commands.confirm({ body, ref })}
-        >{sessionMode === "github"
+        >{#if controller.commands.busy}<LoaderCircle
+            size={15}
+            aria-hidden="true"
+          />{:else}<Check size={15} aria-hidden="true" />{/if}{sessionMode ===
+        "github"
           ? "Confirm GitHub action"
           : "Confirm simulated action"}</Button
       ></Dialog.Footer

@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
+  import { IntentPrefetch } from "../../maintenance/intent-prefetch";
+  import { cardIntent } from "../../maintenance/card-intent";
   import {
     KanbanBoard,
     KanbanActivityView,
@@ -12,8 +15,16 @@
   let {
     controller,
     onOpen,
-  }: { controller: MaintenanceController; onOpen: (id: string) => void } =
-    $props();
+    onPrefetch,
+  }: {
+    controller: MaintenanceController;
+    onOpen: (id: string) => void;
+    onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
+  } = $props();
+  const prefetch = new IntentPrefetch(
+    (id, signal) => onPrefetch?.(id, signal) ?? Promise.resolve(),
+  );
+  onDestroy(() => prefetch.dispose());
   let metadata = $state<Record<string, KanbanColumnMeta>>({});
   let order = $state<string[]>([]);
   const columns = $derived(
@@ -22,10 +33,19 @@
         ...c,
         label: metadata[c.id]?.title ?? c.label,
         color: metadata[c.id]?.color ?? c.color,
+        primary: !!c.cards.length && c.primary,
+        locked: !!c.cards.length && c.locked,
+        excludeFromAutoExpand: !c.cards.length,
       }))
       .toSorted((a, b) =>
         order.length ? order.indexOf(a.id) - order.indexOf(b.id) : 0,
       ),
+  );
+  const boardKey = $derived(
+    `${controller.view}:${columns
+      .filter((column) => !column.cards.length)
+      .map((column) => column.id)
+      .join(":")}`,
   );
   const dates = $derived(
     new Map(controller.items.map((item) => [item.id, item.updatedAt])),
@@ -42,7 +62,10 @@
 </script>
 
 {#snippet cardTags({ card }: KanbanCardContext)}
-  <span class="maintenance-card-tags">
+  <span
+    class="maintenance-card-tags"
+    use:cardIntent={{ id: card.id, prefetch }}
+  >
     {#each card.tags ?? [] as tag}<span
         ><Tag size={12} aria-hidden="true" /><Badge
           variant="outline"
@@ -78,21 +101,23 @@
       onCardOpen={(id) => onOpen(id)}
     />
   {:else}
-    <KanbanBoard
-      cardSnippets={{ tags: cardTags }}
-      {columns}
-      anchorColumnId={columns.find((column) => column.cards.length)?.id ??
-        "approval"}
-      movesEnabled={false}
-      ariaLabel="Maintenance status board. Use arrow keys to navigate and Enter to open details."
-      onCardOpen={(id) => onOpen(id)}
-      onMoveCardToColumn={() => {}}
-      onReorderColumns={(ids) => (order = ids)}
-      onEditColumn={(id, meta) => (metadata = { ...metadata, [id]: meta })}
-      emptyTitle="No maintenance items match"
-      emptyDescription="Clear the filters or refresh to check for new work."
-      brandLabel="Lapis Maintenance"
-    />
+    {#key boardKey}
+      <KanbanBoard
+        cardSnippets={{ tags: cardTags }}
+        {columns}
+        anchorColumnId={columns.find((column) => column.cards.length)?.id ??
+          null}
+        movesEnabled={false}
+        ariaLabel="Maintenance status board. Use arrow keys to navigate and Enter to open details."
+        onCardOpen={(id) => onOpen(id)}
+        onMoveCardToColumn={() => {}}
+        onReorderColumns={(ids) => (order = ids)}
+        onEditColumn={(id, meta) => (metadata = { ...metadata, [id]: meta })}
+        emptyTitle="No maintenance items match"
+        emptyDescription="Clear the filters or refresh to check for new work."
+        brandLabel="Lapis Maintenance"
+      />
+    {/key}
   {/if}
 </div>
 

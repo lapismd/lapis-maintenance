@@ -7,7 +7,7 @@ explicit user approval boundary after each verified slice.
 
 ### Acceptance details
 
-- Each requirement has one verification row; future behavior remains planned.
+- Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.
 - Spec-validator validates navigation, governance, verification, QMD wiring, Markdown, book output and mapped specification-first changes.
-- Tools and CI Actions are pinned; dependencies and lockfiles resolve npm, with published Design Core ^0.13.1 retaining read-only activation and measured long Kanban lanes and Repository UI ^0.2.2 sharing one Core runtime for forge panels and bounded checks, verified through frozen registry acceptance without local archives, package patches or source aliases in the delivered app.
+- The dispatch-only acceptance workflow has no repository permissions, checkout, secret use or publication and uses a disposable review environment; tools/actions are pinned and frozen npm ranges/lockfiles exclude archives, patches and aliases; Design Core ^0.13.1, Repository UI ^0.2.2 and Virtual ^3.13.52 retain measured boards/checks, public UI entries are prebundled against optimizer reloads, and adapted Community rows retain Apache-2.0 attribution/license.
 - CI exercises functional gates, app/fixture-only static builds, real browser storage, production PWA installation/offline/update tests and a fail-closed boundary audit, with credentials/transport/cache in their owning modules, including an explicit IndexedDB data-cache boundary; the local manual live-session story is excluded from published and automated discovery, without screenshot comparisons.

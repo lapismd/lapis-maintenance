@@ -1,3 +1,4 @@
+import { writeFailure } from "./write-errors";
 /** Uncached, non-retrying writes. The session owns credentials and disposal. */
 export class GithubWriteError extends Error {
   constructor(
@@ -15,7 +16,12 @@ export class GithubWriteTransport {
     private send: typeof fetch = globalThis.fetch.bind(globalThis),
     private onUnauthorized = () => {},
   ) {}
-  submit(path: string, method: "POST" | "PUT", body?: unknown) {
+  submit(
+    path: string,
+    method: "POST" | "PUT",
+    body?: unknown,
+    signal?: AbortSignal,
+  ) {
     if (this.#pending || this.#lifetime.signal.aborted)
       return Promise.reject(
         new GithubWriteError(
@@ -28,7 +34,7 @@ export class GithubWriteTransport {
       return Promise.reject(
         new GithubWriteError(false, "Refused an unexpected API origin."),
       );
-    const pending = this.#send(url.href, method, body);
+    const pending = this.#send(url.href, method, body, signal);
     this.#pending = pending;
     void pending
       .finally(() => {
@@ -37,7 +43,12 @@ export class GithubWriteTransport {
       .catch(() => {});
     return pending;
   }
-  async #send(url: string, method: "POST" | "PUT", body: unknown) {
+  async #send(
+    url: string,
+    method: "POST" | "PUT",
+    body: unknown,
+    signal?: AbortSignal,
+  ) {
     let response: Response;
     try {
       response = await this.send(url, {
@@ -51,6 +62,7 @@ export class GithubWriteTransport {
         body: body === undefined ? undefined : JSON.stringify(body),
         signal: AbortSignal.any([
           this.#lifetime.signal,
+          ...(signal ? [signal] : []),
           AbortSignal.timeout(30_000),
         ]),
         cache: "no-store",
@@ -67,7 +79,7 @@ export class GithubWriteTransport {
     if (!response.ok)
       throw new GithubWriteError(
         response.status >= 500 || response.status === 408,
-        `GitHub did not complete the action (HTTP ${response.status}). Check token permissions, repository rules and the current target.`,
+        await writeFailure(response, url),
       );
     const text = await response.text().catch(() => {
       throw new GithubWriteError(

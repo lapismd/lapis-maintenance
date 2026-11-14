@@ -28,6 +28,17 @@ export type ActionKind =
   | "reject-deployment"
   | "dispatch-workflow";
 export type Target =
+  | {
+      kind: "dispatch";
+      sha: string;
+      workflowId: number;
+      ref: string;
+      definitionSha: string;
+      defaultDefinitionSha: string;
+      path: string;
+      name: string;
+      url: string;
+    }
   | { kind: "pull-request"; sha: string }
   | { kind: "workflow"; sha: string; runId: number; attempt: number }
   | {
@@ -79,11 +90,17 @@ export interface MaintenanceSnapshot {
 export interface MaintenanceDetail {
   item: MaintenanceItem;
   description: string;
+  holdReason?: string;
+  nodeId?: string;
   checks: {
+    id?: string;
+    url?: string;
+    workflow?: string;
     name: string;
     state: "passed" | "failed" | "running" | "unknown";
     description?: string;
   }[];
+  checksComplete?: boolean;
   review?: string;
   workflow?: string;
   environment?: string;
@@ -135,8 +152,12 @@ export interface CommandResult {
   message: string;
   url?: string;
 }
+/** Command adapters own one fresh provider preflight; UI controllers never duplicate it. */
 export interface MaintenanceCommandPort {
-  execute(command: MaintenanceCommand): Promise<CommandResult>;
+  execute(
+    command: MaintenanceCommand,
+    signal?: AbortSignal,
+  ): Promise<CommandResult>;
 }
 export interface ActionReceipt extends CommandResult {
   command: MaintenanceCommand;

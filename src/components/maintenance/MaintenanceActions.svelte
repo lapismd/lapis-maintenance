@@ -1,4 +1,5 @@
 <script lang="ts">
+  import MaintenanceActionIcon from "./MaintenanceActionIcon.svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let { controller }: { controller: MaintenanceController } = $props();
@@ -40,7 +41,7 @@
             detail.item,
             action.kind,
             action.kind === "merge-pr" ? { mergeMethod: "squash" } : {},
-          )}>{action.label}</Button
+          )}><MaintenanceActionIcon kind={action.kind} />{action.label}</Button
       >
     {/each}
     {#each workflowApprovals as run}
@@ -55,7 +56,7 @@
             controller.commands.busy ||
             controller.commands.blocked(run, action.kind)}
           onclick={() => controller.commands.prepare(run, "approve-run")}
-          >Approve workflow run</Button
+          ><MaintenanceActionIcon kind="approve-run" />Approve workflow run</Button
         >
         <p class="maintenance-muted">
           {run.title} · {run.target.kind === "workflow"

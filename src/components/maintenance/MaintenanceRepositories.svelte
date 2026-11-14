@@ -8,7 +8,12 @@
   let {
     controller,
     compact,
-  }: { controller: MaintenanceController; compact: boolean } = $props();
+    onRepository,
+  }: {
+    controller: MaintenanceController;
+    compact: boolean;
+    onRepository?: (repository?: string) => void;
+  } = $props();
   let open = $state(true);
 </script>
 
@@ -21,7 +26,11 @@
     <Tooltip.Root>
       <Tooltip.Trigger>
         {#snippet child({ props })}<span {...props} tabindex="-1"
-            ><RepositoryFilter {controller} compact /></span
+            ><RepositoryFilter
+              {controller}
+              compact
+              onSelectRepository={onRepository}
+            /></span
           >{/snippet}
       </Tooltip.Trigger>
       <Tooltip.Content side="right">Repositories</Tooltip.Content>
@@ -47,7 +56,8 @@
             variant="ghost"
             aria-label="Show all repositories"
             aria-pressed={!controller.repositories.length}
-            onclick={() => (controller.repositories = [])}
+            onclick={() =>
+              onRepository ? onRepository() : (controller.repositories = [])}
             ><Inbox size={16} aria-hidden="true" /><span>All repositories</span
             ></Button
           >
@@ -57,7 +67,10 @@
               aria-label={`Show ${repo.repository}`}
               aria-pressed={controller.repositories.includes(repo.repository)}
               title={repo.repository}
-              onclick={() => controller.toggleRepository(repo.repository)}
+              onclick={() =>
+                onRepository
+                  ? onRepository(repo.repository)
+                  : controller.toggleRepository(repo.repository)}
               ><FolderGit2 size={16} aria-hidden="true" /><span
                 >{repo.repository.split("/")[1]}</span
               ></Button

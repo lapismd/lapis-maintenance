@@ -238,6 +238,8 @@ body {
 .maintenance-icon-link:focus-visible {
   background: var(--muted);
   color: var(--foreground);
+}
+.maintenance-icon-link:focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
 }

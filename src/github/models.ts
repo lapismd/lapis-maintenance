@@ -14,9 +14,13 @@ export interface GithubRepository {
   permissions?: { push?: boolean; admin?: boolean; maintain?: boolean };
   archived?: boolean;
   disabled?: boolean;
+  private?: boolean;
 }
 export interface GithubPull {
   state: "open" | "closed";
+  merged_at?: string | null;
+  additions?: number;
+  deletions?: number;
   number: number;
   title: string;
   body?: string | null;
@@ -24,9 +28,13 @@ export interface GithubPull {
   updated_at: string;
   draft: boolean;
   node_id?: string;
-  user?: { login: string };
-  head: { sha: string; ref: string };
-  base: { ref: string };
+  user?: { login: string; avatar_url?: string };
+  head: {
+    sha: string;
+    ref: string;
+    repo?: { full_name: string; private: boolean; fork?: boolean } | null;
+  };
+  base: { ref: string; repo?: { full_name: string; private: boolean } | null };
   labels: { name: string }[];
   requested_reviewers?: { login: string }[];
   mergeable_state?: string;
@@ -39,12 +47,15 @@ export interface GithubCheck {
   conclusion: string | null;
   head_sha: string;
   output?: { title?: string; summary?: string };
+  html_url?: string;
+  details_url?: string;
 }
 export interface GithubStatus {
   id: number;
   context: string;
   state: string;
   description: string | null;
+  target_url?: string | null;
 }
 export interface GithubReview {
   id: number;
@@ -72,6 +83,7 @@ export interface GithubEnvironment {
   environment: { id: number; name: string };
   current_user_can_approve: boolean;
   wait_timer: number;
+  wait_timer_started_at?: string | null;
   reviewers: { type: string; reviewer: { login?: string; name?: string } }[];
 }
 export interface RepositorySelection {

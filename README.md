@@ -16,11 +16,20 @@ Built with Svelte 5, [Design Core](https://github.com/lapismd/design-core) and
 ## What it does
 
 - An inbox, Kanban board and activity view across your selected repositories.
-- Search, multiple repository/status filters, grouped checks and PR details.
+- Search, multiple repository/status filters, grouped linked checks and a PR
+  workspace with Overview, Checks and lazy Activity tabs.
 - PR reviews, merges, draft readiness, workflow approvals, reruns and cancellation,
   with explicit confirmation and current-target verification.
-- GitHub's repository rules and permissions remain authoritative. Release
-  environment approvals and manual workflow dispatch are planned.
+- Environment approval/rejection and manual workflow dispatch with typed inputs,
+  explicit branch/tag selection and confirmation of the commit/definition.
+- GitHub's repository rules and permissions remain authoritative. Dispatch and
+  review acceptance are reported separately from workflow/publication success.
+
+Open **Run workflow** in the header to choose a repository, an active manual
+workflow, and an explicit branch or tag. The app reads its declared input schema
+and rechecks the commit and definition before submitting once. The repository's
+`Maintenance action acceptance` workflow is a no-op for designated test
+environments; it never checks out code, reads secrets or publishes.
 
 ## Connect GitHub
 
@@ -30,7 +39,8 @@ owner, and inaccessible repositories are shown explicitly.
 
 Use repository read access for metadata, pull requests, checks, commit statuses,
 Actions and environments. Actions require Pull requests write, Contents write
-for merges and Actions write for workflows. [Manage GitHub tokens](https://github.com/settings/personal-access-tokens).
+for merges, Actions write for workflows, and Deployments write plus eligible
+environment-reviewer status for protected environment reviews. [Manage GitHub tokens](https://github.com/settings/personal-access-tokens).
 
 “Remember token on this device” stores the token in this browser, separately from
 repository data. Use **Disconnect** in the profile menu to remove it and clear the

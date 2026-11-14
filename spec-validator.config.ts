@@ -42,6 +42,16 @@ export default defineConfig(headingRequirements(), {
       ignore: ["\\.(?:test|stories)\\.ts$"],
       rules: [
         {
+          pattern:
+            "^src/(?:components/maintenance-activity/|maintenance/activity/)|^catalog/(?:Activity|activity/|components/Activity)",
+          chapters: ["spec/src/activity.md"],
+        },
+        {
+          pattern:
+            "^src/(?:components/maintenance-review/|maintenance/review/)|^catalog/(?:Review|review/|components/Review)",
+          chapters: ["spec/src/review.md"],
+        },
+        {
           pattern: "^src/pwa/|^public/|^index\\.html$|^tests/|^scripts/pwa",
           chapters: ["spec/src/hosting.md"],
         },

@@ -34,6 +34,14 @@ export default mergeConfig(
         {
           extends: true,
           plugins: [storybookTest({ configDir: ".storybook" })],
+          optimizeDeps: {
+            include: [
+              "@lapismd/design-core/shadcn/tabs",
+              "@lapismd/design-core/shadcn/avatar",
+              "@lapismd/design-core/shadcn/breadcrumb",
+              "@tanstack/svelte-virtual",
+            ],
+          },
           test: {
             name: "storybook",
             fileParallelism: false,

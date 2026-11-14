@@ -27,12 +27,14 @@
     selected = "failure",
     view = "inbox",
     compact = false,
+    width,
   }: {
     part: string;
     scenario?: Scenario;
     selected?: string;
     view?: View;
     compact?: boolean;
+    width?: number;
   } = $props();
   const port = untrack(() => new MemoryMaintenancePort(scenario));
   const controller = untrack(
@@ -86,7 +88,12 @@
   });
 </script>
 
-<div class="maintenance-app component-demo" data-ui-theme="lapis">
+<div
+  class="maintenance-app component-demo"
+  data-ui-theme="lapis"
+  style:width={width ? `${width}px` : undefined}
+  style:max-width="100%"
+>
   {#if ["toolbar", "navigation", "inspector"].includes(part)}
     <AppShell.Root controller={shell}>
       {#if part === "navigation"}<MaintenanceNavigation

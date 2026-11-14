@@ -15,9 +15,18 @@ Slice 1 was approved and Slice 2 authorized on 2026-11-10. The subsequent reques
 for write access in the live story explicitly authorizes Slice 3 implementation.
 The user also authorized dependency publication, pushing and Pages hosting;
 The user authorized Slice 5 PWA implementation on 2026-11-11.
-Slice 4 release actions remain planned and unapproved.
+The 2026-11-14 continuation authorizes Slice 4, including manual dispatch.
 Slice 2 remembers a token on this device,
 shows token login without a valid session, and uses Turso WASM to cache reads.
+
+### Continuation authorized 2026-11-14
+
+The user approved the reviewed UI and requested the remaining real implementation,
+push and merge when green. This supersedes the R2–R4 separate approval stops:
+workflow/environment action fixes, faster reads and the live PR/activity workspace
+are authorized together. Keep components local, preserve all data/credential and
+write-preflight boundaries, then validate, push a PR, merge its exact green head
+and verify Pages/PWA deployment. The user explicitly included all remaining items and manual workflow dispatch.
 
 ## Repository and specification foundation
 
@@ -217,3 +226,141 @@ browser-storage fallback when isolation is unavailable. Qualify the shared UI
 runtime floor upstream to keep long checks separate from merge controls, then
 consume the npm release. See `spec/records/2026-11-11-cached-reload.md` for the
 failure ledger and qualification; Slice 4 remains unapproved.
+
+## GitHub and PR follow-up — revised 2026-11-14
+
+The user revised the T3-inspired plan: **the first deliverable is UI in
+Storybook only, and new components stay in this repository for now**. This
+supersedes the proposed action-fixes-first sequence; the continuation authorization
+above now permits implementing the remaining live follow-up slices.
+
+### Intended product and findings
+
+Retain Svelte, Design Core AppShell, Repository UI primitives, direct browser
+GitHub requests, remembered token sessions and token-partitioned Turso caches.
+T3 Code supplies patterns for batched GraphQL summaries, independent resources,
+conditional refresh, 150ms intent prefetch and exact fork/head approval checks.
+Preserve provenance and MIT attribution for later code adaptations.
+
+Maintenance already has persistent caches, ETags and interactive priority, but
+inventory reads checks/statuses/reviews separately per PR. Approval checks only
+conclusion, environment actions are intentionally gated, check/job URLs are
+discarded, and controller plus adapter duplicate preflight reads. Existing
+focused tests pass 30/30. Live fixes have not been implemented in this follow-up.
+
+### Revised delivery slices
+
+| Slice                       | Deliverable                                                                                            | Review boundary                           |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | UI approved; implemented                  |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Implemented; hosted qualification pending |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Implemented; hosted qualification pending |
+| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Implemented; hosted qualification pending |
+
+### R1: complete fixture-only UI
+
+- Keep quick details in the joined inspector; Open PR view enters main-panel
+  Overview, Checks and Activity tabs, plus a Files on GitHub link. Back retains filters/selection.
+  Preserve shell navigation, theme/profile, Kanban, resizing and responsiveness;
+  a circular icon-only Back preserves board context, while All repositories
+  and repository breadcrumbs open the inbox with the corresponding filter.
+- Overview shows author, branches/revision, description, labels and review/merge
+  state. Checks have grouped collapsible linked rows, refresh and merge controls.
+  Merge permission is independent of review approval; GitHub enforces repository
+  rules when a confirmed merge is submitted. PR approval still requires checks.
+  Activity is a paginated timeline. File browsing and diffs open on GitHub;
+  no local file resources, patch cache or file-review UI are required.
+- A repo-owned controller owns tabs, independent resource states,
+  refresh, confirmation and feedback. Hosts own read/command ports and disposal;
+  stories own invented data and simulate latency, pagination and effects.
+- Distinguish fork workflow approval from environment approve/reject. Show exact
+  repository/run/attempt/revision/environment and concrete permission/reviewer,
+  timer, stale-target and uncertain-result feedback. Confirmations identify the
+  effect and submissions are explicitly simulated. No real token, network,
+  persistence, write, app route, live-shell integration or backend is added.
+- Workflow/check titles and result links open their identified targets in a new
+  tab. Card bodies still open details; action buttons retain confirmation.
+  Render the same local components in complete-screen and standalone stories.
+- Cover loading, retained refresh, empty/error, denied, pending approval,
+  accepted/stale/uncertain, light/dark and narrow states. Keep registry
+  dependencies unchanged and make no sibling or upstream API changes.
+
+### R1 extension: main Activity timeline
+
+The main Activity navigation item previews a Community-style timeline rather
+than a Kanban board. A shared local entry component serves PR and workspace
+activity. A compact header places multi-event types beside a search toggle.
+Search and multi-repository/status filters start hidden on all toolbar views;
+the filter-icon toggle uses accent styling while open and hidden filters retain values.
+Event types show leading icons and trailing ticks for multiple selections.
+Repository icon buttons and sidebar repository selection open the inbox with just
+that repository selected, closing the PR workspace. Status uses colored icon
+chips, details use an eye icon, and explicit success/failure events have subtle
+tints while neutral events stay unboxed. The current date is sticky and changes
+with the visible timeline day. Typed cursor-page reads belong to a disposable fixture
+port; a local controller owns query identity, page state, duplicate prevention,
+stale-response guards and retained refresh/retry data.
+
+Use measured virtual rows with bounded overscan and near-edge page loading,
+with an explicit Load older fallback, accessible loaded/total counts, stable
+keys and preserved scroll on return. Add populated, empty, loading, refresh,
+error/retry, long-feed, dark and narrow stories, and controller/scroll/filter
+regressions. Add spacing between repository-picker options. Components remain
+in this repository, with no live transport, persistence or deployment; live
+workspace activity reads join R4 only after UI approval.
+
+### R2: live actions and links after approval
+
+Recognize action-required status/conclusion, public-fork identity, unambiguous
+current PR/head and run attempt. Revalidate immediately before approval.
+Environment review uses current pending-deployment/actor eligibility and exact
+run/attempt/environment confirmation. Explain Actions versus Deployments write,
+unverified access versus confirmed denial, unrelated resource failures and
+bounded GitHub rejection details. Preserve target links, individual confirmed
+commands, duplicate prevention and uncertain outcomes without replay. PR approval
+still requires reported checks; merge rules remain authoritative. Manual dispatch follows the original Slice 4 contract. The reviewed components remain local until separately requested.
+
+### R3: faster reads after approval
+
+Measure cold/warm requests and selected-detail/action timing. Read lightweight
+PR summaries in read-only GraphQL batches of at most 25 through the four-slot
+limiter, with per-PR partial errors and scoped REST fallback. Load full checks
+and reviews for selection or validation; load optional resources independently.
+Track/drain asynchronous persistence without delaying verified reads or allowing
+invalidated data back. Keep five-minute inventory refresh; selected pending
+checks may refresh at 45 seconds while visible. Prefetch one hovered/focused
+card after 150ms; pass-over does no work, and cancellation cannot harm another
+subscriber. Retain cache bounds, token and offline boundaries. Put one fresh,
+action-specific preflight in the command adapter immediately before writing;
+remove duplicate validation only with complete safety regression evidence.
+
+### R4: live PR resources after approval
+
+Connect the reviewed screen and workspace timeline to paginated conversation/review activity using their reviewed read ports. Load
+activity lazily and cache it separately, preserving cached boards. Add PR
+identity/tab hash routes with Back restoring the board. Files and diffs remain
+on GitHub through a direct changed-files link; do not add file APIs, patch
+caching or an embedded file viewer. Inline review drafts/comments and bulk operations remain deferred; the original
+Slice 4 manual dispatch is now authorized as part of this continuation.
+
+### Verification and review gates
+
+Commit this revised plan and canonical foundation before UI code. For R1 run
+focused controller/Storybook journeys, component and shell accessibility, types,
+architecture, repository tests, app/static Storybook builds and specifications.
+Inspect populated light/dark/narrow screens in a cold Storybook process. Leave
+stories visual-pending without screenshot comparisons or baseline updates.
+Commit the verified UI and stop for review; do not push to auto-deploying main.
+
+Later slices add mocked permission/stale/uncertain-write cases, pagination,
+partial-data/session/disposal tests and designated disposable live targets.
+Performance acceptance requires zero requests for a fresh reopen and at least
+50% fewer cold requests in a controlled 20-PR fixture. Qualify hosted CI/assets
+and PWA boundaries when live integration/deployment is separately approved.
+
+## 2026-11-14 live implementation checkpoint
+
+All remaining authorized implementation is complete locally, including manual
+dispatch. R2/R3 commits and the live workspace receipt document the regression
+ledger and local gates. Exact-head CI, merged-main Pages delivery and designated
+real environment/dispatch acceptance complete this continuation before handoff.

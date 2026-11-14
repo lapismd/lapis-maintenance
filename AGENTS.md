@@ -5,6 +5,18 @@ Apply the parent workspace guidance. This repository owns the maintenance UI,
 controller, adapters, and hosting configuration; shared component fixes belong
 to their owning Design Core or Agent/Repository UI package.
 
+## Current follow-up boundary — 2026-11-14
+
+The user approved continuing the reviewed UI into the real application on
+2026-11-14 and explicitly requested implementation of the remaining plan,
+pushing and merging when green. R2–R4 are authorized together; separate slice
+review stops no longer apply to this follow-up. Keep components in this
+repository, replace fixture ports with live adapters, preserve session/cache and
+command authority boundaries, and qualify hosted CI and Pages after merging.
+Automatic and published Storybook stays fixture-only; the local live story is
+for manual acceptance. The user also explicitly included the original release slice and manual workflow
+dispatch in this continuation.
+
 - `PLAN.md` records the complete approved plan and slice gates. Implement only
   the current authorized slice. Slice 1 is approved. Slice 2 authorizes token
   login, remembered local credentials, live read-only GitHub adapters and a
@@ -12,7 +24,7 @@ to their owning Design Core or Agent/Repository UI package.
   PR/CI writes through the live app/story; stop before Slice 4 release actions.
   The user also explicitly authorized publishing required dependencies, pushing
   the completed changes and deploying the live app to GitHub Pages. The user authorized Slice 5 PWA installation/offline work on 2026-11-11;
-  Slice 4 release actions remain unapproved.
+  Slice 4 environment reviews and manual dispatch are now authorized.
 - Search with `pnpm spec:search --semantic "topic"` before reading specs;
   use the CLI's executed rg fallback only when QMD is unavailable.
 - Update the owning requirement and verification evidence with protected code.
