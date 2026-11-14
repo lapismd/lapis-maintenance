@@ -253,9 +253,9 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 | Slice                       | Deliverable                                                                                            | Review boundary                           |
 | --------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
 | R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | UI approved; implemented                  |
-| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Implemented; hosted qualification pending |
-| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Implemented; hosted qualification pending |
-| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Implemented; hosted qualification pending |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Implemented; qualification recorded below |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Implemented; qualification recorded below |
+| R4 — Live PR workspace      | Activity adapters, resource caching, routes and hosted acceptance                                      | Implemented; qualification recorded below |
 
 ### R1: complete fixture-only UI
 
@@ -364,3 +364,11 @@ All remaining authorized implementation is complete locally, including manual
 dispatch. R2/R3 commits and the live workspace receipt document the regression
 ledger and local gates. Exact-head CI, merged-main Pages delivery and designated
 real environment/dispatch acceptance complete this continuation before handoff.
+
+## 2026-11-14 release qualification
+
+PR #2 merged its checked head and passed merged-main CI/Pages. Real dispatch,
+environment approve/reject, rerun/new-attempt approval and hosted PWA/cache
+boundaries are qualified in `spec/records/2026-11-14-release.md`. The small
+workflow Actions-link follow-up and this receipt use the same CI/Pages gate;
+all remaining authorized implementation, including manual dispatch, is delivered.
