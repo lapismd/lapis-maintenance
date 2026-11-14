@@ -12,9 +12,9 @@
 
 ## GitHub and PR follow-up
 
-| Slice                   | Authorization         | Delivery | Review                       |
-| ----------------------- | --------------------- | -------- | ---------------------------- |
-| R1 — Local Storybook UI | Authorized 2026-11-14 | Pending  | Required before live changes |
-| R2 — Live actions/links | Not authorized        | Planned  | Pending                      |
-| R3 — Faster reads       | Not authorized        | Planned  | Pending                      |
-| R4 — Live PR workspace  | Not authorized        | Planned  | Pending                      |
+| Slice                   | Authorization         | Delivery    | Review                        |
+| ----------------------- | --------------------- | ----------- | ----------------------------- |
+| R1 — Local Storybook UI | Authorized 2026-11-14 | Implemented | Pending UI/interaction review |
+| R2 — Live actions/links | Not authorized        | Planned     | Pending                       |
+| R3 — Faster reads       | Not authorized        | Planned     | Pending                       |
+| R4 — Live PR workspace  | Not authorized        | Planned     | Pending                       |

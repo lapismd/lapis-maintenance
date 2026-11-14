@@ -241,12 +241,12 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
 
 ### Revised delivery slices
 
-| Slice                       | Deliverable                                                                                            | Review boundary                                |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ | ---------------------------------------------- |
-| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Authorized now; stop for UI/interaction review |
-| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Planned; separate approval required            |
-| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Planned; separate approval required            |
-| R4 — Live PR workspace      | Activity/files/diff adapters, resource caching, routes and hosted acceptance                           | Planned; separate approval required            |
+| Slice                       | Deliverable                                                                                            | Review boundary                                    |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| R1 — Local Storybook UI     | Production components/controller, disposable fixture ports, complete PR workspace and approval/link UI | Implemented locally; UI/interaction review pending |
+| R2 — Live actions and links | Repair workflow approval, environment review, URLs and eligibility/errors                              | Planned; separate approval required                |
+| R3 — Faster reads           | Batched summaries, independent resources, scoped caching, prefetch and one authoritative preflight     | Planned; separate approval required                |
+| R4 — Live PR workspace      | Activity/files/diff adapters, resource caching, routes and hosted acceptance                           | Planned; separate approval required                |
 
 ### R1: complete fixture-only UI
 

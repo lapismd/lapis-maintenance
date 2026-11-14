@@ -13,5 +13,16 @@ const config: StorybookConfig = {
     "@storybook/addon-vitest",
   ],
   framework: { name: "@storybook/svelte-vite", options: {} },
+  viteFinal: (config) => ({
+    ...config,
+    optimizeDeps: {
+      ...config.optimizeDeps,
+      include: [
+        ...(config.optimizeDeps?.include ?? []),
+        "@lapismd/design-core/diff",
+        "@lapismd/design-core/shadcn/tabs",
+      ],
+    },
+  }),
 };
 export default config;

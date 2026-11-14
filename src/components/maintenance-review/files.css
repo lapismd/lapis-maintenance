@@ -1,0 +1,131 @@
+.review-files {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: var(--card);
+}
+.review-file-navigation {
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 17rem;
+  min-height: 0;
+  border-inline-end: 1px solid var(--border);
+}
+.review-file-navigation > header {
+  padding-bottom: 0.75rem;
+}
+.review-file-navigation .review-section-heading {
+  border-bottom: 0;
+}
+.review-file-search {
+  position: relative;
+  margin: 0 0.65rem;
+}
+.review-file-search > svg {
+  position: absolute;
+  inset-inline-start: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--muted-foreground);
+}
+.review-file-list {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.5rem;
+}
+.review-file-row {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+  gap: 0.5rem;
+  text-align: start;
+  height: auto;
+  padding: 0.65rem 0.5rem;
+}
+.review-file-row > svg {
+  flex: none;
+  color: var(--muted-foreground);
+}
+.review-file-row > span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.75rem;
+}
+.review-file-row > span > small {
+  display: block;
+  font-size: 0.65rem;
+  color: var(--muted-foreground);
+  margin-top: 0.15rem;
+}
+.review-file-row[aria-pressed="true"] {
+  background: var(--muted);
+}
+.review-file-stats {
+  display: grid;
+  gap: 0.15rem;
+  flex: none;
+  font-size: 0.65rem;
+}
+.review-file-empty {
+  padding: 1rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.review-file-empty button {
+  margin-top: 0.5rem;
+}
+.review-file-preview {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.review-file-preview > header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+.review-file-path {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+.review-diff-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+}
+.review-diff-controls [aria-pressed="true"] {
+  background: var(--muted);
+}
+.review-diff-surface {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+@container (max-width:42rem) {
+  .review-files {
+    flex-direction: column;
+  }
+  .review-file-navigation {
+    flex: 0 0 12rem;
+    border-inline-end: 0;
+    border-bottom: 1px solid var(--border);
+  }
+}
