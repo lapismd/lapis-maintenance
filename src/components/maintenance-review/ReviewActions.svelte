@@ -1,7 +1,8 @@
 <script lang="ts">
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { GitMerge, GitPullRequestArrow, LoaderCircle } from "@lucide/svelte";
+  import { GitPullRequestArrow, LoaderCircle } from "@lucide/svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
+  import ReviewMergeControl from "./ReviewMergeControl.svelte";
   import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import "./review.css";
   let {
@@ -9,9 +10,6 @@
     mode = "review",
   }: { controller: ReviewController; mode?: "review" | "merge" } = $props();
   const pr = $derived(controller.pullRequest);
-  const methods = $derived<("merge" | "squash" | "rebase")[]>(
-    pr?.mergeMethods ?? ["squash"],
-  );
   const reason = $derived(
     (mode === "merge" ? pr?.mergeReason : pr?.actionReason) ??
       (pr?.state !== "open"
@@ -33,31 +31,7 @@
 {#if pr?.kind === "pull-request"}
   <div class="review-pr-actions">
     {#if mode === "merge"}
-      {#each methods as method}<Button
-          size="sm"
-          disabled={!controller.canMerge || controller.pending}
-          onclick={() => {
-            controller.prepare(
-              "merge-pr",
-              pr.id,
-              method === "squash"
-                ? "Squash and merge"
-                : method === "rebase"
-                  ? "Rebase and merge"
-                  : "Create merge commit",
-            );
-            if (controller.confirmation)
-              controller.confirmation = {
-                ...controller.confirmation,
-                mergeMethod: method,
-              };
-          }}
-          ><GitMerge size={15} aria-hidden="true" />{method === "squash"
-            ? "Squash and merge"
-            : method === "rebase"
-              ? "Rebase and merge"
-              : "Create merge commit"}</Button
-        >{/each}
+      <ReviewMergeControl {controller} />
     {:else}
       <Button
         size="sm"

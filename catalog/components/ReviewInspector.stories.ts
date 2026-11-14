@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/svelte-vite";
+import { expect, within, waitFor } from "storybook/test";
 import Component from "../../src/components/maintenance-review/ReviewInspector.svelte";
 import Demo from "../review/ReviewDemo.svelte";
 export default {
@@ -27,4 +28,32 @@ export const WorkflowApproval: Story = {
 export const EnvironmentApproval: Story = {
   render,
   args: { scenario: "environment-approval" },
+};
+
+export const LongContent: Story = {
+  render,
+  args: { scenario: "long-inspector", width: 1074 },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByRole("heading", { name: /chore\(ci\): pin lock-f8d02/ });
+    await c.findByText(/^0 current-revision approval/);
+    const inspector =
+        canvasElement.querySelector<HTMLElement>(".review-inspector")!,
+      pane = inspector.closest("aside")!;
+    await waitFor(() =>
+      expect(inspector.getBoundingClientRect().right).toBeLessThanOrEqual(
+        pane.getBoundingClientRect().right + 1,
+      ),
+    );
+    await expect(inspector.scrollWidth).toBeLessThanOrEqual(
+      inspector.clientWidth + 1,
+    );
+    for (const element of inspector.querySelectorAll<HTMLElement>(
+      "h2, .review-button-row",
+    )) {
+      await expect(element.getBoundingClientRect().right).toBeLessThanOrEqual(
+        pane.getBoundingClientRect().right + 1,
+      );
+    }
+  },
 };

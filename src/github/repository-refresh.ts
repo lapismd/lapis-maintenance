@@ -77,8 +77,8 @@ export class RepositoryRefreshes {
     await Promise.all([
       this.cache?.removePrefix(`json:/repos/${repository}/pulls/`),
       this.cache?.removePrefix(`json:/repos/${repository}/actions/runs/`),
-      this.cache?.removePrefix(`maintenance-detail:v2:${repository}:`),
-      this.cache?.removePrefix(`review:v1:${repository}:`),
+      this.cache?.removePrefix(`maintenance-detail:v3:${repository}:`),
+      this.cache?.removePrefix(`review:v2:${repository}:`),
     ]);
     signal.throwIfAborted();
     const result = await readRepository(
@@ -90,7 +90,7 @@ export class RepositoryRefreshes {
       this.actor,
     );
     signal.throwIfAborted();
-    await this.cache?.removePrefix(`maintenance-detail:v2:${repository}:`);
+    await this.cache?.removePrefix(`maintenance-detail:v3:${repository}:`);
     signal.throwIfAborted();
     this.#versions.set(repository, this.version(repository) + 1);
     for (const updates of this.#active) updates.set(repository, result);

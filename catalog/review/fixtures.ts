@@ -7,6 +7,8 @@ import type {
   ReviewEvent,
 } from "../../src/maintenance/review/types";
 export type ReviewScenario =
+  | "merge-options"
+  | "long-inspector"
   | "ready"
   | "merge-blocked"
   | "workflow-approval"
@@ -107,6 +109,16 @@ export function reviewFixture(
   const pr = structuredClone(overview),
     root = `https://github.com/${pr.repository}`,
     failing = scenario === "failed-checks" || pr.id === "failure";
+  if (scenario === "merge-options" || scenario === "long-inspector")
+    pr.mergeMethods = ["squash", "merge", "rebase"];
+  if (scenario === "long-inspector") {
+    pr.title =
+      "chore(ci): pin lock-f8d02dcb3899b740 dependency image with a very long repository revision " +
+      "abcdef".repeat(18);
+    pr.review =
+      "0 current-revision approval(s). Required reviews and merge rules are evaluated by GitHub. " +
+      "Review notes remain available for the displayed commit. ".repeat(5);
+  }
   if (scenario === "workflow-approval") {
     pr.draft = false;
     pr.review = "Workflow approval required before CI can run";

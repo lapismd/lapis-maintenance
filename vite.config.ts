@@ -22,6 +22,8 @@ export default defineConfig({
       "@lapismd/design-core/shell",
       "@lapismd/design-core/shadcn/badge",
       "@lapismd/design-core/shadcn/button",
+      "@lapismd/design-core/shadcn/button-group",
+      "@lapismd/design-core/shadcn/dropdown-menu",
       "@lapismd/design-core/shadcn/dialog",
       "@lapismd/design-core/shadcn/empty",
       "@lapismd/design-core/shadcn/input",

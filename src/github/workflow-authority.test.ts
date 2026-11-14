@@ -91,7 +91,6 @@ it("recognizes status-only approval waits and verifies the exact public fork PR"
 });
 it.each([
   "private",
-  "same-repo",
   "changed-sha",
   "closed",
   "wrong-branch",
@@ -101,7 +100,6 @@ it.each([
   async (kind) => {
     const pr = structuredClone(pull);
     if (kind === "private") pr.head.repo!.private = true;
-    if (kind === "same-repo") pr.head.repo!.full_name = "owner/repo";
     if (kind === "changed-sha") pr.head.sha = "b".repeat(40);
     if (kind === "closed") pr.state = "closed";
     if (kind === "wrong-branch") pr.head.ref = "elsewhere";
@@ -178,4 +176,31 @@ it("does not mistake ordinary completed failures for fork approval", () => {
       access,
     ).available,
   ).toBe(false);
+});
+
+it("allows GitHub action-required automation PRs from the same public repository", async () => {
+  const pr = structuredClone(pull);
+  pr.head.repo = { full_name: "owner/repo", private: false, fork: false };
+  pr.head.ref = "automation/ci";
+  pr.user = { login: "github-actions[bot]" };
+  const { client } = fixture(pr);
+  const detail = (
+    await readWorkflow(
+      client,
+      "owner/repo",
+      {
+        ...run,
+        status: "completed",
+        conclusion: "action_required",
+        head_branch: pr.head.ref,
+      },
+      new AbortController().signal,
+      {},
+      access,
+    )
+  )[0]!;
+  expect(
+    detail.item.actions.find((a) => a.kind === "approve-run")?.available,
+  ).toBe(true);
+  client.dispose();
 });

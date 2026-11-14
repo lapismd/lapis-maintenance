@@ -51,7 +51,7 @@
             />{:else}<ShieldCheck size={16} aria-hidden="true" />{/if}
           <span class="review-eyebrow"
             >{approval.kind === "workflow"
-              ? "Fork workflow"
+              ? "Workflow approval"
               : "Environment review"}</span
           >
           <Badge variant="outline"
