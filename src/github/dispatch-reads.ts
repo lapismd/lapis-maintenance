@@ -83,7 +83,7 @@ export class DispatchReads {
               id: workflow.id,
               name: workflow.name,
               path: workflow.path,
-              url: workflow.html_url,
+              url: `https://github.com/${repository}/actions/workflows/${encodeURIComponent(workflow.path.split("/").at(-1)!)}`,
               inputs: definition.inputs,
             });
           } catch (error) {

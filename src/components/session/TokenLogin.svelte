@@ -77,7 +77,8 @@
       <p class="maintenance-muted">
         Use repository read access for metadata, pull requests, checks, commit
         statuses, Actions and environments. To take actions, add Pull requests
-        write, Contents write for merges and Actions write for workflows.
+        write, Contents write for merges, Actions write for workflows and
+        Deployments write plus eligible reviewer status for environment reviews.
         Fine-grained tokens cover one resource owner.
       </p>
       <a

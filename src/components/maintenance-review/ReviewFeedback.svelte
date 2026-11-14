@@ -17,7 +17,10 @@
         aria-hidden="true"
       />{:else}<CircleAlert size={18} aria-hidden="true" />{/if}
     <div>
-      <strong>Preview · {feedback.result.status}</strong>
+      <strong
+        >{controller.mode === "live" ? "GitHub" : "Preview"} · {feedback.result
+          .status}</strong
+      >
       <p>{feedback.result.message}</p>
       {#if feedback.result.url}<a
           href={feedback.result.url}

@@ -52,6 +52,7 @@ export class LiveWorkspace {
         ),
       this.resources,
       new GithubReviewCommands(reader, this.resources, commands, inbox),
+      "live",
     );
   }
   dispose() {
