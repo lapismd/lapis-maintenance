@@ -126,6 +126,12 @@ it("uses the production session for a confirmed, SHA-bound merge and refreshes t
       .toBeVisible();
     expect(mutations).toHaveLength(1);
     await expect
+      .element(page.getByText("GitHub · completed", { exact: true }))
+      .toBeVisible();
+    await expect
+      .element(page.getByText("Preview · completed", { exact: true }))
+      .not.toBeInTheDocument();
+    await expect
       .element(
         page.getByRole("button", { name: /Open status log:.*GitHub merged/ }),
       )

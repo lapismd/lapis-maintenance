@@ -35,6 +35,7 @@ export class ReviewController {
       | (() => readonly ReviewOverview[]),
     private read: ReviewReadPort,
     private write: ReviewCommandPort,
+    readonly mode: "preview" | "live" = "preview",
   ) {}
   get summaries() {
     return typeof this.source === "function" ? this.source() : this.source;
