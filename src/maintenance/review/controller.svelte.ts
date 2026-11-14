@@ -201,6 +201,7 @@ export class ReviewController {
         targetId,
         this.canApprove,
         this.canMerge,
+        this.resources,
       )
     )
       return;
@@ -225,7 +226,7 @@ export class ReviewController {
       attempt: approval?.attempt,
       environment: approval?.environment,
       mergeMethod:
-        kind === "merge-pr"
+        kind === "merge-pr" || kind === "enable-auto-merge"
           ? (this.pullRequest?.mergeMethods?.[0] ?? "squash")
           : undefined,
     };

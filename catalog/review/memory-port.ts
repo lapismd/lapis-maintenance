@@ -104,6 +104,39 @@ export class MemoryReviewPort implements ReviewReadPort, ReviewCommandPort {
           "GitHub rejected the merge: a required repository rule is not satisfied. The pull request remains open.",
         url: data.overview.url,
       };
+    if (
+      command.kind === "enable-auto-merge" ||
+      command.kind === "disable-auto-merge"
+    ) {
+      data.overview.autoMerge =
+        command.kind === "enable-auto-merge"
+          ? {
+              method: command.mergeMethod ?? "squash",
+              enabledBy: "demo-maintainer",
+            }
+          : undefined;
+      data.overview.actions = [
+        {
+          kind: data.overview.autoMerge
+            ? "disable-auto-merge"
+            : "enable-auto-merge",
+          label: data.overview.autoMerge
+            ? "Disable auto-merge"
+            : "Enable auto-merge",
+          available: true,
+        },
+      ];
+      return {
+        status:
+          command.kind === "enable-auto-merge"
+            ? ("accepted" as const)
+            : ("completed" as const),
+        message: data.overview.autoMerge
+          ? "Auto-merge enabled in this preview; the PR remains open."
+          : "Auto-merge disabled in this preview; the PR remains open.",
+        url: data.overview.url,
+      };
+    }
     if (command.kind === "approve-pr") {
       data.overview.review = "Approved by demo-maintainer";
     }

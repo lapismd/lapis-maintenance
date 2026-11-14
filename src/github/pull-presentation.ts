@@ -172,6 +172,12 @@ export function presentPull(
     item,
     holdReason: hold,
     nodeId: pr.node_id,
+    autoMerge: pr.auto_merge
+      ? {
+          method: pr.auto_merge.merge_method,
+          enabledBy: pr.auto_merge.enabled_by?.login,
+        }
+      : undefined,
     description: pr.body?.trim() || reasons.join("\n\n"),
     checks,
     checksComplete:

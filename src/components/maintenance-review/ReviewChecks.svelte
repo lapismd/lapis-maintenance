@@ -17,7 +17,10 @@
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import type { ReviewCheck } from "../../maintenance/review/types";
   import "./review.css";
-  let { controller }: { controller: ReviewController } = $props();
+  let {
+    controller,
+    collapseGroups = false,
+  }: { controller: ReviewController; collapseGroups?: boolean } = $props();
   let expanded = $state(true),
     initializedId = $state("");
   const checks = $derived(controller.resources.checks.data ?? []);
@@ -115,54 +118,56 @@
     <p class="review-check-revision">
       Revision <code>{controller.overview?.sha.slice(0, 8)}</code>
     </p>
-    {#each groups as group (group.state)}
-      <Collapsible.Root open>
-        <Collapsible.Trigger
-          >{#snippet child({ props })}<Button
-              {...props}
-              variant="ghost"
-              class="review-check-group-toggle"
-              >{group.checks.length}
-              {group.state[0]!.toUpperCase() + group.state.slice(1)} checks<ChevronDown
-                size={14}
-                aria-hidden="true"
-              /></Button
-            >{/snippet}</Collapsible.Trigger
-        >
-        <Collapsible.Content>
-          <ul class="review-check-list">
-            {#each group.checks as check (check.id)}<li
-                class="review-check-row"
-                data-state={check.state}
-              >
-                {#if check.state === "passed"}<CircleCheck
-                    size={17}
-                    aria-hidden="true"
-                  />{:else if check.state === "failed"}<CircleX
-                    size={17}
-                    aria-hidden="true"
-                  />{:else if check.state === "unknown"}<CircleHelp
-                    size={17}
-                    aria-hidden="true"
-                  />{:else}<Clock size={17} aria-hidden="true" />{/if}
-                <div>
-                  {#if check.url}<a
-                      href={check.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      >{check.name}<ExternalLink
-                        size={11}
-                        aria-hidden="true"
-                      /></a
-                    >{:else}<strong>{check.name}</strong>{/if}
-                  <p>{check.state} · {check.description}</p>
-                  <span>{check.workflow}</span>
-                </div>
-              </li>{/each}
-          </ul>
-        </Collapsible.Content>
-      </Collapsible.Root>
-    {/each}
+    {#key controller.selectedId}
+      {#each groups as group (group.state)}
+        <Collapsible.Root open={!collapseGroups}>
+          <Collapsible.Trigger
+            >{#snippet child({ props })}<Button
+                {...props}
+                variant="ghost"
+                class="review-check-group-toggle"
+                >{group.checks.length}
+                {group.state[0]!.toUpperCase() + group.state.slice(1)} checks<ChevronDown
+                  size={14}
+                  aria-hidden="true"
+                /></Button
+              >{/snippet}</Collapsible.Trigger
+          >
+          <Collapsible.Content>
+            <ul class="review-check-list">
+              {#each group.checks as check (check.id)}<li
+                  class="review-check-row"
+                  data-state={check.state}
+                >
+                  {#if check.state === "passed"}<CircleCheck
+                      size={17}
+                      aria-hidden="true"
+                    />{:else if check.state === "failed"}<CircleX
+                      size={17}
+                      aria-hidden="true"
+                    />{:else if check.state === "unknown"}<CircleHelp
+                      size={17}
+                      aria-hidden="true"
+                    />{:else}<Clock size={17} aria-hidden="true" />{/if}
+                  <div>
+                    {#if check.url}<a
+                        href={check.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        >{check.name}<ExternalLink
+                          size={11}
+                          aria-hidden="true"
+                        /></a
+                      >{:else}<strong>{check.name}</strong>{/if}
+                    <p>{check.state} · {check.description}</p>
+                    <span>{check.workflow}</span>
+                  </div>
+                </li>{/each}
+            </ul>
+          </Collapsible.Content>
+        </Collapsible.Root>
+      {/each}
+    {/key}
   </ReviewResource>
   {#if controller.pullRequest}<div class="review-check-footer">
       <ReviewActions {controller} mode="merge" />

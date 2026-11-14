@@ -7,11 +7,19 @@ export function canPrepare(
   targetId: string,
   canApprove: boolean,
   canMerge: boolean,
+  resources: ReviewState,
 ) {
+  if (
+    ["enable-auto-merge", "disable-auto-merge"].includes(kind) &&
+    (resources.overview.loading || resources.overview.error)
+  )
+    return false;
   if (kind === "approve-pr") return canApprove;
   if (kind === "merge-pr") return canMerge;
   if (
     [
+      "enable-auto-merge",
+      "disable-auto-merge",
       "mark-ready",
       "request-changes",
       "comment",

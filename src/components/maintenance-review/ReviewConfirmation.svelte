@@ -45,7 +45,7 @@
         >{live ? "GitHub action" : "UI preview · simulated action"}</Badge
       >
       <dl class="review-confirm-facts">
-        {#if ["approve-pr", "merge-pr", "mark-ready", "request-changes", "comment"].includes(command.kind)}<div
+        {#if ["approve-pr", "merge-pr", "enable-auto-merge", "disable-auto-merge", "mark-ready", "request-changes", "comment"].includes(command.kind)}<div
           >
             <dt>Pull request</dt>
             <dd>#{controller.pullRequest?.number}</dd>
@@ -68,25 +68,29 @@
         <div>
           <dt>Effect</dt>
           <dd>
-            {command.kind === "merge-pr"
-              ? command.mergeMethod === "squash"
-                ? "Squash this revision into the base branch."
-                : `Merge this revision into the base branch using ${command.mergeMethod}.`
-              : command.kind === "reject-environment"
-                ? "Reject this environment review so its protected job does not proceed."
-                : command.kind === "approve-pr"
-                  ? "Record a review approval for this commit."
-                  : command.kind === "mark-ready"
-                    ? "Mark this draft ready for review."
-                    : command.kind === "comment"
-                      ? "Submit a review comment on this revision."
-                      : command.kind === "request-changes"
-                        ? "Request changes on this revision."
-                        : command.kind === "rerun-failed"
-                          ? "Start another attempt of failed workflow jobs."
-                          : command.kind === "cancel-run"
-                            ? "Cancel this identified running workflow attempt."
-                            : "Allow the identified pending workflow or environment to continue. Publication is not confirmed."}
+            {command.kind === "enable-auto-merge"
+              ? `Ask GitHub to automatically ${command.mergeMethod} and merge this PR when its required checks and reviews are satisfied.`
+              : command.kind === "disable-auto-merge"
+                ? "Stop GitHub from automatically merging this PR. The pull request stays open."
+                : command.kind === "merge-pr"
+                  ? command.mergeMethod === "squash"
+                    ? "Squash this revision into the base branch."
+                    : `Merge this revision into the base branch using ${command.mergeMethod}.`
+                  : command.kind === "reject-environment"
+                    ? "Reject this environment review so its protected job does not proceed."
+                    : command.kind === "approve-pr"
+                      ? "Record a review approval for this commit."
+                      : command.kind === "mark-ready"
+                        ? "Mark this draft ready for review."
+                        : command.kind === "comment"
+                          ? "Submit a review comment on this revision."
+                          : command.kind === "request-changes"
+                            ? "Request changes on this revision."
+                            : command.kind === "rerun-failed"
+                              ? "Start another attempt of failed workflow jobs."
+                              : command.kind === "cancel-run"
+                                ? "Cancel this identified running workflow attempt."
+                                : "Allow the identified pending workflow or environment to continue. Publication is not confirmed."}
           </dd>
         </div>
       </dl>

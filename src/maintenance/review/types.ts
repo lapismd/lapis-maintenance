@@ -19,6 +19,7 @@ export interface ReviewOverview {
   target?: import("../types").Target;
   mergeMethods?: ("merge" | "squash" | "rebase")[];
   mergeReason?: string;
+  autoMerge?: import("../types").MaintenanceDetail["autoMerge"];
   linkedPull?: ReviewOverview;
   actions?: import("../types").ActionCapability[];
   canReview: boolean;
@@ -81,6 +82,8 @@ export type ReviewState = {
 export type ReviewAction =
   | "approve-pr"
   | "merge-pr"
+  | "enable-auto-merge"
+  | "disable-auto-merge"
   | "approve-workflow"
   | "approve-environment"
   | "reject-environment"

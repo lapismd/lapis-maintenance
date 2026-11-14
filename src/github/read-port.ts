@@ -167,7 +167,7 @@ export class GithubReadPort implements MaintenanceReadPort {
         this.#writes.delete(writing);
       }
       if (version !== this.#snapshots.scopes.version(repository)) {
-        await this.cache?.removePrefix(`maintenance-detail:v3:${repository}:`);
+        await this.cache?.removePrefix(`maintenance-detail:v4:${repository}:`);
         return this.readDetails(id, signal, options);
       }
       return detail;
@@ -183,7 +183,7 @@ export class GithubReadPort implements MaintenanceReadPort {
               description: "",
               checks: [],
             });
-        await this.cache?.removePrefix(`maintenance-detail:v3:${repository}:`);
+        await this.cache?.removePrefix(`maintenance-detail:v4:${repository}:`);
       }
       throw error;
     }

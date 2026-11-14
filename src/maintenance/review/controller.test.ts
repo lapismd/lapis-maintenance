@@ -149,3 +149,25 @@ describe("fixture-only review controller", () => {
     controller.dispose();
   });
 });
+
+it("requires explicit auto-merge confirmation, preserves the open PR and blocks refreshing authority", async () => {
+  const port = new MemoryReviewPort("auto-merge", 0);
+  const controller = new ReviewController(port.summaries, port, port);
+  await controller.select("registry");
+  controller.prepare("enable-auto-merge", "registry", "Enable auto-merge");
+  expect(port.commands).toHaveLength(0);
+  expect(controller.confirmation?.mergeMethod).toBe("squash");
+  await controller.confirm();
+  expect(port.commands).toHaveLength(1);
+  expect(controller.overview?.autoMerge?.method).toBe("squash");
+  expect(controller.overview?.state).toBe("open");
+  const refreshing = controller.load("overview");
+  controller.prepare("disable-auto-merge", "registry", "Disable auto-merge");
+  expect(controller.confirmation).toBeNull();
+  await refreshing;
+  controller.prepare("disable-auto-merge", "registry", "Disable auto-merge");
+  await controller.confirm();
+  expect(controller.overview?.autoMerge).toBeUndefined();
+  expect(controller.overview?.state).toBe("open");
+  controller.dispose();
+});

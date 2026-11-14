@@ -46,6 +46,11 @@ export function pullActions(
         ["comment", "Leave review comment"],
         ["merge-pr", "Merge PR"],
       ];
+  kinds.push(
+    pr.auto_merge
+      ? ["disable-auto-merge", "Disable auto-merge"]
+      : ["enable-auto-merge", "Enable auto-merge"],
+  );
   if (!access) return kinds.map(([kind, label]) => futureAction(kind, label));
   const active = pr.state === "open" && availableRepository(access);
   const own = pr.user?.login?.toLowerCase() === access.login.toLowerCase();
@@ -67,6 +72,26 @@ export function pullActions(
         false,
         "PR approval requires available current-revision checks. Approve any waiting workflow run first so CI can report its checks.",
       );
+    if (kind === "enable-auto-merge" || kind === "disable-auto-merge") {
+      const disabling = kind === "disable-auto-merge";
+      const allowed =
+        !!pr.node_id &&
+        (disabling
+          ? active && canPush(access) && !!pr.auto_merge
+          : eligible &&
+            access.repository.allow_auto_merge === true &&
+            !pr.auto_merge);
+      return capability(
+        kind,
+        label,
+        allowed,
+        !disabling && access.repository.allow_auto_merge !== true
+          ? "Auto-merge is disabled in this repository's GitHub settings."
+          : detail.holdReason && !disabling
+            ? detail.holdReason
+            : "Auto-merge requires a current open PR, repository write access and Contents write permission; enabling also requires a non-draft PR and an allowed merge method. GitHub applies required checks and review rules.",
+      );
+    }
     if (kind === "merge-pr")
       return capability(
         kind,

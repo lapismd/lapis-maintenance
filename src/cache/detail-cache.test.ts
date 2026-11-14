@@ -39,7 +39,7 @@ it("recomputes derived approval policy after upgrades without dropping raw respo
   const raw = { body: { conclusion: "action_required" }, fetchedAt: now };
   await cache.put("json:/repos/owner/repo/actions/runs/12", raw);
   await cache.put(
-    `maintenance-detail:v2:owner/repo:${viewKey(selection)}:${detail.item.id}`,
+    `maintenance-detail:v3:owner/repo:${viewKey(selection)}:${detail.item.id}`,
     { body: { schema: 1, detail }, fetchedAt: now },
   );
   expect(
