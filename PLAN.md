@@ -274,6 +274,23 @@ focused tests pass 30/30. Live fixes have not been implemented in this follow-up
   accepted/stale/uncertain, light/dark and narrow states. Keep registry
   dependencies unchanged and make no sibling or upstream API changes.
 
+### R1 extension: main Activity timeline
+
+The main Activity navigation item previews a Community-style timeline rather
+than a Kanban board. A shared local entry component serves PR and workspace
+activity. Header search, multi-repository/status filters and a multi-event-type
+picker select the feed. Typed cursor-page reads belong to a disposable fixture
+port; a local controller owns query identity, page state, duplicate prevention,
+stale-response guards and retained refresh/retry data.
+
+Use measured virtual rows with bounded overscan and near-edge page loading,
+with an explicit Load older fallback, accessible loaded/total counts, stable
+keys and preserved scroll on return. Add populated, empty, loading, refresh,
+error/retry, long-feed, dark and narrow stories, and controller/scroll/filter
+regressions. Add spacing between repository-picker options. Components remain
+in this repository, with no live transport, persistence or deployment; live
+workspace activity reads join R4 only after UI approval.
+
 ### R2: live actions and links after approval
 
 Recognize action-required status/conclusion, public-fork identity, unambiguous
@@ -302,7 +319,7 @@ remove duplicate validation only with complete safety regression evidence.
 
 ### R4: live PR resources after approval
 
-Connect the reviewed screen to paginated conversation/review activity. Load
+Connect the reviewed screen and workspace timeline to paginated conversation/review activity using their reviewed read ports. Load
 activity lazily and cache it separately, preserving cached boards. Add PR
 identity/tab hash routes with Back restoring the board. Files and diffs remain
 on GitHub through a direct changed-files link; do not add file APIs, patch

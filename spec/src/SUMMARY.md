@@ -8,6 +8,7 @@
 - [Local read cache](cache.md)
 - [Write actions](actions.md)
 - [Maintenance review follow-up](review.md)
+- [Workspace activity preview](activity.md)
 - [Hosting and offline](hosting.md)
 - [Slice tracker](slices.md)
 - [Verification](verification.md)
