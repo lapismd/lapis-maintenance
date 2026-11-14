@@ -142,8 +142,13 @@
                   ></Breadcrumb.Item
                 >
               </Breadcrumb.List>
-            </Breadcrumb.Root><Badge variant="secondary">UI preview</Badge
-            ><Button
+            </Breadcrumb.Root>{#if review.overview}<Badge variant="outline"
+                >{review.overview.draft
+                  ? "Draft"
+                  : review.overview.state === "merged"
+                    ? "Merged"
+                    : "Open"}</Badge
+              >{/if}<Badge variant="secondary">UI preview</Badge><Button
               variant="ghost"
               size="icon-sm"
               aria-label="Refresh pull request"

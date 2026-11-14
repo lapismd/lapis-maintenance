@@ -22,7 +22,7 @@ export const Workspace: Story = {
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
     await c.findByRole("heading", {
-      name: "Publish approved registry updates",
+      name: "Publish approved registry updates #63",
       level: 1,
     });
     await expect(
@@ -55,7 +55,7 @@ export const Inbox: Story = {
     );
     await userEvent.click(c.getByRole("button", { name: "Open PR view" }));
     await c.findByRole("heading", {
-      name: "Review Design Core 0.12 compatibility",
+      name: "Review Design Core 0.12 compatibility #74",
       level: 1,
     });
     await userEvent.click(c.getByRole("button", { name: "Back to inbox" }));

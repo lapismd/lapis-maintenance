@@ -26,19 +26,8 @@
 <section class="review-workspace" aria-label="Pull request workspace">
   {#if pr}
     <header class="review-workspace-heading">
-      <div class="review-workspace-context">
-        <GitPullRequest size={16} aria-hidden="true" /><span
-          >{pr.repository}</span
-        ><span>/</span><strong>#{pr.number}</strong><Badge variant="outline"
-          >{pr.draft
-            ? "Draft"
-            : pr.state === "merged"
-              ? "Merged"
-              : "Open"}</Badge
-        >
-      </div>
       <div class="review-workspace-title">
-        <h1>{pr.title}</h1>
+        <h1>{pr.title} <span class="review-pr-number">#{pr.number}</span></h1>
         <ReviewActions {controller} />
       </div>
       <div class="review-workspace-meta">

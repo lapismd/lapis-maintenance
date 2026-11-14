@@ -22,7 +22,7 @@
 }
 .review-breadcrumb-control {
   max-width: 100%;
-  padding: 0;
+  padding: 0.25rem 0.5rem;
   height: auto;
   font-size: inherit;
   text-align: start;
@@ -49,30 +49,24 @@
   background: var(--card);
   padding: 1.5rem 2rem 1.2rem;
 }
-.review-workspace-context {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  color: var(--muted-foreground);
-  font-size: 0.75rem;
-}
-.review-workspace-context strong {
-  color: var(--foreground);
-  font-weight: 550;
-}
 .review-workspace-title {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin: 0.75rem 0;
+  margin: 0 0 0.75rem;
 }
 .review-workspace-title h1 {
+  min-width: 0;
   font-size: clamp(1.15rem, 2vw, 1.7rem);
   line-height: 1.3;
   letter-spacing: -0.035em;
   font-weight: 600;
+}
+.review-pr-number {
+  color: var(--muted-foreground);
+  font-weight: 400;
+  white-space: nowrap;
 }
 .review-workspace-title .review-pr-actions p {
   display: none;
