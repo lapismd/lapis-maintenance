@@ -93,6 +93,7 @@ export type ReviewAction =
   | "rerun-failed"
   | "cancel-run";
 export interface ReviewCommand {
+  repository?: string;
   requestId: string;
   itemId: string;
   targetId: string;

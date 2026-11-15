@@ -19,9 +19,9 @@ Built with Svelte 5, [Design Core](https://github.com/lapismd/design-core) and
 - Search, multiple repository/status filters, grouped linked checks and a PR
   workspace with Overview, Checks and lazy Activity tabs.
 - PR reviews, merges, draft readiness, workflow approvals, reruns and cancellation,
-  with explicit confirmation and current-target verification.
+  with one-click activation and current-target verification.
 - Environment approval/rejection and manual workflow dispatch with typed inputs,
-  explicit branch/tag selection and confirmation of the commit/definition.
+  explicit branch/tag selection and one submission bound to the commit/definition.
 - GitHub's repository rules and permissions remain authoritative. Dispatch and
   review acceptance are reported separately from workflow/publication success.
 

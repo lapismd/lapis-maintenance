@@ -19,7 +19,7 @@ export const TypedInputs: Story = {
       await page.findByRole("option", { name: "Verify release" }),
     );
     await expect(
-      dialog.getByRole("button", { name: "Review dispatch" }),
+      dialog.getByRole("button", { name: "Simulate workflow dispatch" }),
     ).toBeDisabled();
     await userEvent.click(
       dialog.getByRole("combobox", {
@@ -31,11 +31,8 @@ export const TypedInputs: Story = {
     );
     await waitFor(() =>
       expect(
-        dialog.getByRole("button", { name: "Review dispatch" }),
+        dialog.getByRole("button", { name: "Simulate workflow dispatch" }),
       ).toBeEnabled(),
-    );
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Review dispatch" }),
     );
     await expect(dialog.getByText("refs/heads/main")).toBeVisible();
     await userEvent.click(

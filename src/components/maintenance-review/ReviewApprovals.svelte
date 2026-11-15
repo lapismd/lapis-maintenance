@@ -91,7 +91,7 @@
             size="sm"
             {disabled}
             onclick={() =>
-              controller.prepare(
+              controller.invoke(
                 approval.kind === "workflow"
                   ? "approve-workflow"
                   : "approve-environment",
@@ -101,6 +101,10 @@
                   : "Approve environment",
               )}
             ><MaintenanceActionIcon
+              pending={controller.active?.targetId === approval.id &&
+                ["approve-workflow", "approve-environment"].includes(
+                  controller.active?.kind ?? "",
+                )}
               kind={approval.kind === "workflow"
                 ? "approve-workflow"
                 : "approve-environment"}
@@ -113,12 +117,16 @@
               variant="outline"
               {disabled}
               onclick={() =>
-                controller.prepare(
+                controller.invoke(
                   "reject-environment",
                   approval.id,
                   "Reject environment",
                 )}
-              ><MaintenanceActionIcon kind="reject-environment" />Reject</Button
+              ><MaintenanceActionIcon
+                kind="reject-environment"
+                pending={controller.active?.targetId === approval.id &&
+                  controller.active?.kind === "reject-environment"}
+              />Reject</Button
             >{/if}
         </div>
       </article>

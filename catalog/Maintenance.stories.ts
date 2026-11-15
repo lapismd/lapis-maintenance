@@ -71,20 +71,11 @@ async function submitApproval(canvasElement: HTMLElement) {
       name: "Approve deployment",
     }),
   );
-  const page = within(canvasElement.ownerDocument.body);
-  const dialog = within(await page.findByRole("dialog"));
-  await waitFor(() =>
-    expect(dialog.getByText("lapismd/lapis-plugin-notebook")).toBeVisible(),
-  );
-  await userEvent.type(
-    dialog.getByRole("textbox", { name: "Comment" }),
-    "Reviewed the verified candidate.",
-  );
-  await userEvent.click(
-    dialog.getByRole("button", { name: "Confirm simulated action" }),
-  );
+  await expect(
+    within(canvasElement.ownerDocument.body).queryByRole("dialog"),
+  ).not.toBeInTheDocument();
 }
-export const ConfirmAction: Story = {
+export const ImmediateAction: Story = {
   play: async ({ canvasElement }) => {
     await submitApproval(canvasElement);
     await expect(
@@ -139,16 +130,9 @@ export const RetryCommand: Story = {
     await userEvent.click(
       c.getByRole("button", { name: "Approve deployment" }),
     );
-    const dialog = within(
-      await within(canvasElement.ownerDocument.body).findByRole("dialog"),
-    );
-    await userEvent.type(
-      dialog.getByRole("textbox", { name: "Comment" }),
-      "Retry the reviewed candidate.",
-    );
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Confirm simulated action" }),
-    );
+    await expect(
+      within(canvasElement.ownerDocument.body).queryByRole("dialog"),
+    ).not.toBeInTheDocument();
     await expect(
       await c.findByText("Simulated action completed successfully."),
     ).toBeVisible();
@@ -206,12 +190,9 @@ export const AcceptedWorkflow: Story = {
     await userEvent.click(
       await c.findByRole("button", { name: "Rerun failed jobs" }),
     );
-    const d = within(
-      await within(canvasElement.ownerDocument.body).findByRole("dialog"),
-    );
-    await userEvent.click(
-      d.getByRole("button", { name: "Confirm simulated action" }),
-    );
+    await expect(
+      within(canvasElement.ownerDocument.body).queryByRole("dialog"),
+    ).not.toBeInTheDocument();
     await expect(await c.findByText("Accepted · still running")).toBeVisible();
   },
 };
@@ -249,31 +230,12 @@ export const ReviewAndMerge: Story = {
       c.getByText("Required maintainer approval is still pending."),
     ).toBeVisible();
     await userEvent.click(c.getByRole("button", { name: "Approve PR" }));
-    let modal = await page.findByRole("dialog");
-    await waitFor(() => expect(modal).toBeVisible());
-    await userEvent.click(
-      within(modal).getByRole("button", { name: "Confirm simulated action" }),
-    );
-    await waitFor(() =>
-      expect(
-        page.queryByRole("dialog", { hidden: true }),
-      ).not.toBeInTheDocument(),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await waitFor(() =>
       expect(c.getByRole("button", { name: "Squash and merge" })).toBeEnabled(),
     );
     await userEvent.click(c.getByRole("button", { name: "Squash and merge" }));
-    modal = await page.findByRole("dialog");
-    await waitFor(() => expect(modal).toBeVisible());
-    await expect(within(modal).getByText("squash")).toBeVisible();
-    await userEvent.click(
-      within(modal).getByRole("button", { name: "Confirm simulated action" }),
-    );
-    await waitFor(() =>
-      expect(
-        page.queryByRole("dialog", { hidden: true }),
-      ).not.toBeInTheDocument(),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await expect(
       await c.findByRole("button", {
         name: /Open status log:.*Simulated action completed successfully/,

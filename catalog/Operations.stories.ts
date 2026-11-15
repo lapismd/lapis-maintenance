@@ -9,7 +9,7 @@ export default {
     docs: {
       description: {
         component:
-          "Fixture-only coordinator waves, issues and confirmed actions. Visual review pending.",
+          "Fixture-only coordinator waves, issues and explicit actions. Visual review pending.",
       },
     },
   },
@@ -29,7 +29,7 @@ export const WavesAndIssues: Story = {
     });
   },
 };
-export const ConfirmedPartialBatch: Story = {
+export const ImmediatePartialBatch: Story = {
   args: { uncertain: true },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement),
@@ -37,13 +37,7 @@ export const ConfirmedPartialBatch: Story = {
     await userEvent.click(
       await c.findByRole("button", { name: "Rerun eligible failures" }),
     );
-    const dialog = within(await page.findByRole("dialog"));
-    await waitFor(() =>
-      expect(dialog.getByText(/run:example\/consumer:1/)).toBeVisible(),
-    );
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Confirm listed actions" }),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findByText(/Fixture outcome unknown/);
     await c.findByText(/Fixture rerun accepted/);
   },
@@ -60,13 +54,7 @@ export const WorkflowBatch: Story = {
     await userEvent.click(
       await c.findByRole("button", { name: "Approve eligible workflows" }),
     );
-    const dialog = within(await page.findByRole("dialog"));
-    await waitFor(() =>
-      expect(dialog.getByText(/run:example\/consumer:1/)).toBeVisible(),
-    );
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Confirm listed actions" }),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findAllByText(/Fixture rerun accepted/);
   },
 };
@@ -78,22 +66,7 @@ export const EnvironmentBatch: Story = {
     await userEvent.click(
       await c.findByRole("button", { name: "Approve eligible environments" }),
     );
-    const dialog = within(await page.findByRole("dialog"));
-    await waitFor(() =>
-      expect(
-        dialog.getByText(/deployment:example\/consumer:1:101/),
-      ).toBeVisible(),
-    );
-    const confirm = dialog.getByRole("button", {
-      name: "Confirm listed actions",
-    });
-    await expect(confirm).toBeDisabled();
-    await userEvent.type(
-      dialog.getByLabelText("Environment approval comment"),
-      "Fixture approval after review.",
-    );
-    await expect(confirm).toBeEnabled();
-    await userEvent.click(confirm);
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findAllByText(/Fixture rerun accepted/);
   },
 };

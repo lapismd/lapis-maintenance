@@ -17,7 +17,7 @@
   import MaintenanceProfile from "../src/components/maintenance/MaintenanceProfile.svelte";
   import RepositoryReview from "../src/components/maintenance/RepositoryReview.svelte";
   import RepositoryFilter from "../src/components/maintenance/RepositoryFilter.svelte";
-  import ActionConfirmation from "../src/components/maintenance/ActionConfirmation.svelte";
+  import ActionInputDialog from "../src/components/maintenance/ActionInputDialog.svelte";
   import { MaintenanceController } from "../src/maintenance/controller.svelte";
   import { MemoryMaintenancePort, type Scenario } from "./memory-port";
   import type { View } from "../src/maintenance/types";
@@ -78,7 +78,7 @@
         ) {
           await controller.select(selected);
           if (part === "confirmation" && controller.detail)
-            controller.commands.prepare(controller.detail.item, "rerun-failed");
+            controller.commands.invoke(controller.detail.item, "comment");
         }
       });
     return () => {
@@ -171,7 +171,7 @@
           {controller}
           onClose={() => controller.closeDetail()}
         />
-      {:else if part === "confirmation"}<ActionConfirmation {controller} />{/if}
+      {:else if part === "confirmation"}<ActionInputDialog {controller} />{/if}
     </div>
   {/if}
 </div>

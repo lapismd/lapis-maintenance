@@ -7,6 +7,10 @@ explicit user approval boundary after each verified slice.
 
 The 2026-11-15 continuation authorizes the consolidated coordinator S4 operator integration and deployment; LM-GH-004, LM-OPS-001 and LM-ACT-003 retain its source/hosted/disposable qualification boundaries.
 
+The 2026-11-15 approved interaction policy replaces blanket confirmation with
+explicit activation, reserving confirmation for permanent deletion and one
+submission for required-input forms.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

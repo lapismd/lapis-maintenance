@@ -9,9 +9,9 @@ it("refreshes selected pending checks only while visible and releases its timer"
       pending: false,
       resources: { checks: { loading: false, data: [{ state: "running" }] } },
       refresh,
-    } as unknown as ReviewController;
+    };
   const page = { visibilityState: "hidden" as DocumentVisibilityState },
-    stop = startReviewRefresh(review, page);
+    stop = startReviewRefresh(review as unknown as ReviewController, page);
   await vi.advanceTimersByTimeAsync(45000);
   expect(refresh).not.toHaveBeenCalled();
   page.visibilityState = "visible";

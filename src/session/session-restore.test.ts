@@ -85,8 +85,7 @@ it("renders cached cards before authentication, denies fresh command validation,
       item.actions.some((action) => action.available),
     )!;
     const action = actionable.actions.find((action) => action.available)!;
-    f.session.controller!.commands.prepare(actionable, action.kind);
-    await f.session.controller!.commands.confirm();
+    await f.session.controller!.commands.invoke(actionable, action.kind);
     expect(f.session.controller!.commands.receipts.at(-1)?.status).toBe(
       "rejected",
     );

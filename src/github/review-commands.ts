@@ -1,3 +1,4 @@
+import { actionKindForReview } from "../maintenance/review/command";
 import type {
   ReviewCommand,
   ReviewCommandPort,
@@ -29,14 +30,7 @@ export class GithubReviewCommands implements ReviewCommandPort {
         message: "The displayed revision changed. Refresh before submitting.",
       };
     this.reader.remember(detail);
-    const kind =
-      (
-        {
-          "approve-workflow": "approve-run",
-          "approve-environment": "approve-deployment",
-          "reject-environment": "reject-deployment",
-        } as const
-      )[command.kind as "approve-workflow"] ?? command.kind;
+    const kind = actionKindForReview(command.kind);
     const target = command.target ?? detail.item.target;
     const request = {
       requestId: command.requestId,

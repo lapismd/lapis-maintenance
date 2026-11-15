@@ -11,7 +11,7 @@
   import ReviewChecks from "../../src/components/maintenance-review/ReviewChecks.svelte";
   import ReviewApprovals from "../../src/components/maintenance-review/ReviewApprovals.svelte";
   import ReviewActivity from "../../src/components/maintenance-review/ReviewActivity.svelte";
-  import ReviewConfirmation from "../../src/components/maintenance-review/ReviewConfirmation.svelte";
+  import ReviewInputDialog from "../../src/components/maintenance-review/ReviewInputDialog.svelte";
   import ReviewFeedback from "../../src/components/maintenance-review/ReviewFeedback.svelte";
   import ReviewOverview from "../../src/components/maintenance-review/ReviewOverview.svelte";
   import ReviewActions from "../../src/components/maintenance-review/ReviewActions.svelte";
@@ -91,11 +91,7 @@
     void selecting.then(() => {
       if (scenario === "refreshing") void review.refresh();
       if (part === "confirmation")
-        review.prepare(
-          "approve-environment",
-          "production",
-          "Approve environment",
-        );
+        void review.invoke("comment", selected, "Leave review comment");
     });
     return () => {
       review.dispose();
@@ -122,7 +118,7 @@
     />
   {:else if part === "workspace"}<ReviewWorkspace
       controller={review}
-    /><ReviewConfirmation controller={review} />
+    /><ReviewInputDialog controller={review} />
   {:else}<div class="review-component-surface">
       <ReviewFeedback controller={review} />
       {#if part === "checks"}<ReviewChecks
@@ -136,6 +132,6 @@
         />{:else if part === "actions"}<ReviewActions
           controller={review}
         /><ReviewChecks controller={review} />{/if}
-      <ReviewConfirmation controller={review} />
+      <ReviewInputDialog controller={review} />
     </div>{/if}
 </div>

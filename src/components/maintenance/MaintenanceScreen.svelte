@@ -5,7 +5,7 @@
   import MaintenanceToolbar from "./MaintenanceToolbar.svelte";
   import MaintenanceInbox from "./MaintenanceInbox.svelte";
   import MaintenanceInspector from "./MaintenanceInspector.svelte";
-  import ActionConfirmation from "./ActionConfirmation.svelte";
+  import ActionInputDialog from "./ActionInputDialog.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { PersonalProfile } from "@lapismd/repository-ui/settings";
   let {
@@ -108,5 +108,5 @@
     </AppShell.Main>
     <MaintenanceInspector {controller} onClose={closeDetail} />
   </AppShell.Root>
-  <ActionConfirmation {controller} {sessionMode} />
+  <ActionInputDialog {controller} {sessionMode} />
 </div>

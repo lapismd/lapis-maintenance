@@ -24,6 +24,6 @@
 The user authorized the remaining consolidated dependency-automation plan,
 including S4, deployment and workflow approvals. LM-GH-004, LM-OPS-001 and
 LM-ACT-003 implement versioned reports, issue discovery, operator explanations
-and confirmed batches. Hosted Pages/PWA and designated disposable action
+and individually validated batches. Hosted Pages/PWA and designated disposable action
 acceptance remain separate qualification gates; fixture stories remain
 visual-pending and contain only synthetic public data.

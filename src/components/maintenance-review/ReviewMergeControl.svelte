@@ -32,11 +32,11 @@
       !autoAction?.available ||
       (autoKind === "enable-auto-merge" && disabled),
   );
-  function prepare(
+  function invoke(
     kind: "merge-pr" | "enable-auto-merge" | "disable-auto-merge" = "merge-pr",
   ) {
     if (!pr || (kind === "merge-pr" ? disabled : autoDisabled)) return;
-    controller.prepare(
+    void controller.invoke(
       kind,
       pr.id,
       kind === "merge-pr"
@@ -44,20 +44,18 @@
         : kind === "enable-auto-merge"
           ? "Enable auto-merge"
           : "Disable auto-merge",
+      { mergeMethod: method },
     );
-    if (controller.confirmation)
-      controller.confirmation = {
-        ...controller.confirmation,
-        mergeMethod: method,
-      };
   }
 </script>
 
 <ButtonGroup.Root aria-label="Pull request merge controls">
-  <Button size="sm" {disabled} onclick={() => prepare()}
-    ><GitMerge data-icon="inline-start" aria-hidden="true" />{method
-      ? labels[method]
-      : "Merge PR"}</Button
+  <Button size="sm" {disabled} onclick={() => invoke()}
+    ><MaintenanceActionIcon
+      kind="merge-pr"
+      pending={controller.active?.kind === "merge-pr" &&
+        controller.active?.targetId === pr?.id}
+    />{method ? labels[method] : "Merge PR"}</Button
   >
   {#if methods.length > 1}
     <ButtonGroup.Separator />
@@ -105,8 +103,12 @@
   disabled={autoDisabled}
   title={autoAction?.reason ??
     "Auto-merge needs repository write access and must be enabled in GitHub settings."}
-  onclick={() => prepare(autoKind)}
-  ><MaintenanceActionIcon kind={autoKind} />{autoKind === "enable-auto-merge"
+  onclick={() => invoke(autoKind)}
+  ><MaintenanceActionIcon
+    kind={autoKind}
+    pending={controller.active?.kind === autoKind &&
+      controller.active?.targetId === pr?.id}
+  />{autoKind === "enable-auto-merge"
     ? "Enable auto-merge"
     : "Disable auto-merge"}</Button
 >

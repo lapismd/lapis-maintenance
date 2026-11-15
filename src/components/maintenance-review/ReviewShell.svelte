@@ -19,7 +19,7 @@
   import { Play } from "@lucide/svelte";
   import ReviewWorkspace from "./ReviewWorkspace.svelte";
   import ReviewInspector from "./ReviewInspector.svelte";
-  import ReviewConfirmation from "./ReviewConfirmation.svelte";
+  import ReviewInputDialog from "./ReviewInputDialog.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import "./review.css";
@@ -276,5 +276,5 @@
       repositories={inbox.snapshot?.repositories.map((r) => r.repository) ?? []}
       live={sessionMode === "github"}
     />{/if}
-  <ReviewConfirmation controller={review} live={sessionMode === "github"} />
+  <ReviewInputDialog controller={review} live={sessionMode === "github"} />
 </div>

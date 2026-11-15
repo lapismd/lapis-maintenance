@@ -1,10 +1,10 @@
 <script lang="ts">
+  import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import { onMount } from "svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import { attentionReason } from "../../maintenance/operator-types";
-  import BatchConfirmation from "./BatchConfirmation.svelte";
   import "./operations.css";
   let {
     controller,
@@ -171,11 +171,11 @@
         {gap.repository}: {gap.reason}
       </p>{/each}
   </section>
-  <section aria-label="Confirmed batch actions">
+  <section aria-label="Batch actions">
     <h3>Batch actions</h3>
     <p>
-      Only individually eligible targets in the current filtered inbox enter
-      confirmation. Each target is revalidated immediately before writing.
+      Only individually eligible targets in the current filtered inbox run on
+      click. Each target is revalidated immediately before writing.
     </p>
     <div class="operations-actions">
       {#each actions as action}<Button
@@ -188,12 +188,15 @@
                 !controller.commands.blocked(i, action.kind),
             )}
           onclick={() =>
-            controller.commands.prepareBatch(controller.items, action.kind)}
-          >{action.label}</Button
+            controller.commands.invokeBatch(controller.items, action.kind)}
+          ><MaintenanceActionIcon
+            kind={action.kind}
+            pending={controller.commands.active?.kind === action.kind}
+          />{action.label}</Button
         >{/each}
     </div>
     {#if controller.commands.busy}<p role="status">
-        Submitting confirmed targets…
+        Submitting eligible targets…
       </p>{/if}
     <ol aria-label="Action outcomes">
       {#each controller.commands.receipts as receipt}<li>
@@ -205,4 +208,3 @@
     </ol>
   </section>
 </section>
-<BatchConfirmation {controller} {sessionMode} />

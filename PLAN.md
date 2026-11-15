@@ -390,3 +390,16 @@ interaction/accessibility scenarios, seven PWA tests, type/boundary checks,
 production/static builds and canonical specification lanes; the regression
 ledger is `spec/records/2026-11-15-operator.md` and hosted Pages/disposable batch
 qualification remains pending.
+
+## 2026-11-15 — One-click action policy amendment
+
+The approved confirmation audit supersedes earlier blanket confirmation steps
+in this plan. All current actions, including merge, release/environment approval,
+auto-merge toggles and eligible batches, execute on explicit action activation.
+Only permanent content deletion requires confirmation; no current command
+deletes content permanently. Comments/change requests and manual dispatch retain
+required-input forms with one submit action. Optional approval comments never
+block execution. Preserve immutable targets, fresh preflight, synchronous busy
+guards, per-target batch receipts, disposal and uncertain-result no-replay.
+Apply this to live and older fixture components; qualify full local checks,
+CI and Pages. Include the reported collapsed check-group boundary border fix.

@@ -19,8 +19,8 @@ const item = (id: string, available = true): MaintenanceItem => ({
   },
   actions: [{ kind: "rerun-failed", label: "Rerun failed jobs", available }],
 });
-describe("confirmed batches", () => {
-  it("admits individually eligible distinct targets and never writes during preparation", async () => {
+describe("explicit batches", () => {
+  it("runs only eligible distinct targets on activation", async () => {
     const execute = vi
       .fn()
       .mockResolvedValue({ status: "accepted", message: "queued" });
@@ -29,13 +29,11 @@ describe("confirmed batches", () => {
       { execute },
       async () => {},
     );
-    commands.prepareBatch(
+    await commands.invokeBatch(
       [item("1"), item("1"), item("2", false)],
       "rerun-failed",
     );
-    expect(execute).not.toHaveBeenCalled();
-    expect(commands.batchConfirmation?.commands).toHaveLength(1);
-    await commands.confirmBatch();
+    expect(commands.draft).toBeNull();
     expect(execute).toHaveBeenCalledTimes(1);
     expect(commands.receipts[0]?.status).toBe("accepted");
   });
@@ -49,15 +47,17 @@ describe("confirmed batches", () => {
       { execute },
       async () => {},
     );
-    commands.prepareBatch([item("1"), item("2")], "rerun-failed");
-    await Promise.all([commands.confirmBatch(), commands.confirmBatch()]);
+    await Promise.all([
+      commands.invokeBatch([item("1"), item("2")], "rerun-failed"),
+      commands.invokeBatch([item("1"), item("2")], "rerun-failed"),
+    ]);
     expect(execute).toHaveBeenCalledTimes(2);
     expect(commands.receipts.map((r) => r.status)).toEqual([
       "completed",
       "uncertain",
     ]);
-    commands.prepareBatch([item("2")], "rerun-failed");
-    expect(commands.batchConfirmation).toBeNull();
+    await commands.invokeBatch([item("2")], "rerun-failed");
+    expect(execute).toHaveBeenCalledTimes(2);
   });
 });
 it("stops remaining batch submissions on disposal", async () => {
@@ -73,8 +73,7 @@ it("stops remaining batch submissions on disposal", async () => {
     { execute },
     async () => {},
   );
-  commands.prepareBatch([item("1"), item("2")], "rerun-failed");
-  const pending = commands.confirmBatch();
+  const pending = commands.invokeBatch([item("1"), item("2")], "rerun-failed");
   commands.dispose();
   resolve({ status: "accepted", message: "queued" });
   await pending;
