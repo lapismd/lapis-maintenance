@@ -21,3 +21,13 @@
 - Batch bounded read-only GraphQL PR summaries with scoped REST fallback for denied, partial or truncated results; read current-head checks/statuses/reviews, workflow attempts and environment waits; closed-PR runs cannot become missing-branch warnings, omitted run associations may link only unique open matching heads, and real coverage failures identify the run, branch and error while draft/running/cancelled/held/unavailable remain distinct.
 - Valid cached boards publish before allowlist discovery and remain visible while repository activity revalidates; manual and five-minute visible refresh retain bounded concurrency, pagination, conditional requests and rate-limit backoff; selected details and validation take queue priority over background inventory, scoped refreshes invalidate affected derived/entity data without scanning unrelated repositories, and the native browser fetch receiver/session boundaries remain intact, with independent cancellation for shared readers.
 - Cached targets restore identity only and command preflights supply fresh authority; the live shell owns lazy timelines, dispatch and independent PR resources; confirmed actions use current identity and permission feedback; repository auto-merge settings and PR scheduling state reuse existing reads; navigation/filtering/refresh stay read-only, check/job links retain targets, workflow fallbacks open Actions, previews precede storage, fresh persistent resources avoid provider reads, inventory restore preserves presentation caches, and denial invalidates retained details.
+
+## LM-GH-003 — Shared monitoring policy
+
+**Requirement.** Repository discovery MUST combine the coordinator's monitoring-only repositories with dependency-update defaults without treating monitoring membership as write authority.
+
+### Acceptance details
+
+- Monitoring exclusions remove default entries, duplicate monitoring entries preserve existing consumer holds, and legacy configurations without monitoring remain supported.
+- Explicit operator additions/exclusions retain their existing precedence; legitimate dot-prefixed repository names such as `lapismd/.github` are accepted, while path traversal and URL injection are rejected.
+- Malformed monitoring policy produces an explicit discovery coverage gap; the coordinator and explicit valid additions remain inspectable without silently using partial defaults.

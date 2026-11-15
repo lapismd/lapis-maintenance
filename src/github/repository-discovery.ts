@@ -1,4 +1,5 @@
 import type { RepositoryCoverage } from "../maintenance/types";
+import { repositoryDefaults } from "./repository-policy";
 import {
   validRepository,
   type RepositoryDefault,
@@ -19,22 +20,12 @@ export async function discoverRepositories(
   let defaults: RepositoryDefault[] = [{ repository: coordinator }];
   const coverage: RepositoryCoverage[] = [];
   try {
-    const config = await client.read<{ repositories: RepositoryDefault[] }>(
+    const config = await client.read<unknown>(
       `/repos/${coordinator}/contents/config/repositories.json`,
       signal,
       { ...options, accept: "application/vnd.github.raw+json" },
     );
-    if (
-      !Array.isArray(config.repositories) ||
-      config.repositories.some(
-        (entry) =>
-          !entry ||
-          typeof entry.repository !== "string" ||
-          !validRepository(entry.repository),
-      )
-    )
-      throw new Error("Invalid repository allowlist");
-    defaults = [...defaults, ...config.repositories];
+    defaults = [...defaults, ...repositoryDefaults(config)];
   } catch (error) {
     signal.throwIfAborted();
     if (error instanceof GithubError && error.status === 401) throw error;
