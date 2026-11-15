@@ -4,6 +4,8 @@
 
 **Requirement.** The host MUST own one token session, show login without a valid remembered token and render the authenticated GitHub identity and avatar.
 
+Repository branch-action summaries reuse the default-branch head and paginated workflow inventory. Aggregate the latest attempt per workflow only at that head and branch, excluding PR events; failed outranks pending, incomplete or absent results stay unknown, and unrelated PR/issue failures do not erase verified branch status. No badge-specific requests are introduced.
+
 ### Acceptance details
 
 - Token entry uses a password control; remembering is explicit in the form, credentials stay in a dedicated device-local session record and never enter controller snapshots, Storybook args, URLs, logs or the Turso data cache.

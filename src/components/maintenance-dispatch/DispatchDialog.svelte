@@ -4,6 +4,7 @@
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Play, LoaderCircle, ExternalLink, X } from "@lucide/svelte";
   import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
+  import DispatchRepositoryPicker from "./DispatchRepositoryPicker.svelte";
   import DispatchSelect from "./DispatchSelect.svelte";
   import DispatchInputs from "./DispatchInputs.svelte";
   let {
@@ -39,11 +40,10 @@
     >
     {#if !controller.result && repositories.length > 1}<Field.Field
         ><Field.FieldLabel for={`${id}-repository`}>Repository</Field.FieldLabel
-        ><DispatchSelect
+        ><DispatchRepositoryPicker
           id={`${id}-repository`}
-          label="Choose repository"
           value={controller.repository}
-          options={repositories.map((r) => ({ value: r, label: r }))}
+          {repositories}
           disabled={controller.loading || controller.pending}
           onChange={(value) => void controller.show(value)}
         /></Field.Field

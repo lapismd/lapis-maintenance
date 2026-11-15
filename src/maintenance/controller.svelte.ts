@@ -1,3 +1,8 @@
+import { visibleItems } from "./filtering";
+import {
+  filterRepositories,
+  type RepositoryActionState,
+} from "./repository-actions";
 import { OperatorReports } from "./operator-report.svelte";
 import { MaintenanceCommands } from "./commands.svelte";
 import { patchRepository } from "./repository-snapshot";
@@ -13,17 +18,6 @@ import {
   type View,
 } from "./types";
 
-const priority: Record<ItemStatus, number> = {
-  "approval-wait": 0,
-  failed: 1,
-  unavailable: 1.5,
-  "review-needed": 2,
-  blocked: 3,
-  draft: 4,
-  cancelled: 5,
-  running: 6,
-  passed: 7,
-};
 /** Host-owned production state. A catalog adapter is injected, never imported. */
 export class MaintenanceController {
   snapshot = $state.raw<MaintenanceSnapshot | null>(null);
@@ -37,6 +31,7 @@ export class MaintenanceController {
   query = $state("");
   repositories = $state<string[]>([]);
   statuses = $state<ItemStatus[]>([]);
+  repositoryStatuses = $state<RepositoryActionState[]>([]);
   view = $state<View>("inbox");
   connected = $state(true);
   readonly commands: MaintenanceCommands;
@@ -60,28 +55,14 @@ export class MaintenanceController {
       this.refreshAffected(command),
     );
   }
+  get repositoryRows() {
+    return filterRepositories(
+      this.snapshot?.repositories ?? [],
+      this.repositoryStatuses,
+    );
+  }
   get items() {
-    const query = this.query.toLowerCase().trim();
-    return (this.snapshot?.items ?? [])
-      .filter(
-        (item) =>
-          (this.view === "operations" ||
-            this.view === "inbox" ||
-            this.view === "activity" ||
-            item.kind === this.view) &&
-          (!this.repositories.length ||
-            this.repositories.includes(item.repository)) &&
-          (!this.statuses.length || this.statuses.includes(item.status)) &&
-          (!query ||
-            [item.title, item.repository, item.category, ...item.reasons]
-              .join(" ")
-              .toLowerCase()
-              .includes(query)),
-      )
-      .toSorted(
-        (a, b) =>
-          priority[a.status] - priority[b.status] || a.id.localeCompare(b.id),
-      );
+    return visibleItems(this.snapshot, this);
   }
   get counts() {
     const items = this.snapshot?.items ?? [];
@@ -145,7 +126,8 @@ export class MaintenanceController {
     this.#readAbort = new AbortController();
     this.phase = this.snapshot ? "refreshing" : "loading";
     this.error = null;
-    if (this.reports.evidence) void this.reports.refresh(force);
+    if (this.reports.evidence || (force && this.view === "operations"))
+      void this.reports.refresh(force);
     try {
       const snapshot = await this.#read.readSnapshot(this.#readAbort.signal, {
         force,
@@ -276,6 +258,7 @@ export class MaintenanceController {
     this.query = "";
     this.repositories = [];
     this.statuses = [];
+    this.repositoryStatuses = [];
   }
   dispose(): void {
     this.#disposed = true;

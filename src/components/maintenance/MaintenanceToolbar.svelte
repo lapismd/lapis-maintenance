@@ -37,7 +37,10 @@
   let searchOpen = $state(false);
   const searchId = $props.id();
   const shell = useAppShell();
-  const refreshBusy = $derived(refreshing ?? controller.phase === "refreshing");
+  const refreshBusy = $derived(
+    (refreshing ?? controller.phase === "refreshing") ||
+      (controller.view === "operations" && controller.reports.loading),
+  );
   const mobile = $derived(shell.mobile.resolvedMode === "mobile");
   let mobileExpanded = $state(false);
   let desktopExpanded = $state(true);

@@ -1,54 +1,133 @@
+.operations-page {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
 .maintenance-operations {
-  padding: 1rem;
-  overflow: auto;
+  padding: 0;
   min-width: 0;
   width: 100%;
-}
-.maintenance-operations header {
   display: flex;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 0;
+}
+.maintenance-main.maintenance-main-operations {
+  padding: 0;
+  overflow: hidden;
+}
+.operations-page-heading {
+  margin: 0.6rem 0.85rem 0.15rem;
+  display: flex;
+  gap: 0.65rem;
   align-items: center;
   flex-wrap: wrap;
 }
-.maintenance-operations section {
-  margin-top: 1.25rem;
+.operations-page-heading > div {
+  flex: 1;
+  min-width: min(16rem, 100%);
 }
-.maintenance-operations article {
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.75rem;
-  margin: 0.5rem 0;
+.operations-page-heading h2 {
+  font-family: inherit;
+  font-size: 0.85rem;
+  font-weight: 550;
+  letter-spacing: normal;
+  margin: 0;
 }
-.maintenance-operations h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
+.operations-page-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  color: var(--muted-foreground);
+  background: var(--muted);
 }
-.maintenance-operations h3,
-.maintenance-operations h4 {
-  font-weight: 600;
+.operations-section {
+  min-width: 0;
 }
-.maintenance-operations p {
-  margin: 0.4rem 0;
-}
-.maintenance-operations a {
-  color: var(--foreground);
-  text-decoration: underline;
-}
-.maintenance-operations code,
-.operations-batch-targets code {
-  overflow-wrap: anywhere;
-}
-.operations-actions {
+.operations-section-heading,
+.operations-entry-heading {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin: 0.75rem 0;
+  margin: 0;
 }
-.operations-batch-targets {
-  overflow: auto;
-  max-height: 50vh;
+.operations-section-heading > [data-slot="badge"] {
+  margin-inline-start: auto;
 }
-.operations-batch-targets li {
-  padding-block: 0.5rem;
-  overflow-wrap: anywhere;
+.operations-entry-heading h4 {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin: 0;
+}
+.maintenance-operations p,
+.operations-attention p {
+  margin: 0.3rem 0;
+}
+.maintenance-operations > * {
+  flex-shrink: 0;
+}
+
+.operations-section-header {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 2;
+  background: var(--background);
+  border-bottom: 1px solid var(--border);
+}
+.operations-section-heading {
+  margin: 0;
+}
+.operations-section-toggle {
+  width: 100%;
+  height: auto;
+  min-height: 2.75rem;
+  justify-content: flex-start;
+  gap: 0.7rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 0;
+}
+.operations-section-label {
+  flex: 1;
+  text-align: start;
+  color: var(--muted-foreground);
+  font-size: 0.78rem;
+  font-weight: 550;
+}
+.operations-section-icon {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 1rem;
+  flex: none;
+  color: var(--muted-foreground);
+}
+.operations-section-content {
+  padding: 0.25rem 0.35rem 0.6rem;
+}
+
+@media (max-width: 480px) {
+  .operations-section-toggle {
+    gap: 0.45rem;
+  }
+  .operations-section-icon {
+    width: 1.65rem;
+  }
+}
+
+.operations-scroll {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.operations-scroll-viewport {
+  padding-inline-end: 0.5rem;
+  box-sizing: border-box;
 }

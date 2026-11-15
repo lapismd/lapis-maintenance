@@ -41,7 +41,9 @@ export class GithubActivityPort implements ActivityReadPort {
     const repositories = (this.snapshot()?.repositories ?? [])
       .map((r) => r.repository)
       .filter(
-        (r) => !query.repositories.length || query.repositories.includes(r),
+        (r) =>
+          (!query.repositories.length && !query.repositoriesRestricted) ||
+          query.repositories.includes(r),
       )
       .sort();
     const identity = JSON.stringify({ query, repositories });

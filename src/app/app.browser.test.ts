@@ -63,6 +63,9 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await expect
       .element(page.getByRole("button", { name: "Refresh", exact: true }))
       .toBeEnabled();
+    await expect
+      .element(page.getByRole("button", { name: "Operations", exact: true }))
+      .toHaveAttribute("aria-busy", "false");
     const initialReads = requests.filter((path) => path !== "/user").length;
     await unmount(app);
     target.replaceChildren();
@@ -77,6 +80,12 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await expect
       .element(page.getByRole("heading", { name: "0 items in view" }))
       .toBeVisible();
+    await expect
+      .element(page.getByRole("button", { name: "Refresh", exact: true }))
+      .toBeEnabled();
+    await expect
+      .element(page.getByRole("button", { name: "Operations", exact: true }))
+      .toHaveAttribute("aria-busy", "false");
     expect(requests.filter((path) => path === "/user")).toHaveLength(2);
     expect(requests.filter((path) => path !== "/user")).toHaveLength(
       initialReads,

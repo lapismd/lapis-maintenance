@@ -1,3 +1,4 @@
+import { branchActions } from "./branch-actions";
 import { approvalWaiting } from "./workflow-authority";
 import type { GithubPull, GithubRun } from "./models";
 import {
@@ -16,12 +17,14 @@ export async function readWorkflowInventory(
 ) {
   const heads = new Set(prs.map((pr) => pr.head.sha));
   const gaps: string[] = [];
+  let defaultSha: string | undefined;
   try {
     const current = await client.read<{ sha: string }>(
       `/repos/${repository}/commits/${encodeURIComponent(defaultBranch)}`,
       signal,
       options,
     );
+    defaultSha = current.sha;
     heads.add(current.sha);
   } catch (error) {
     signal.throwIfAborted();
@@ -68,5 +71,21 @@ export async function readWorkflowInventory(
       );
     }
   });
-  return { runs: [...runs.values()], gaps };
+  const mainResult =
+    results[
+      queries.findIndex(
+        (query) =>
+          query.query === `head_sha=${encodeURIComponent(defaultSha ?? "")}`,
+      )
+    ];
+  return {
+    runs: [...runs.values()],
+    gaps,
+    actions: branchActions(
+      defaultBranch,
+      defaultSha,
+      mainResult?.status === "fulfilled" ? mainResult.value : [],
+      mainResult?.status === "fulfilled",
+    ),
+  };
 }

@@ -22,8 +22,60 @@ export const WavesAndIssues: Story = {
       name: "Dependency and release operations",
     });
     await c.findByText("Expected upstream wait");
+    const footer = c.getByRole("region", { name: "Batch actions" });
+    const scroller = canvasElement.querySelector<HTMLElement>(
+      ".operations-scroll-viewport",
+    )!;
+    await expect(scroller.dataset.uiComponent).toBe("scroll-area");
+    const contentRight = scroller
+      .querySelector(".operations-section-header")!
+      .getBoundingClientRect().right;
+    await expect(
+      scroller.getBoundingClientRect().right - contentRight,
+    ).toBeGreaterThanOrEqual(8);
+    const before = footer.getBoundingClientRect();
+    scroller.scrollTo({ top: scroller.scrollHeight });
+    await waitFor(() => expect(scroller.scrollTop).toBeGreaterThan(0));
+    await expect(footer.getBoundingClientRect().top).toBeCloseTo(before.top, 0);
+    await expect(
+      c.queryByText(/Only individually eligible targets/),
+    ).not.toBeInTheDocument();
+    const badges = [
+      ...canvasElement.querySelectorAll<HTMLElement>("[data-operation-status]"),
+    ];
+    const waiting = badges.find(
+      (b) => b.dataset.operationStatus === "waiting",
+    )!;
+    const failed = badges.find((b) => b.dataset.operationStatus === "failed")!;
+    const held = badges.find((b) => b.dataset.operationStatus === "held")!;
+    await expect(getComputedStyle(waiting).backgroundColor).not.toBe(
+      getComputedStyle(failed).backgroundColor,
+    );
+    await expect(getComputedStyle(held).backgroundColor).not.toBe(
+      getComputedStyle(failed).backgroundColor,
+    );
+    scroller.scrollTo({ top: 0 });
+
+    const release = c.getByRole("button", {
+      name: /@example\/foundation example\/foundation/,
+    });
+    await expect(release).toHaveAttribute("aria-expanded", "false");
+    await userEvent.click(release);
+    const commit = await c.findAllByRole("link", {
+      name: /View commit aaaaaaaa/,
+    });
+    await expect(commit[0]).toHaveAttribute(
+      "href",
+      "https://github.com/example/foundation/commit/" + "a".repeat(40),
+    );
+    await expect(
+      canvasElement.querySelector(".operations-timeline"),
+    ).not.toBeNull();
     await c.findByText("Manual repair ownership");
     await c.findByText("Compatibility decision");
+    await userEvent.click(
+      c.getByRole("button", { name: /Review major framework compatibility/ }),
+    );
     await c.findByRole("link", {
       name: /Review major framework compatibility/,
     });
@@ -68,5 +120,182 @@ export const EnvironmentBatch: Story = {
     );
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findAllByText(/Fixture rerun accepted/);
+  },
+};
+
+export const AttentionSummary: Story = {
+  args: { part: "attention" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const toggle = await c.findByRole("button", {
+      name: "Toggle automation attention",
+    });
+    await expect(toggle).toHaveAttribute("aria-expanded", "false");
+    await userEvent.click(toggle);
+    await c.findByText("Manual repair ownership");
+    await expect(
+      c.getByRole("button", { name: "View waves, issues and decisions" }),
+    ).toBeVisible();
+  },
+};
+export const Workspace: Story = {
+  args: { shell: true },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByRole("heading", {
+      name: "Dependency and release operations",
+    });
+    const toolbar = canvasElement.querySelector(
+      ".ui-minimal-app-shell__toolbar",
+    )!;
+    const scroll = canvasElement.querySelector(".operations-scroll-viewport")!;
+    await expect(scroll.getBoundingClientRect().top).toBeCloseTo(
+      toolbar.getBoundingClientRect().bottom,
+      0,
+    );
+    await expect(
+      c.getByRole("img", { name: "4 items need attention" }),
+    ).toBeVisible();
+  },
+};
+export const Narrow: Story = { args: { width: 390 } };
+
+export const StickySections: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByText("Expected upstream wait");
+    const scroller = canvasElement.querySelector<HTMLElement>(
+      ".operations-scroll-viewport",
+    )!;
+    await userEvent.click(
+      c.getByRole("button", {
+        name: /example\/consumer Expected upstream wait/,
+      }),
+    );
+    const heading = c.getByRole("heading", {
+      name: /^Downstream progress and attention/,
+    });
+    const header = heading.closest("header")!;
+    await expect(header).not.toBeNull();
+    await expect(getComputedStyle(header).position).toBe("sticky");
+    scroller.scrollTo({
+      top:
+        scroller.scrollTop +
+        header.getBoundingClientRect().top -
+        scroller.getBoundingClientRect().top +
+        60,
+    });
+    await waitFor(() =>
+      expect(header.getBoundingClientRect().top).toBeCloseTo(
+        scroller.getBoundingClientRect().top,
+        0,
+      ),
+    );
+    await userEvent.click(
+      c.getByRole("button", {
+        name: /example\/compatibility Compatibility decision/,
+      }),
+    );
+    const link = c.getAllByRole("link", { name: "example/compatibility" })[0]!;
+    await userEvent.hover(link);
+    await expect(getComputedStyle(link).textDecorationLine).toBe("none");
+  },
+};
+
+export const Footer: Story = { args: { part: "footer" } };
+
+export const RowAlignment: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByText("Expected upstream wait");
+    const group = c.getByRole("region", { name: "Coverage gaps" });
+    const parentIcon = group
+      .querySelector("header svg")!
+      .getBoundingClientRect();
+    const childIcon = group
+      .querySelector(".operations-row-icon")!
+      .getBoundingClientRect();
+    await expect(parentIcon.left + parentIcon.width / 2).toBeCloseTo(
+      childIcon.left + childIcon.width / 2,
+      0,
+    );
+    await userEvent.click(
+      c.getByRole("button", { name: /^Verified publications/ }),
+    );
+    const empty = c.getByText("No verified publications in this report.");
+    const range = document.createRange();
+    range.selectNodeContents(empty);
+    const title = group
+      .querySelector(".operations-row-copy strong")!
+      .getBoundingClientRect();
+    await expect(range.getBoundingClientRect().left).toBeCloseTo(title.left, 0);
+  },
+};
+
+export const SectionDisclosure: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const empty = await c.findByRole("button", {
+      name: /^Verified publications/,
+    });
+    await expect(empty).toHaveAttribute("aria-expanded", "false");
+    await expect(
+      c.queryByText("No verified publications in this report."),
+    ).not.toBeVisible();
+    await userEvent.click(empty);
+    await c.findByText("No verified publications in this report.");
+    const populated = c.getByRole("button", {
+      name: /^Downstream progress and attention/,
+    });
+    await expect(populated).toHaveAttribute("aria-expanded", "true");
+    await userEvent.click(populated);
+    await waitFor(() =>
+      expect(c.queryByText("Expected upstream wait")).not.toBeVisible(),
+    );
+  },
+};
+
+export const FoldAll: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(
+      await c.findByRole("button", { name: "Fold all operations" }),
+    );
+    await waitFor(() =>
+      expect(c.queryByText("Expected upstream wait")).not.toBeVisible(),
+    );
+    await userEvent.click(
+      c.getByRole("button", { name: "Expand all operations" }),
+    );
+    await c.findAllByRole("button", { name: /Copy operation ID / });
+    await expect(
+      c.getByRole("button", { name: /^Verified publications/ }),
+    ).toHaveAttribute("aria-expanded", "true");
+  },
+};
+
+export const IdentifierPairs: Story = {
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await userEvent.click(
+      await c.findByRole("button", { name: "Fold all operations" }),
+    );
+    await userEvent.click(
+      c.getByRole("button", { name: "Expand all operations" }),
+    );
+    const pairs = await c.findAllByRole("group", {
+      name: /^Identifiers$/,
+    });
+    await expect(pairs.length).toBeGreaterThanOrEqual(3);
+    for (const pair of pairs) {
+      const buttons = within(pair).getAllByRole("button");
+      await expect(buttons).toHaveLength(2);
+      await expect(buttons[0].textContent).toMatch(/Operation|Report/);
+      await expect(buttons[1]).toHaveTextContent("Policy");
+      await expect(buttons[0].getBoundingClientRect().right).toBeCloseTo(
+        buttons[1].getBoundingClientRect().left,
+        0,
+      );
+    }
   },
 };

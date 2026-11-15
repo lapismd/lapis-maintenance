@@ -11,6 +11,8 @@ The 2026-11-15 approved interaction policy replaces blanket confirmation with
 explicit activation, reserving confirmation for permanent deletion and one
 submission for required-input forms.
 
+Public RepositoryIdentifiers controls used for shortened custom-label identifiers are prebundled by the Storybook and browser-test startup configuration to avoid late dependency-optimizer reloads.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

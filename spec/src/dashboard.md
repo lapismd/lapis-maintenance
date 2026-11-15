@@ -5,7 +5,7 @@
 **Requirement.** The dashboard MUST use public Design Core AppShell and controls for a responsive,
 accessible action inbox with light and dark themes.
 
-The Operations view implements LM-OPS-001 using fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
+The existing Operations view implements LM-OPS-001 with an attention-count navigation badge and fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
 
 Repository settings include monitoring-only defaults from LM-GH-003, retain consumer hold explanations, and distinguish unavailable discovery from an empty healthy repository list.
 
@@ -41,3 +41,13 @@ including shared forge frames and grouped checks, without parallel private imple
 - Live checks compose public RepositoryChecks with status grouping, independently collapsible groups, summary ring, descriptions, revision/completeness information and explicit refresh; the isolated LM-PR-001 follow-up may use one local linked-check presentation across its preview views, composing public ForgePanel/Collapsible controls without dependency changes.
 - PR merge controls remain visible but disabled until eligible, workflows associated with exactly one open PR at the same SHA use that PR target, standalone or ambiguous runs never invent merge authority, shared merge/auto-merge controls appear in PR and linked detail views without duplicate footer controls.
 - Standalone stories render the production toolbar, inbox, inspector, checks, PR review, board/activity, filters, summary, navigation, profile, actions, required-input forms, repository picker/settings, token login, installation/update controls and offline reconnect shell, with wrappers owning only disposable controllers and simulated ports.
+
+## LM-UI-004 — Repository branch-action badges and filtering
+
+**Requirement.** Repository navigation MUST show an icon-only default-branch Actions summary and filter repositories and views by that independent status.
+
+### Acceptance details
+
+- Align theme-aware success/failure/pending/unknown icons at each repository row's right edge, preserving ellipsis and readable accessible status/branch descriptions; collapsed navigation retains one searchable repository picker with the same badges and multi-select branch-status filter.
+- Apply branch-status selection to repository choices, board items, Operations and workspace activity independently of card statuses; empty matches stay empty, explicit repository selections persist, clear resets filters and hash navigation restores branch filters across PR views and reloads without writes.
+- The Run workflow repository field uses a searchable Command View with keyboard selection and a selected tick; changing repository resets workflow/ref/input discovery and never dispatches, and pending execution disables selection.

@@ -23,7 +23,7 @@
   </div>
   <RepositoryFilter {controller} />
   <StatusFilter {controller} />
-  {#if controller.query || controller.repositories.length || controller.statuses.length}<Button
+  {#if controller.query || controller.repositories.length || controller.statuses.length || controller.repositoryStatuses.length}<Button
       size="icon-sm"
       variant="ghost"
       style="border-radius:50%"

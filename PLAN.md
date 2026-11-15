@@ -403,3 +403,21 @@ block execution. Preserve immutable targets, fresh preflight, synchronous busy
 guards, per-target batch receipts, disposal and uncertain-result no-replay.
 Apply this to live and older fixture components; qualify full local checks,
 CI and Pages. Include the reported collapsed check-group boundary border fix.
+
+## 2026-11-16 — Repository Actions and Operations refinement
+
+The user approved all remaining UI work, required shared-package publication,
+push/merge and deployment without another review stop. Cached default-branch
+Actions badges and multi-select filters cover repositories and views; dispatch
+uses the shared searchable Command View. Operations retains its existing page
+with a compact collapsible timeline, sticky headers, ScrollArea, fixed action
+footer and shared joined identifier pairs with custom labels.
+
+Local public-archive qualification passes 225 unit, 20 browser, seven PWA and
+210 Storybook cases plus type, boundary, spec and static builds. Source PRs #38
+and #39 merged green; immutable release `v0.2.8` passed registry byte/provenance
+verification. The temporary archive is replaced by Repository UI `^0.2.6` and
+Design Core `^0.13.4` registry floors. Final registry consumer validation passes
+the same full matrix, with 27 focused stories and a cold populated shell review.
+Exact-head hosted CI and merged-main Pages/PWA remain separate delivery gates.
+Evidence: `spec/records/2026-11-15-repository-actions-operations.md`.

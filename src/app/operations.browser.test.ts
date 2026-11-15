@@ -63,6 +63,9 @@ it("navigates to operator evidence and submits each eligible batch target once",
         }),
       )
       .toBeVisible();
+    await page
+      .getByRole("button", { name: /Review major framework compatibility/ })
+      .click();
     await expect
       .element(
         page.getByRole("link", {
@@ -73,6 +76,14 @@ it("navigates to operator evidence and submits each eligible batch target once",
         "href",
         "https://github.com/example/compatibility/issues/19",
       );
+    await page.getByRole("button", { name: "Refresh", exact: true }).click();
+    await vi.waitFor(() =>
+      expect(read.readCoordinatorReport).toHaveBeenCalledTimes(2),
+    );
+    expect(read.readCoordinatorReport).toHaveBeenLastCalledWith(
+      expect.any(AbortSignal),
+      { force: true },
+    );
     await page.getByRole("button", { name: "Rerun eligible failures" }).click();
     await expect.element(page.getByRole("dialog")).not.toBeInTheDocument();
     await vi.waitFor(() => expect(execute).toHaveBeenCalledTimes(2));

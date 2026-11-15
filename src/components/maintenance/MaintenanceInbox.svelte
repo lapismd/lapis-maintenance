@@ -24,7 +24,10 @@
   } = $props();
 </script>
 
-<div class="maintenance-main">
+<div
+  class="maintenance-main"
+  class:maintenance-main-operations={controller.view === "operations"}
+>
   {#if !controller.connected}<Empty.Root
       ><Empty.Header
         ><Empty.Media variant="icon"><Unplug aria-hidden="true" /></Empty.Media

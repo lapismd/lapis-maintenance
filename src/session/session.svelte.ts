@@ -14,17 +14,11 @@ import {
   type ResponseCache,
 } from "../cache/response-cache";
 import { openSessionCache } from "./session-cache";
-import { openResponseCache } from "../cache/turso-cache";
 import { personalProfile } from "./session-identity";
 import { LiveWorkspace } from "./live-workspace";
 import { restorePreview } from "./preview-controller";
 import { RestorePorts } from "./restore-ports";
-import type { DeviceStore } from "./device-store";
-interface SessionDependencies {
-  store: DeviceStore;
-  openCache?: typeof openResponseCache;
-  send?: typeof fetch;
-}
+import type { SessionDependencies, OpenedSessionCache } from "./session-types";
 export class MaintenanceSession {
   phase = $state<"restoring" | "login" | "connecting" | "connected">(
     "restoring",
@@ -118,7 +112,7 @@ export class MaintenanceSession {
     this.notice = "";
     const abort = (this.#abort = new AbortController());
     let auth: GithubTransport | undefined;
-    let opened: Awaited<ReturnType<typeof openResponseCache>> | undefined;
+    let opened: OpenedSessionCache | undefined;
     try {
       token = token.trim();
       if (!token || /[\s\x00-\x1f]/.test(token))
@@ -243,6 +237,7 @@ export class MaintenanceSession {
       );
       this.profile = personalProfile(user);
       this.phase = "connected";
+      void this.controller.reports.refresh();
       await this.controller.refresh();
     } catch (error) {
       if (generation !== this.#generation || this.#disposed) return;
