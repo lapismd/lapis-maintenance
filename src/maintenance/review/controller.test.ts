@@ -45,14 +45,20 @@ describe("fixture-only review controller", () => {
     expect(port.commands).toHaveLength(0);
     controller.dispose();
   });
-  it("requires explicit confirmation and prevents duplicate simulated submissions", async () => {
+  it("executes workflow approval on activation without replay", async () => {
     const { port, controller } = fixture("workflow-approval");
     await controller.select("compatibility");
-    controller.prepare("approve-workflow", "fork-ci", "Approve workflow run");
     expect(port.commands).toHaveLength(0);
-    const first = controller.confirm();
-    await controller.confirm();
-    await first;
+    await controller.invoke(
+      "approve-workflow",
+      "fork-ci",
+      "Approve workflow run",
+    );
+    await controller.invoke(
+      "approve-workflow",
+      "fork-ci",
+      "Approve workflow run",
+    );
     expect(port.commands).toHaveLength(1);
     expect(controller.feedback?.result.status).toBe("accepted");
     expect(controller.resources.approvals.data?.[0]?.state).toBe("accepted");
@@ -63,22 +69,21 @@ describe("fixture-only review controller", () => {
     async (scenario) => {
       const { port, controller } = fixture(scenario);
       await controller.select("registry");
-      controller.prepare(
+      await controller.invoke(
         "approve-environment",
         "production",
         "Approve environment",
       );
-      await controller.confirm();
       expect(controller.feedback?.result.status).toBe(
         scenario === "stale" ? "rejected" : "uncertain",
       );
       if (scenario === "uncertain") {
-        controller.prepare(
+        await controller.invoke(
           "approve-environment",
           "production",
           "Approve environment",
         );
-        expect(controller.confirmation).toBeNull();
+        expect(controller.draft).toBeNull();
       }
       expect(port.commands).toHaveLength(1);
       controller.dispose();
@@ -90,9 +95,8 @@ describe("fixture-only review controller", () => {
     await controller.select("registry");
     expect(controller.canApprove).toBe(false);
     expect(controller.canMerge).toBe(true);
-    controller.prepare("merge-pr", "registry", "Squash and merge");
     expect(port.commands).toHaveLength(0);
-    await controller.confirm();
+    await controller.invoke("merge-pr", "registry", "Squash and merge");
     expect(port.commands).toHaveLength(1);
     expect(controller.overview?.state).toBe("merged");
     expect(controller.canMerge).toBe(false);
@@ -101,8 +105,7 @@ describe("fixture-only review controller", () => {
   it("presents repository-rule rejection without changing state or replaying", async () => {
     const { controller, port } = fixture("merge-blocked");
     await controller.select("registry");
-    controller.prepare("merge-pr", "registry", "Squash and merge");
-    await controller.confirm();
+    await controller.invoke("merge-pr", "registry", "Squash and merge");
     expect(controller.feedback?.result.status).toBe("rejected");
     expect(controller.overview?.state).toBe("open");
     expect(port.commands).toHaveLength(1);
@@ -112,9 +115,9 @@ describe("fixture-only review controller", () => {
     for (const scenario of ["empty", "permission-denied"] as const) {
       const { port, controller } = fixture(scenario);
       await controller.select("registry");
-      controller.prepare("approve-pr", "registry", "Approve PR");
+      await controller.invoke("approve-pr", "registry", "Approve PR");
       if (scenario === "permission-denied")
-        controller.prepare(
+        await controller.invoke(
           "approve-environment",
           "production",
           "Approve environment",
@@ -122,7 +125,7 @@ describe("fixture-only review controller", () => {
       expect(controller.canApprove).toBe(false);
       if (scenario === "permission-denied")
         expect(controller.canMerge).toBe(false);
-      expect(controller.confirmation).toBeNull();
+      expect(controller.draft).toBeNull();
       expect(port.commands).toHaveLength(0);
       controller.dispose();
     }
@@ -150,23 +153,29 @@ describe("fixture-only review controller", () => {
   });
 });
 
-it("requires explicit auto-merge confirmation, preserves the open PR and blocks refreshing authority", async () => {
+it("executes auto-merge on activation, preserves the open PR and blocks refreshing authority", async () => {
   const port = new MemoryReviewPort("auto-merge", 0);
   const controller = new ReviewController(port.summaries, port, port);
   await controller.select("registry");
-  controller.prepare("enable-auto-merge", "registry", "Enable auto-merge");
   expect(port.commands).toHaveLength(0);
-  expect(controller.confirmation?.mergeMethod).toBe("squash");
-  await controller.confirm();
+  await controller.invoke("enable-auto-merge", "registry", "Enable auto-merge");
+
   expect(port.commands).toHaveLength(1);
   expect(controller.overview?.autoMerge?.method).toBe("squash");
   expect(controller.overview?.state).toBe("open");
   const refreshing = controller.load("overview");
-  controller.prepare("disable-auto-merge", "registry", "Disable auto-merge");
-  expect(controller.confirmation).toBeNull();
+  await controller.invoke(
+    "disable-auto-merge",
+    "registry",
+    "Disable auto-merge",
+  );
+  expect(controller.draft).toBeNull();
   await refreshing;
-  controller.prepare("disable-auto-merge", "registry", "Disable auto-merge");
-  await controller.confirm();
+  await controller.invoke(
+    "disable-auto-merge",
+    "registry",
+    "Disable auto-merge",
+  );
   expect(controller.overview?.autoMerge).toBeUndefined();
   expect(controller.overview?.state).toBe("open");
   controller.dispose();

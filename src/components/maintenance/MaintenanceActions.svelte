@@ -37,11 +37,16 @@
           controller.commands.busy ||
           controller.commands.blocked(detail.item, action.kind)}
         onclick={() =>
-          controller.commands.prepare(
+          controller.commands.invoke(
             detail.item,
             action.kind,
             action.kind === "merge-pr" ? { mergeMethod: "squash" } : {},
-          )}><MaintenanceActionIcon kind={action.kind} />{action.label}</Button
+          )}
+        ><MaintenanceActionIcon
+          kind={action.kind}
+          pending={controller.commands.active?.kind === action.kind &&
+            controller.commands.active?.itemId === detail.item.id}
+        />{action.label}</Button
       >
     {/each}
     {#each workflowApprovals as run}
@@ -55,8 +60,12 @@
             !!controller.detailError ||
             controller.commands.busy ||
             controller.commands.blocked(run, action.kind)}
-          onclick={() => controller.commands.prepare(run, "approve-run")}
-          ><MaintenanceActionIcon kind="approve-run" />Approve workflow run</Button
+          onclick={() => controller.commands.invoke(run, "approve-run")}
+          ><MaintenanceActionIcon
+            kind="approve-run"
+            pending={controller.commands.active?.kind === "approve-run" &&
+              controller.commands.active?.itemId === run.id}
+          />Approve workflow run</Button
         >
         <p class="maintenance-muted">
           {run.title} · {run.target.kind === "workflow"

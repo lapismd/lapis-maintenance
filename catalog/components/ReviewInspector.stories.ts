@@ -67,6 +67,41 @@ export const CollapsedCheckGroups: Story = {
     await expect(failed).toHaveAttribute("aria-expanded", "false");
     const passed = c.getByRole("button", { name: "3 Passed checks" });
     await expect(passed).toHaveAttribute("aria-expanded", "false");
+    const border = (element: Element, edge: "Top" | "Bottom") =>
+      parseFloat(getComputedStyle(element)[`border${edge}Width`]);
+    const chevron = (element: Element) =>
+      new DOMMatrixReadOnly(
+        getComputedStyle(element.querySelector("svg")!).transform,
+      );
+    await expect(chevron(failed).b).toBeCloseTo(-1);
+    await expect(chevron(passed).b).toBeCloseTo(-1);
+    // Every joined edge is exactly one pixel, including the merge footer.
+    const footer = canvasElement.querySelector(".review-check-footer")!;
+    await expect(
+      border(failed.parentElement!, "Bottom") +
+        border(passed.parentElement!, "Top"),
+    ).toBe(1);
+    await expect(
+      border(passed.parentElement!, "Bottom") + border(footer, "Top"),
+    ).toBe(1);
+    const headerHeight = failed.getBoundingClientRect().height;
+    await userEvent.click(failed);
+    await waitFor(() =>
+      expect(failed).toHaveAttribute("aria-expanded", "true"),
+    );
+    await expect(border(failed, "Bottom")).toBe(0);
+    const list = failed.parentElement!.querySelector("ul")!;
+    await expect(border(list, "Top")).toBe(1);
+    await expect(failed.getBoundingClientRect().height).toBe(headerHeight);
+    await waitFor(() => expect(chevron(failed).a).toBeCloseTo(1));
+    await expect(chevron(failed).b).toBeCloseTo(0);
+    await userEvent.click(failed);
+    await waitFor(() =>
+      expect(failed).toHaveAttribute("aria-expanded", "false"),
+    );
+    await expect(border(failed.parentElement!, "Top")).toBe(1);
+    await expect(failed.getBoundingClientRect().height).toBe(headerHeight);
+    await expect(border(failed, "Bottom")).toBe(0);
     await expect(
       c.getByRole("button", { name: "Squash and merge" }),
     ).toBeVisible();

@@ -40,8 +40,10 @@ it("performs one authoritative preflight for a confirmed command without duplica
     writer = new GithubWriteTransport("invented-single", send);
   const port = new GithubCommandPort(client, writer, read);
   const commands = new MaintenanceCommands(read, port, async () => {});
-  commands.prepare(detail.item, "merge-pr", { mergeMethod: "squash" });
-  await Promise.all([commands.confirm(), commands.confirm()]);
+  await Promise.all([
+    commands.invoke(detail.item, "merge-pr", { mergeMethod: "squash" }),
+    commands.invoke(detail.item, "merge-pr", { mergeMethod: "squash" }),
+  ]);
   expect(commands.receipts[0]?.status).toBe("completed");
   expect(readDetails).toHaveBeenCalledOnce();
   expect(readDetails).toHaveBeenCalledWith(

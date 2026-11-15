@@ -1,4 +1,5 @@
-import { canPrepare, canApproveReview, canMergeReview } from "./prepare";
+import { ReviewCommands } from "./commands.svelte";
+import { canApproveReview, canMergeReview } from "./prepare";
 import {
   emptyReviewState,
   type ReviewOverview,
@@ -11,32 +12,40 @@ import {
   type ReviewAction,
   type ReviewCommand,
 } from "./types";
-import type { CommandResult } from "../types";
 export class ReviewController {
   selectedId = $state<string | null>(null);
   tab = $state<ReviewTab>("overview");
   workspaceOpen = $state(false);
   resources = $state.raw<ReviewState>(emptyReviewState());
-  confirmation = $state.raw<ReviewCommand | null>(null);
-  pending = $state(false);
-  receipt = $state.raw<{
-    itemId: string;
-    label: string;
-    result: CommandResult;
-  } | null>(null);
+  readonly commands: ReviewCommands;
+  get draft() {
+    return this.commands.draft;
+  }
+  get pending() {
+    return this.commands.pending;
+  }
+  get active() {
+    return this.commands.active;
+  }
+  get inputResult() {
+    return this.commands.inputResult;
+  }
+  get receipt() {
+    return this.commands.receipt;
+  }
   #generation = 0;
-  #sequence = 0;
   #disposed = false;
   #reads = new Map<string, AbortController>();
-  #command?: AbortController;
   constructor(
     private source:
       | readonly ReviewOverview[]
       | (() => readonly ReviewOverview[]),
     private read: ReviewReadPort,
-    private write: ReviewCommandPort,
+    write: ReviewCommandPort,
     readonly mode: "preview" | "live" = "preview",
-  ) {}
+  ) {
+    this.commands = new ReviewCommands(this, write);
+  }
   get summaries() {
     return typeof this.source === "function" ? this.source() : this.source;
   }
@@ -76,7 +85,7 @@ export class ReviewController {
     this.#abortReads();
     this.selectedId = id;
     this.tab = "overview";
-    this.confirmation = null;
+    this.commands.cancel();
     const preview = this.read.preview?.(id);
     this.resources = {
       ...emptyReviewState(),
@@ -188,79 +197,19 @@ export class ReviewController {
       };
     }
   }
-  prepare(kind: ReviewAction, targetId: string, label: string) {
-    if (this.#disposed || this.pending || !this.overview) return;
-    const approval = this.resources.approvals.data?.find(
-      (item) => item.id === targetId,
-    );
-    if (
-      !canPrepare(
-        kind,
-        targetId === this.pullRequest?.id ? this.pullRequest : this.overview,
-        this.resources.approvals.data,
-        targetId,
-        this.canApprove,
-        this.canMerge,
-        this.resources,
-      )
-    )
-      return;
-    if (
-      this.feedback?.result.status === "uncertain" &&
-      this.receipt?.label === label
-    )
-      return;
-    this.confirmation = {
-      requestId: `review-${++this.#sequence}`,
-      itemId: this.overview.id,
-      targetId,
-      target:
-        approval?.target ??
-        (targetId === this.pullRequest?.id
-          ? this.pullRequest.target
-          : this.overview.target),
-      sha: approval?.sha ?? this.overview.sha,
-      kind,
-      label,
-      runId: approval?.runId,
-      attempt: approval?.attempt,
-      environment: approval?.environment,
-      mergeMethod:
-        kind === "merge-pr" || kind === "enable-auto-merge"
-          ? (this.pullRequest?.mergeMethods?.[0] ?? "squash")
-          : undefined,
-    };
+  invoke(
+    kind: ReviewAction,
+    targetId: string,
+    label: string,
+    options: { mergeMethod?: ReviewCommand["mergeMethod"] } = {},
+  ) {
+    return this.commands.invoke(kind, targetId, label, options);
   }
   cancel() {
-    if (!this.pending) this.confirmation = null;
+    this.commands.cancel();
   }
-  async confirm(comment = "") {
-    const command = this.confirmation;
-    if (this.#disposed || this.pending || !command) return;
-    this.pending = true;
-    this.#command = new AbortController();
-    try {
-      let result: CommandResult;
-      try {
-        result = await this.write.execute(
-          { ...command, comment },
-          this.#command.signal,
-        );
-      } catch {
-        result = {
-          status: "uncertain",
-          message:
-            "The response was interrupted. Inspect the target before retrying.",
-        };
-      }
-      if (this.#disposed) return;
-      this.receipt = { itemId: command.itemId, label: command.label, result };
-      this.confirmation = null;
-      if (this.selectedId === command.itemId && result.status !== "uncertain")
-        await this.refresh();
-    } finally {
-      this.pending = false;
-    }
+  submitInput(comment = "") {
+    return this.commands.submitInput(comment);
   }
   close() {
     this.workspaceOpen = false;
@@ -270,12 +219,12 @@ export class ReviewController {
     this.#abortReads();
     this.selectedId = null;
     this.resources = emptyReviewState();
-    this.confirmation = null;
+    this.commands.cancel();
   }
   dispose() {
     this.#disposed = true;
     this.#abortReads();
-    this.#command?.abort();
+    this.commands.dispose();
   }
   #abortReads() {
     for (const request of this.#reads.values()) request.abort();

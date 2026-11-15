@@ -1,6 +1,5 @@
 <script lang="ts">
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { GitPullRequestArrow, LoaderCircle } from "@lucide/svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import ReviewMergeControl from "./ReviewMergeControl.svelte";
   import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
@@ -37,16 +36,13 @@
         size="sm"
         variant="outline"
         disabled={!controller.canApprove || controller.pending}
-        onclick={() => controller.prepare("approve-pr", pr.id, "Approve PR")}
+        onclick={() => controller.invoke("approve-pr", pr.id, "Approve PR")}
       >
-        {#if controller.pending}<LoaderCircle
-            size={15}
-            class="review-spinner"
-            aria-hidden="true"
-          />{:else}<GitPullRequestArrow
-            size={15}
-            aria-hidden="true"
-          />{/if}Approve PR
+        <MaintenanceActionIcon
+          kind="approve-pr"
+          pending={controller.active?.kind === "approve-pr" &&
+            controller.active?.itemId === controller.selectedId}
+        />Approve PR
       </Button>
     {/if}
     {#if mode === "review"}
@@ -57,12 +53,16 @@
           disabled={!action.available || controller.pending}
           title={action.reason}
           onclick={() =>
-            controller.prepare(
+            controller.invoke(
               action.kind as import("../../maintenance/review/types").ReviewAction,
               pr.id,
               action.label,
             )}
-          ><MaintenanceActionIcon kind={action.kind} />{action.label}</Button
+          ><MaintenanceActionIcon
+            kind={action.kind}
+            pending={controller.active?.kind === action.kind &&
+              controller.active?.targetId === pr.id}
+          />{action.label}</Button
         >
       {/each}
     {/if}
@@ -79,10 +79,15 @@
         disabled={!action.available || controller.pending}
         title={action.reason}
         onclick={() =>
-          controller.prepare(
+          controller.invoke(
             action.kind as import("../../maintenance/review/types").ReviewAction,
             controller.overview!.id,
             action.label,
-          )}><MaintenanceActionIcon kind={action.kind} />{action.label}</Button
+          )}
+        ><MaintenanceActionIcon
+          kind={action.kind}
+          pending={controller.active?.kind === action.kind &&
+            controller.active?.targetId === controller.overview!.id}
+        />{action.label}</Button
       >{/each}
   </div>{/if}

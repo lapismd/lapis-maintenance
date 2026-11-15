@@ -2,13 +2,7 @@
   import * as Dialog from "@lapismd/design-core/shadcn/dialog";
   import * as Field from "@lapismd/design-core/shadcn/field";
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import {
-    Play,
-    LoaderCircle,
-    ExternalLink,
-    X,
-    ArrowLeft,
-  } from "@lucide/svelte";
+  import { Play, LoaderCircle, ExternalLink, X } from "@lucide/svelte";
   import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
   import DispatchSelect from "./DispatchSelect.svelte";
   import DispatchInputs from "./DispatchInputs.svelte";
@@ -43,7 +37,7 @@
           : "Fixture preview; dispatch is simulated in memory."}</Dialog.Description
       ></Dialog.Header
     >
-    {#if !controller.confirmation && !controller.result && repositories.length > 1}<Field.Field
+    {#if !controller.result && repositories.length > 1}<Field.Field
         ><Field.FieldLabel for={`${id}-repository`}>Repository</Field.FieldLabel
         ><DispatchSelect
           id={`${id}-repository`}
@@ -66,53 +60,6 @@
           rel="noopener noreferrer"
           ><ExternalLink aria-hidden="true" />Open workflow on GitHub</a
         >{/if}
-    {:else if controller.confirmation}{@const command = controller.confirmation}
-      <dl class="review-confirm-facts">
-        <div>
-          <dt>Workflow</dt>
-          <dd>{controller.target?.workflow.name}</dd>
-        </div>
-        <div>
-          <dt>Ref</dt>
-          <dd>{command.inputs.ref}</dd>
-        </div>
-        <div>
-          <dt>Commit</dt>
-          <dd><code>{command.target.sha.slice(0, 12)}</code></dd>
-        </div>
-        <div>
-          <dt>Definition</dt>
-          <dd><code>{controller.target?.definitionSha.slice(0, 12)}</code></dd>
-        </div>
-        {#each Object.entries(command.inputs.workflowInputs ?? {}) as [name, value]}<div
-          >
-            <dt>{name}</dt>
-            <dd>{value}</dd>
-          </div>{/each}
-        <div>
-          <dt>Effect</dt>
-          <dd>
-            Submit this workflow once. Accepted dispatch does not confirm
-            execution or publication.
-          </dd>
-        </div>
-      </dl>
-      <Dialog.Footer
-        ><Button
-          variant="outline"
-          disabled={controller.pending}
-          onclick={() => controller.cancel()}
-          ><ArrowLeft aria-hidden="true" />Edit</Button
-        ><Button
-          disabled={controller.pending}
-          onclick={() => controller.confirm()}
-          ><Play aria-hidden="true" />{controller.pending
-            ? "Submitting…"
-            : live
-              ? "Confirm workflow dispatch"
-              : "Simulate workflow dispatch"}</Button
-        ></Dialog.Footer
-      >
     {:else}<Field.FieldGroup
         ><Field.Field
           ><Field.FieldLabel for={`${id}-workflow`}>Workflow</Field.FieldLabel
@@ -124,7 +71,7 @@
               value: String(w.id),
               label: w.name,
             }))}
-            disabled={controller.loading}
+            disabled={controller.loading || controller.pending}
             onChange={(value) => void controller.select(value, controller.ref)}
           /></Field.Field
         ><Field.Field
@@ -138,7 +85,7 @@
               value: r.ref,
               label: `${r.kind}: ${r.name}`,
             }))}
-            disabled={controller.loading}
+            disabled={controller.loading || controller.pending}
             onChange={(value) =>
               void controller.select(controller.workflowId, value)}
           /></Field.Field
@@ -151,13 +98,39 @@
       {#each controller.warnings as warning}<p class="review-muted">
           {warning}
         </p>{/each}
+      {#if controller.target}<dl class="review-confirm-facts">
+          <div>
+            <dt>Ref</dt>
+            <dd>{controller.target.ref.ref}</dd>
+          </div>
+          <div>
+            <dt>Commit</dt>
+            <dd><code>{controller.target.ref.sha.slice(0, 12)}</code></dd>
+          </div>
+          <div>
+            <dt>Definition</dt>
+            <dd><code>{controller.target.definitionSha.slice(0, 12)}</code></dd>
+          </div>
+        </dl>{/if}
       <Dialog.Footer
-        ><Button variant="outline" onclick={() => controller.close()}
+        ><Button
+          variant="outline"
+          disabled={controller.pending}
+          onclick={() => controller.close()}
           ><X aria-hidden="true" />Cancel</Button
         ><Button
-          disabled={!controller.target || controller.loading}
-          onclick={() => controller.prepare()}
-          ><Play aria-hidden="true" />Review dispatch</Button
+          disabled={!controller.target ||
+            controller.loading ||
+            controller.pending}
+          onclick={() => controller.submit()}
+          >{#if controller.pending}<LoaderCircle
+              class="review-spinner"
+              aria-hidden="true"
+            />{:else}<Play aria-hidden="true" />{/if}{controller.pending
+            ? "Submitting…"
+            : live
+              ? "Run workflow"
+              : "Simulate workflow dispatch"}</Button
         ></Dialog.Footer
       >
     {/if}

@@ -6,7 +6,7 @@ import { credentialKey } from "../session/device-store";
 import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
-it("uses the production session for a confirmed, SHA-bound merge and refreshes the result", async () => {
+it("uses the production session for a one-click, SHA-bound merge and refreshes the result", async () => {
   localStorage.removeItem(credentialKey);
   const sha = "a".repeat(40),
     repository = "lapismd/dependency-automation";
@@ -112,15 +112,7 @@ it("uses the production session for a confirmed, SHA-bound merge and refreshes t
       .toBeEnabled();
     expect(mutations).toHaveLength(0);
     await page.getByRole("button", { name: "Squash and merge" }).click();
-    await expect
-      .element(
-        page.getByText(
-          "This action changes GitHub. The target will be checked again immediately before submission.",
-        ),
-      )
-      .toBeVisible();
-    expect(mutations).toHaveLength(0);
-    await page.getByRole("button", { name: "Confirm GitHub action" }).click();
+    await expect.element(page.getByRole("dialog")).not.toBeInTheDocument();
     await expect
       .element(page.getByRole("heading", { name: "0 items in view" }))
       .toBeVisible();

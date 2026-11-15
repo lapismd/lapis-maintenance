@@ -120,7 +120,7 @@
     </p>
     {#key controller.selectedId}
       {#each groups as group (group.state)}
-        <Collapsible.Root open={!collapseGroups}>
+        <Collapsible.Root open={!collapseGroups} class="review-check-group">
           <Collapsible.Trigger
             >{#snippet child({ props })}<Button
                 {...props}

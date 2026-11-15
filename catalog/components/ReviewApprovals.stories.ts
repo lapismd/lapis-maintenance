@@ -15,6 +15,22 @@ export const Environment: Story = { render };
 export const Workflow: Story = {
   render,
   args: { scenario: "workflow-approval", selected: "compatibility" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const approve = await c.findByRole("button", {
+      name: "Approve workflow run",
+    });
+    await waitFor(() => expect(approve).toBeEnabled());
+    await userEvent.click(approve);
+    await expect(approve).toBeDisabled();
+    await expect(
+      approve.querySelector(".maintenance-action-spinner"),
+    ).not.toBeNull();
+    await expect(
+      within(canvasElement.ownerDocument.body).queryByRole("dialog"),
+    ).not.toBeInTheDocument();
+    await c.findByText("Preview · accepted");
+  },
 };
 export const Denied: Story = {
   render,
@@ -47,10 +63,7 @@ export const Stale: Story = {
     });
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
-    const dialog = within(await page.findByRole("dialog"));
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Simulate approve environment" }),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findByText("Preview · rejected");
   },
 };
@@ -65,10 +78,7 @@ export const Uncertain: Story = {
     });
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
-    const dialog = within(await page.findByRole("dialog"));
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Simulate approve environment" }),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await c.findByText("Preview · uncertain");
     await expect(
       c.getByRole("button", { name: /^Approve environment$/ }),

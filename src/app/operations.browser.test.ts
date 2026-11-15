@@ -7,7 +7,7 @@ import { operatorFixture } from "../../catalog/operations/fixtures";
 import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
-it("navigates to operator evidence and confirms each displayed batch target once", async () => {
+it("navigates to operator evidence and submits each eligible batch target once", async () => {
   const snapshot = operatorFixture();
   snapshot.coordinator = {
     state: "unavailable",
@@ -74,9 +74,7 @@ it("navigates to operator evidence and confirms each displayed batch target once
         "https://github.com/example/compatibility/issues/19",
       );
     await page.getByRole("button", { name: "Rerun eligible failures" }).click();
-    expect(execute).not.toHaveBeenCalled();
-    await expect.element(page.getByRole("dialog")).toBeVisible();
-    await page.getByRole("button", { name: "Confirm listed actions" }).click();
+    await expect.element(page.getByRole("dialog")).not.toBeInTheDocument();
     await vi.waitFor(() => expect(execute).toHaveBeenCalledTimes(2));
     expect(controller.commands.receipts.map((r) => r.status)).toEqual([
       "accepted",

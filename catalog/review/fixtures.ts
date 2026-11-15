@@ -45,6 +45,10 @@ export function reviewSummaries(): ReviewOverview[] {
     review: "Maintainer review required",
     draft: item.status === "draft",
     state: "open",
+    actions: [
+      { kind: "comment", label: "Leave review comment", available: true },
+      { kind: "request-changes", label: "Request changes", available: true },
+    ],
     canReview: true,
     canMerge: item.kind === "pull-request",
     additions: 128,

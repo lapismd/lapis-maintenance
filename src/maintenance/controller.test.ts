@@ -115,8 +115,7 @@ describe("explicit command boundary", () => {
     const untouched = c.snapshot!.items.filter(
       (item) => item.repository !== repository,
     );
-    c.commands.prepare(c.detail!.item, "rerun-failed");
-    await c.commands.confirm();
+    await c.commands.invoke(c.detail!.item, "rerun-failed");
     expect(scoped).toHaveBeenCalledWith(repository, expect.any(AbortSignal));
     expect(port.reads).toBe(1);
     expect(
@@ -124,13 +123,15 @@ describe("explicit command boundary", () => {
     ).toEqual(untouched);
     c.dispose();
   });
-  it("does not submit before confirmation, prevents double confirmation, and distinguishes accepted", async () => {
+  it("runs on activation, prevents duplicate clicks, and distinguishes accepted", async () => {
     const { controller: c, port } = create();
     await c.refresh();
     await c.select("failure");
-    c.commands.prepare(c.detail!.item, "rerun-failed");
     expect(port.commands).toHaveLength(0);
-    await Promise.all([c.commands.confirm(), c.commands.confirm()]);
+    await Promise.all([
+      c.commands.invoke(c.detail!.item, "rerun-failed"),
+      c.commands.invoke(c.detail!.item, "rerun-failed"),
+    ]);
     expect(port.commands).toHaveLength(1);
     expect(c.commands.receipts[0]?.status).toBe("accepted");
     c.dispose();
@@ -139,8 +140,7 @@ describe("explicit command boundary", () => {
     const { controller: c, port } = create("stale-target");
     await c.refresh();
     await c.select("approval");
-    c.commands.prepare(c.detail!.item, "approve-deployment");
-    await c.commands.confirm();
+    await c.commands.invoke(c.detail!.item, "approve-deployment");
     expect(port.commands).toHaveLength(0);
     expect(c.commands.receipts[0]?.message).toContain(
       "Target or permissions changed",
@@ -151,20 +151,18 @@ describe("explicit command boundary", () => {
     const denied = create("permissions");
     await denied.controller.refresh();
     await denied.controller.select("approval");
-    denied.controller.commands.prepare(
+    denied.controller.commands.invoke(
       denied.controller.detail!.item,
       "approve-deployment",
     );
-    expect(denied.controller.commands.confirmation).toBeNull();
+    expect(denied.controller.commands.draft).toBeNull();
     denied.controller.dispose();
     const { controller: c, port } = create("uncertain");
     await c.refresh();
     await c.select("approval");
-    c.commands.prepare(c.detail!.item, "approve-deployment");
-    await c.commands.confirm();
+    await c.commands.invoke(c.detail!.item, "approve-deployment");
     expect(c.commands.receipts[0]?.status).toBe("uncertain");
-    c.commands.prepare(c.detail!.item, "approve-deployment");
-    await c.commands.confirm();
+    await c.commands.invoke(c.detail!.item, "approve-deployment");
     expect(port.commands).toHaveLength(1);
     c.dispose();
   });
@@ -172,8 +170,7 @@ describe("explicit command boundary", () => {
     const { controller: c, port } = create();
     await c.refresh();
     await c.select("approval");
-    c.commands.prepare(c.detail!.item, "approve-deployment");
-    const done = c.commands.confirm();
+    const done = c.commands.invoke(c.detail!.item, "approve-deployment");
     c.dispose();
     await done;
     expect(port.commands).toHaveLength(0);

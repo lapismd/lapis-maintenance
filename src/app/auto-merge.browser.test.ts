@@ -6,7 +6,7 @@ import { credentialKey } from "../session/device-store";
 import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
-it("schedules auto-merge through the production session only after confirmation and retains the PR", async () => {
+it("schedules auto-merge through the production session on activation and retains the PR", async () => {
   localStorage.removeItem(credentialKey);
   const sha = "a".repeat(40),
     repository = "lapismd/dependency-automation";
@@ -132,15 +132,7 @@ it("schedules auto-merge through the production session only after confirmation 
       .toBeEnabled();
     expect(mutations).toHaveLength(0);
     await page.getByRole("button", { name: "Enable auto-merge" }).click();
-    await expect
-      .element(
-        page.getByText(
-          "This action changes GitHub. The target will be checked again immediately before submission.",
-        ),
-      )
-      .toBeVisible();
-    expect(mutations).toHaveLength(0);
-    await page.getByRole("button", { name: "Confirm GitHub action" }).click();
+    await expect.element(page.getByRole("dialog")).not.toBeInTheDocument();
     await expect
       .element(page.getByRole("heading", { name: "1 item in view" }))
       .toBeVisible();

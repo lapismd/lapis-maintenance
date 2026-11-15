@@ -137,11 +137,7 @@ export const WorkflowApproval: Story = {
     });
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
-    const dialog = within(await page.findByRole("dialog"));
-    await waitFor(() => expect(dialog.getByText(/#41074/)).toBeVisible());
-    await userEvent.click(
-      dialog.getByRole("button", { name: "Simulate approve workflow run" }),
-    );
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await within(
       c.getByRole("region", { name: "Pull request workspace" }),
     ).findByText("Preview · accepted");
@@ -161,12 +157,11 @@ export const EnvironmentApproval: Story = {
     });
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
-    const dialog = within(await page.findByRole("dialog"));
-    await waitFor(() =>
-      expect(dialog.getByText("npm-production")).toBeVisible(),
-    );
-    await userEvent.click(dialog.getByRole("button", { name: /^Cancel$/ }));
-    await expect(c.queryByText("Preview · accepted")).not.toBeInTheDocument();
+    await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
+    await within(
+      c.getByRole("region", { name: "Pull request workspace" }),
+    ).findByText("Preview · accepted");
+    await expect(approve).toBeDisabled();
   },
 };
 export const Checks: Story = {

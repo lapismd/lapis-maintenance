@@ -19,7 +19,6 @@ export class DispatchController {
   pending = $state(false);
   error = $state("");
   warnings = $state<string[]>([]);
-  confirmation = $state.raw<MaintenanceCommand | null>(null);
   result = $state.raw<CommandResult | null>(null);
   #request?: AbortController;
   #command?: AbortController;
@@ -33,7 +32,6 @@ export class DispatchController {
     this.workflowId = "";
     this.ref = "";
     this.target = null;
-    this.confirmation = null;
     this.result = null;
     const generation = ++this.#generation;
     this.#request?.abort();
@@ -63,7 +61,6 @@ export class DispatchController {
     this.workflowId = workflowId;
     this.ref = ref;
     this.target = null;
-    this.confirmation = null;
     this.result = null;
     this.error = "";
     const generation = ++this.#generation;
@@ -99,7 +96,7 @@ export class DispatchController {
       if (this.#current(generation, request)) this.loading = false;
     }
   }
-  prepare() {
+  async submit() {
     const target = this.target;
     if (
       !target ||
@@ -109,13 +106,14 @@ export class DispatchController {
       this.#disposed
     )
       return;
+    let command: MaintenanceCommand;
     try {
       const inputs = validateInputs(
         target.inputs,
         this.values,
         target.environments,
       );
-      this.confirmation = {
+      command = {
         requestId: `dispatch-${crypto.randomUUID()}`,
         itemId: `dispatch:${this.repository}:${target.workflow.id}`,
         repository: this.repository,
@@ -131,22 +129,25 @@ export class DispatchController {
           name: target.workflow.name,
           url: target.workflow.url,
         },
-        inputs: { ref: target.ref.ref, workflowInputs: inputs },
+        inputs: {
+          ref: target.ref.ref,
+          workflowInputs: structuredClone(inputs),
+        },
       };
-      this.error = "";
     } catch (error) {
       this.error =
         error instanceof Error ? error.message : "Invalid workflow inputs.";
+      return;
     }
-  }
-  async confirm() {
-    const command = this.confirmation;
-    if (!command || this.pending || this.#disposed) return;
     this.pending = true;
+    this.error = "";
     const request = (this.#command = new AbortController());
     try {
       const result = await this.port.execute(command, request.signal);
-      if (!this.#disposed) this.result = result;
+      if (!this.#disposed) {
+        if (result.status === "rejected") this.error = result.message;
+        else this.result = result;
+      }
     } catch {
       if (!this.#disposed)
         this.result = {
@@ -155,12 +156,8 @@ export class DispatchController {
             "The dispatch response was interrupted. Inspect GitHub; do not resubmit this operation.",
         };
     } finally {
-      this.confirmation = null;
       this.pending = false;
     }
-  }
-  cancel() {
-    if (!this.pending) this.confirmation = null;
   }
   close() {
     if (this.pending) return;

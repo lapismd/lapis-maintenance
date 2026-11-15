@@ -1,3 +1,4 @@
+import { interactionFor, inputError } from "./action-interaction";
 import {
   targetKey,
   type CommandResult,
@@ -10,31 +11,23 @@ import {
   type MaintenanceReadPort,
 } from "./types";
 
-/** Explicit commands are separate from read/selection state. Never replay unknown effects. */
+/** Only explicit activation submits. Input forms never authorize a different target. */
 export class MaintenanceCommands {
-  confirmation = $state.raw<{
-    command: MaintenanceCommand;
-    label: string;
-  } | null>(null);
-  batchConfirmation = $state.raw<{
-    label: string;
-    commands: MaintenanceCommand[];
-  } | null>(null);
+  draft = $state.raw<{ command: MaintenanceCommand; label: string } | null>(
+    null,
+  );
+  inputResult = $state.raw<CommandResult | null>(null);
+  active = $state.raw<MaintenanceCommand | null>(null);
   receipts = $state.raw<ActionReceipt[]>([]);
   busy = $state(false);
   #disposed = false;
   #sequence = 0;
   #attempt?: AbortController;
-  #write: MaintenanceCommandPort;
-  #refresh: (command: MaintenanceCommand) => Promise<void>;
   constructor(
     _read: MaintenanceReadPort,
-    write: MaintenanceCommandPort,
-    refresh: (command: MaintenanceCommand) => Promise<void>,
-  ) {
-    this.#write = write;
-    this.#refresh = refresh;
-  }
+    private write: MaintenanceCommandPort,
+    private refresh: (command: MaintenanceCommand) => Promise<void>,
+  ) {}
   blocked(item: MaintenanceItem, kind: ActionKind): boolean {
     return this.receipts.some(
       (r) =>
@@ -44,104 +37,102 @@ export class MaintenanceCommands {
         targetKey(r.command.target) === targetKey(item.target),
     );
   }
-  prepare(
+  #capture(
+    item: MaintenanceItem,
+    kind: ActionKind,
+    inputs: CommandInputs,
+  ): MaintenanceCommand | undefined {
+    if (
+      this.#disposed ||
+      this.busy ||
+      !interactionFor(kind) ||
+      this.blocked(item, kind) ||
+      !item.actions.some((a) => a.kind === kind && a.available)
+    )
+      return;
+    return {
+      requestId: `maintenance-${++this.#sequence}`,
+      itemId: item.id,
+      repository: item.repository,
+      target: structuredClone(item.target),
+      kind,
+      inputs: structuredClone(inputs),
+    };
+  }
+  async invoke(
     item: MaintenanceItem,
     kind: ActionKind,
     inputs: CommandInputs = {},
-  ): void {
-    const capability = item.actions.find((a) => a.kind === kind && a.available);
-    if (this.#disposed || this.busy || !capability || this.blocked(item, kind))
+  ) {
+    const command = this.#capture(item, kind, inputs);
+    if (!command) return;
+    this.inputResult = null;
+    if (interactionFor(kind) !== "direct") {
+      this.draft = {
+        command,
+        label: item.actions.find((a) => a.kind === kind)!.label,
+      };
       return;
-    this.batchConfirmation = null;
-    this.confirmation = {
-      label: capability.label,
-      command: {
-        requestId: `maintenance-${++this.#sequence}`,
-        itemId: item.id,
-        repository: item.repository,
-        target: structuredClone(item.target),
-        kind,
-        inputs: structuredClone(inputs),
-      },
-    };
+    }
+    this.draft = null;
+    await this.#execute([command]);
   }
-  cancel(): void {
+  cancel() {
     if (!this.busy) {
-      this.confirmation = null;
-      this.batchConfirmation = null;
+      this.draft = null;
+      this.inputResult = null;
     }
   }
-  async confirm(inputs: CommandInputs = {}): Promise<void> {
-    if (this.#disposed || this.busy || !this.confirmation) return;
+  async submitInput(inputs: CommandInputs = {}) {
+    const draft = this.draft;
+    if (
+      this.#disposed ||
+      this.busy ||
+      !draft ||
+      this.inputResult?.status === "uncertain"
+    )
+      return;
     const command = {
-      ...this.confirmation.command,
-      inputs: { ...this.confirmation.command.inputs, ...inputs },
+      ...draft.command,
+      requestId: `maintenance-${crypto.randomUUID()}`,
+      inputs: { ...draft.command.inputs, ...structuredClone(inputs) },
     };
-    this.busy = true;
-    this.confirmation = null;
-    this.#attempt = new AbortController();
-    try {
-      let result: CommandResult;
-      try {
-        result = await this.#write.execute(command, this.#attempt.signal);
-      } catch {
-        result = {
-          status: "uncertain",
-          message:
-            "The outcome is unknown. Inspect GitHub before requesting this action again.",
-        };
-      }
-      if (this.#disposed) return;
-      this.#record(command, result);
-      // A refresh failure cannot change the already recorded remote outcome.
-      await this.#refresh(command).catch(() => {});
-    } finally {
-      if (!this.#disposed) this.busy = false;
+    const error = inputError(command.kind, command.inputs);
+    if (error) {
+      this.inputResult = { status: "rejected", message: error };
+      return;
     }
+    await this.#execute([command], draft.command.requestId);
   }
-  prepareBatch(items: MaintenanceItem[], kind: ActionKind): void {
+  async invokeBatch(items: MaintenanceItem[], kind: ActionKind) {
     if (
       this.#disposed ||
       this.busy ||
       !["rerun-failed", "approve-run", "approve-deployment"].includes(kind)
     )
       return;
-    const commands: MaintenanceCommand[] = [];
-    const seen = new Set<string>();
+    const commands: MaintenanceCommand[] = [],
+      seen = new Set<string>();
     for (const item of items) {
-      if (seen.has(item.id) || this.blocked(item, kind)) continue;
+      if (seen.has(item.id)) continue;
       seen.add(item.id);
-      const capability = item.actions.find(
-        (a) => a.kind === kind && a.available,
-      );
-      if (!capability) continue;
-      commands.push({
-        requestId: `maintenance-batch-${++this.#sequence}`,
-        itemId: item.id,
-        repository: item.repository,
-        target: structuredClone(item.target),
-        kind,
-        inputs: {},
-      });
+      const command = this.#capture(item, kind, {});
+      if (command) commands.push(command);
     }
-    this.confirmation = null;
-    this.batchConfirmation = commands.length ? { label: kind, commands } : null;
+    if (!commands.length) return;
+    this.draft = null;
+    await this.#execute(commands);
   }
-  async confirmBatch(inputs: CommandInputs = {}): Promise<void> {
-    if (this.#disposed || this.busy || !this.batchConfirmation) return;
-    const commands = this.batchConfirmation.commands.map((command) => ({
-      ...command,
-      inputs: { ...command.inputs, ...structuredClone(inputs) },
-    }));
-    this.batchConfirmation = null;
+  async #execute(commands: MaintenanceCommand[], draftId?: string) {
     this.busy = true;
-    this.#attempt = new AbortController();
+    const request = (this.#attempt = new AbortController());
     try {
       for (const command of commands) {
-        if (this.#disposed || this.#attempt.signal.aborted) break;
+        if (this.#disposed || request.signal.aborted) break;
+        this.active = command;
         let result: CommandResult;
         try {
-          result = await this.#write.execute(command, this.#attempt.signal);
+          result = await this.write.execute(command, request.signal);
         } catch {
           result = {
             status: "uncertain",
@@ -150,21 +141,26 @@ export class MaintenanceCommands {
           };
         }
         if (this.#disposed) break;
-        this.#record(command, result);
-        await this.#refresh(command).catch(() => {});
+        this.receipts = [...this.receipts, { ...result, command }];
+        if (this.draft?.command.requestId === draftId && !!draftId) {
+          this.inputResult = result;
+          if (["completed", "accepted"].includes(result.status))
+            this.draft = null;
+        }
+        await this.refresh(command).catch(() => {});
       }
     } finally {
-      if (!this.#disposed) this.busy = false;
+      if (!this.#disposed) {
+        this.busy = false;
+        this.active = null;
+      }
     }
   }
-  #record(command: MaintenanceCommand, result: CommandResult): void {
-    this.receipts = [...this.receipts, { ...result, command }];
-  }
-  dispose(): void {
+  dispose() {
     this.#disposed = true;
     this.#attempt?.abort();
-    this.batchConfirmation = null;
-    this.confirmation = null;
+    this.draft = null;
     this.busy = false;
+    this.active = null;
   }
 }

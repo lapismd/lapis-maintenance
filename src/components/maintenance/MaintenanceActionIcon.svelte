@@ -11,11 +11,14 @@
     ShieldCheck,
     ShieldX,
     Play,
+    LoaderCircle,
   } from "@lucide/svelte";
   import type { ActionKind } from "../../maintenance/types";
   let {
     kind,
+    pending = false,
   }: {
+    pending?: boolean;
     kind:
       | ActionKind
       | "approve-workflow"
@@ -43,4 +46,24 @@
   const Icon = $derived(icons[kind]);
 </script>
 
-<Icon size={15} aria-hidden="true" data-icon="inline-start" />
+{#if pending}<LoaderCircle
+    aria-hidden="true"
+    data-icon="inline-start"
+    class="maintenance-action-spinner"
+  />{:else}<Icon size={15} aria-hidden="true" data-icon="inline-start" />{/if}
+
+<style>
+  :global(.maintenance-action-spinner) {
+    animation: maintenance-action-spin 1s linear infinite;
+  }
+  @keyframes maintenance-action-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    :global(.maintenance-action-spinner) {
+      animation: none;
+    }
+  }
+</style>

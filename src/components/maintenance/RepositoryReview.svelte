@@ -89,7 +89,7 @@
     if (value.action.kind === "refresh" || value.action.kind === "checks")
       void controller.select(detail.item.id, true);
     else if (value.action.kind === "merge")
-      controller.commands.prepare(detail.item, "merge-pr", {
+      controller.commands.invoke(detail.item, "merge-pr", {
         mergeMethod: value.action.method,
       });
   }

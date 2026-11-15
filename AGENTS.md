@@ -32,7 +32,9 @@ dispatch in this continuation.
 - Use public Design Core AppShell and controls, native CSS and public tokens.
   Keep host credentials, effects, and controller lifetime outside presentation.
 - Production code cannot import catalog fixtures. Mounting and reads never
-  write. Commands require explicit confirmation and immutable target identity.
+  write. The 2026-11-15 approved policy makes action buttons final: only permanent
+  deletion requires confirmation; comments/change requests and dispatch use one
+  input-form submission. Commands retain immutable targets and fresh preflight.
 - No real token, GitHub transport, backend, bot, deployment or PWA in Slice 1.
   Published Storybook and automated story runs remain fixture-only. The user
   authorized a local-development live-session story that mounts the production

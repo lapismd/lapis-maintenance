@@ -40,9 +40,8 @@ it("preflights each batch member immediately and rejects changed later targets w
     new GithubCommandPort(client, writer, read),
     async () => {},
   );
-  commands.prepareBatch(items, "rerun-failed");
   expect(order).toEqual([]);
-  await commands.confirmBatch();
+  await commands.invokeBatch(items, "rerun-failed");
   expect(order).toEqual([
     `preflight:${items[0]!.id}`,
     "write",
