@@ -7,6 +7,8 @@ and command ports; the host owns construction and disposal.
 
 Repository discovery policy under LM-GH-003 affects read coverage only; adding a monitored repository cannot prepare a command, remove a consumer hold or bypass the command adapter's fresh authority checks.
 
+Cache retirement drains writes and closes its connection before a same-partition successor opens, preserving cached responses across rapid remounts under LM-CACHE-001.
+
 ### Acceptance details
 
 - Reads supply snapshots/details with PR identity and workflow Actions links; commands bind to a PR SHA, run attempt or deployment identity, with check completeness independent of unrelated resource gaps and return completed, accepted, rejected or uncertain; the selected card remains available for immediate inspector presentation while ports load full cached details; subsequent cached progress replaces that summary and preserves disabled actions until the detail read settles.

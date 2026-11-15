@@ -7,18 +7,38 @@ import {
   type ResponseCache,
 } from "./response-cache";
 
+// The WASM worker must finish closing an OPFS database before reopening it.
+const partitions = new Map<string, Promise<void>>();
+async function claimPartition(partition: string) {
+  const previous = partitions.get(partition);
+  let release!: () => void;
+  const retired = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  partitions.set(partition, retired);
+  void retired.then(() => {
+    if (partitions.get(partition) === retired) partitions.delete(partition);
+  });
+  await previous;
+  return release;
+}
 /** One database per high-entropy token digest; the database never receives the token. */
 export class TursoResponseCache implements ResponseCache {
   readonly kind = "turso";
   #closed = false;
-  constructor(private db: Database) {}
+  constructor(
+    private db: Database,
+    private release: () => void,
+  ) {}
   static async open(partition: string): Promise<TursoResponseCache> {
-    // Official prebuilt browser entry: 0.8.3's Vite entry fails in its worker pool.
-    const { connect } = (await import(
-      "@tursodatabase/database-wasm/bundle" as string
-    )) as { connect(path: string): Promise<Database> };
-    const db = await connect(`lapis-maintenance-${partition}.db`);
+    const release = await claimPartition(partition);
+    let db: Database | undefined;
     try {
+      // Official prebuilt browser entry: 0.8.3's Vite entry fails in its worker pool.
+      const { connect } = (await import(
+        "@tursodatabase/database-wasm/bundle" as string
+      )) as { connect(path: string): Promise<Database> };
+      db = await connect(`lapis-maintenance-${partition}.db`);
       await db.exec(
         "CREATE TABLE IF NOT EXISTS responses (key TEXT PRIMARY KEY, value TEXT NOT NULL, touched INTEGER NOT NULL)",
       );
@@ -26,12 +46,16 @@ export class TursoResponseCache implements ResponseCache {
         "DELETE FROM responses WHERE touched < ?",
         Date.now() - 86_400_000,
       );
-      return new TursoResponseCache(db);
+      return new TursoResponseCache(db, release);
     } catch (error) {
-      await db.close().catch(() => {});
+      try {
+        await db?.close();
+      } catch {}
+      release();
       throw error;
     }
   }
+
   async get(key: string): Promise<CachedResponse | undefined> {
     if (this.#closed) return;
     const row = (await this.db.get(
@@ -86,7 +110,11 @@ export class TursoResponseCache implements ResponseCache {
   async close() {
     if (!this.#closed) {
       this.#closed = true;
-      await this.db.close();
+      try {
+        await this.db.close();
+      } finally {
+        this.release();
+      }
     }
   }
 }

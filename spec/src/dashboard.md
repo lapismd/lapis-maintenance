@@ -9,6 +9,8 @@ The Operations view implements LM-OPS-001 using fixture-only stories, showing op
 
 Repository settings include monitoring-only defaults from LM-GH-003, retain consumer hold explanations, and distinguish unavailable discovery from an empty healthy repository list.
 
+Rapid authenticated remounts retain their persistent cache through the host-owned connection handoff, preserving cached content rather than selecting a transient fallback.
+
 ### Acceptance details
 
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
