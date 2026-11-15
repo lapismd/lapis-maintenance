@@ -16,6 +16,10 @@ export class MaintenanceCommands {
     command: MaintenanceCommand;
     label: string;
   } | null>(null);
+  batchConfirmation = $state.raw<{
+    label: string;
+    commands: MaintenanceCommand[];
+  } | null>(null);
   receipts = $state.raw<ActionReceipt[]>([]);
   busy = $state(false);
   #disposed = false;
@@ -48,6 +52,7 @@ export class MaintenanceCommands {
     const capability = item.actions.find((a) => a.kind === kind && a.available);
     if (this.#disposed || this.busy || !capability || this.blocked(item, kind))
       return;
+    this.batchConfirmation = null;
     this.confirmation = {
       label: capability.label,
       command: {
@@ -61,7 +66,10 @@ export class MaintenanceCommands {
     };
   }
   cancel(): void {
-    if (!this.busy) this.confirmation = null;
+    if (!this.busy) {
+      this.confirmation = null;
+      this.batchConfirmation = null;
+    }
   }
   async confirm(inputs: CommandInputs = {}): Promise<void> {
     if (this.#disposed || this.busy || !this.confirmation) return;
@@ -91,12 +99,71 @@ export class MaintenanceCommands {
       if (!this.#disposed) this.busy = false;
     }
   }
+  prepareBatch(items: MaintenanceItem[], kind: ActionKind): void {
+    if (
+      this.#disposed ||
+      this.busy ||
+      !["rerun-failed", "approve-run", "approve-deployment"].includes(kind)
+    )
+      return;
+    const commands: MaintenanceCommand[] = [];
+    const seen = new Set<string>();
+    for (const item of items) {
+      if (seen.has(item.id) || this.blocked(item, kind)) continue;
+      seen.add(item.id);
+      const capability = item.actions.find(
+        (a) => a.kind === kind && a.available,
+      );
+      if (!capability) continue;
+      commands.push({
+        requestId: `maintenance-batch-${++this.#sequence}`,
+        itemId: item.id,
+        repository: item.repository,
+        target: structuredClone(item.target),
+        kind,
+        inputs: {},
+      });
+    }
+    this.confirmation = null;
+    this.batchConfirmation = commands.length ? { label: kind, commands } : null;
+  }
+  async confirmBatch(inputs: CommandInputs = {}): Promise<void> {
+    if (this.#disposed || this.busy || !this.batchConfirmation) return;
+    const commands = this.batchConfirmation.commands.map((command) => ({
+      ...command,
+      inputs: { ...command.inputs, ...structuredClone(inputs) },
+    }));
+    this.batchConfirmation = null;
+    this.busy = true;
+    this.#attempt = new AbortController();
+    try {
+      for (const command of commands) {
+        if (this.#disposed || this.#attempt.signal.aborted) break;
+        let result: CommandResult;
+        try {
+          result = await this.#write.execute(command, this.#attempt.signal);
+        } catch {
+          result = {
+            status: "uncertain",
+            message:
+              "Outcome unknown. Inspect GitHub; this target will not be replayed.",
+          };
+        }
+        if (this.#disposed) break;
+        this.#record(command, result);
+        await this.#refresh(command).catch(() => {});
+      }
+    } finally {
+      if (!this.#disposed) this.busy = false;
+    }
+  }
   #record(command: MaintenanceCommand, result: CommandResult): void {
     this.receipts = [...this.receipts, { ...result, command }];
   }
   dispose(): void {
     this.#disposed = true;
     this.#attempt?.abort();
+    this.batchConfirmation = null;
     this.confirmation = null;
     this.busy = false;
   }

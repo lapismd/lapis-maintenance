@@ -340,7 +340,7 @@ Connect the reviewed screen and workspace timeline to paginated conversation/rev
 activity lazily and cache it separately, preserving cached boards. Add PR
 identity/tab hash routes with Back restoring the board. Files and diffs remain
 on GitHub through a direct changed-files link; do not add file APIs, patch
-caching or an embedded file viewer. Inline review drafts/comments and bulk operations remain deferred; the original
+caching or an embedded file viewer. Inline review drafts/comments and bulk PR reviews remain deferred; S4 authorizes limited confirmed workflow/environment batches under LM-ACT-003; the original
 Slice 4 manual dispatch is now authorized as part of this continuation.
 
 ### Verification and review gates
@@ -372,3 +372,21 @@ environment approve/reject, rerun/new-attempt approval and hosted PWA/cache
 boundaries are qualified in `spec/records/2026-11-14-release.md`. The small
 workflow Actions-link follow-up and this receipt use the same CI/Pages gate;
 all remaining authorized implementation, including manual dispatch, is delivered.
+
+## 2026-11-15 coordinator operator integration
+
+The authorized consolidated dependency-automation S4 adds a version 1 read-only
+coordinator adapter, open issues, wave/decision attention and individually
+confirmed batches of eligible reruns/workflow/environment approvals. The browser
+reads the coordinator's durable public report branch; unattended collection
+remains in coordinator Actions. Unsupported/missing/stale reports preserve
+ordinary manual controls. Batch execution uses the existing immediate preflight
+and retains partial/uncertain outcomes without replay. Source implementation
+and fixture acceptance precede hosted Pages/PWA and designated disposable action
+qualification. No private report data enters public app/Storybook assets.
+
+Local S4 qualification passes 201 unit tests, 19 browser tests, 183 Storybook
+interaction/accessibility scenarios, seven PWA tests, type/boundary checks,
+production/static builds and canonical specification lanes; the regression
+ledger is `spec/records/2026-11-15-operator.md` and hosted Pages/disposable batch
+qualification remains pending.

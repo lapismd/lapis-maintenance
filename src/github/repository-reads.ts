@@ -10,6 +10,7 @@ import {
   type GithubTransport,
   type ReadOptions,
 } from "./transport";
+import { readOpenIssues } from "./issue-reads";
 import { readPullSummaries } from "./pull-summaries";
 import { readWorkflow } from "./workflow-reads";
 import { associateRun } from "./run-association";
@@ -41,6 +42,10 @@ export async function readRepository(
       throw pulls.reason;
     gaps.push("Pull requests unavailable.");
   }
+  const issueRead = readOpenIssues(client, repository, signal, options).then(
+    (value) => ({ status: "fulfilled" as const, value }),
+    (reason) => ({ status: "rejected" as const, reason }),
+  );
   const summaries = readPullSummaries(
     client,
     repository,
@@ -144,8 +149,15 @@ export async function readRepository(
       throw runs.reason;
     gaps.push("Workflow coverage unavailable.");
   }
+  const issues = await issueRead;
+  if (issues.status === "rejected") {
+    if (issues.reason instanceof GithubError && issues.reason.status === 401)
+      throw issues.reason;
+    gaps.push("Open issue coverage unavailable.");
+  }
   signal.throwIfAborted();
   return {
+    issues: issues.status === "fulfilled" ? issues.value : [],
     details,
     coverage: {
       repository,

@@ -35,6 +35,7 @@ it("scoped refresh invalidates only its repository and survives an older global 
       title,
     };
     return {
+      issues: [],
       details: [detailFixture(item)],
       coverage: {
         repository,
@@ -125,6 +126,7 @@ it("checkpoints completed repositories so an interrupted scan can restore cards"
   vi.mocked(readRepository).mockImplementation(async (_client, entry) => {
     if (entry.repository === "owner/b") await gate;
     return {
+      issues: [],
       details: entry.repository === "owner/a" ? [detailFixture(item)] : [],
       coverage: {
         repository: entry.repository,

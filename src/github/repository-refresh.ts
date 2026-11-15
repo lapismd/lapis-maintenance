@@ -37,6 +37,7 @@ export class RepositoryRefreshes {
   }
   snapshot(repository: string, result: RepositoryResult): MaintenanceSnapshot {
     return {
+      issues: result.issues,
       items: result.details.map((detail) => detail.item),
       repositories: [result.coverage],
       fetchedAt: new Date(this.now()).toISOString(),
@@ -60,10 +61,12 @@ export class RepositoryRefreshes {
     updates: Map<string, RepositoryResult>,
     completed: Map<string, MaintenanceDetail[]>,
     coverage: Map<string, RepositoryCoverage>,
+    issues: Map<string, import("../maintenance/types").OpenIssue[]>,
   ) {
     for (const [repository, result] of updates) {
       completed.set(repository, result.details);
       coverage.set(repository, result.coverage);
+      issues.set(repository, result.issues);
     }
   }
   async refresh(

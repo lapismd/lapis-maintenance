@@ -47,6 +47,7 @@
       !shell.left.previewed,
   );
   const navigation = [
+    { id: "operations" as View, label: "Operations", icon: Workflow },
     { id: "inbox" as View, label: "Inbox", icon: Inbox },
     { id: "activity" as View, label: "Activity", icon: Activity },
     {

@@ -3,6 +3,7 @@ import type { ReviewController } from "../maintenance/review/controller.svelte";
 import type { View } from "../maintenance/types";
 import type { ReviewTab } from "../maintenance/review/types";
 const views: View[] = [
+  "operations",
   "inbox",
   "activity",
   "pull-request",

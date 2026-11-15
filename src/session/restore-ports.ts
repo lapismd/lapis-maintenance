@@ -45,6 +45,14 @@ export class RestorePorts
     this.#write = write;
     this.preview = null;
   }
+  readCoordinatorReport: NonNullable<
+    MaintenanceReadPort["readCoordinatorReport"]
+  > = async (signal, options) => {
+    signal.throwIfAborted();
+    return this.#read?.readCoordinatorReport
+      ? this.#read.readCoordinatorReport(signal, options)
+      : { state: "unavailable", reason: pending };
+  };
   readSnapshot: MaintenanceReadPort["readSnapshot"] = async (
     signal,
     options,

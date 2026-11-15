@@ -1,6 +1,7 @@
 import type { MaintenanceController } from "../maintenance/controller.svelte";
 import type { View } from "../maintenance/types";
 const views: View[] = [
+  "operations",
   "inbox",
   "activity",
   "pull-request",

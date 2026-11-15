@@ -1,0 +1,91 @@
+export interface WaveNode {
+  visibility: "public";
+  repository: string;
+  sourceSha: string;
+  operationId: string;
+  status: string;
+  holds: string[];
+  waits: { package: string; repository: string; reason: string }[];
+  updates: {
+    name: string;
+    current: string;
+    target: string;
+    compatibility: string;
+  }[];
+  admittedUpdates?: WaveNode["updates"];
+  branchHolds?: {
+    branch: string;
+    head: string;
+    family: string | null;
+    reason: string;
+  }[];
+  acceptance: { state: string; reason: string };
+  ownership: { state: string; reason: string; pr?: number; head?: string };
+}
+export interface WaveReport {
+  schemaVersion: 1;
+  kind: "lapis-dependency-waves";
+  reportId: string;
+  observedAt: string;
+  policyRevision: string;
+  generation: number;
+  coverage: { opaqueId: string; reason: string }[];
+  nodes: WaveNode[];
+  releases: {
+    name: string;
+    repository: string;
+    sourceSha: string;
+    baseline: string;
+    status: string;
+    version?: string;
+    requires: { name: string; type: string; target: string }[];
+  }[];
+  publications: { name: string; version: string; integrity: string }[];
+  operations: {
+    id: string;
+    repository: string;
+    sourceSha: string;
+    policyRevision: string;
+    status: string;
+    observedAt: string;
+    reason: string;
+    ownership: string;
+    acceptance: string;
+    targets: { name: string; target: string; path: string; type: string }[];
+  }[];
+}
+export interface CoordinatorEvidence {
+  state: "current" | "stale" | "unsupported" | "unavailable";
+  reason: string;
+  report?: WaveReport;
+  url?: string;
+  sourceRevision?: string;
+}
+export function attentionReason(node: WaveNode): string {
+  if (node.ownership.state === "repair-owned") return "Manual repair ownership";
+  if (node.updates.some((u) => u.compatibility === "breaking"))
+    return "Compatibility decision";
+  if (node.status === "failed")
+    return /publish|publication|registry/i.test(node.acceptance.reason)
+      ? "Publication failure"
+      : "Qualification failure";
+  if (
+    /approval|action.required/i.test(
+      [node.acceptance.reason, ...node.holds].join(" "),
+    )
+  )
+    return "Approval wait";
+  return (
+    (
+      {
+        "upstream-wait": "Expected upstream wait",
+        "publication-wait": "Waiting for registry publication",
+        "qualification-wait": "Waiting for consumer qualification",
+        uncertain: "Uncertain write: reconciliation required",
+        admitted: "Running compatible update",
+        held: "Explicit hold",
+        unchanged: "No update required",
+      } as Record<string, string>
+    )[node.status] ?? `Coordinator state: ${node.status}`
+  );
+}

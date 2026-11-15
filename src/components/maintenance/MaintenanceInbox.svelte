@@ -3,17 +3,21 @@
   import { Skeleton } from "@lapismd/design-core/shadcn/skeleton";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
   import { Unplug, Link2 } from "@lucide/svelte";
+  import OperationsAttention from "../maintenance-operations/OperationsAttention.svelte";
+  import OperationsPanel from "../maintenance-operations/OperationsPanel.svelte";
   import MaintenanceBoard from "./MaintenanceBoard.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
     controller,
     onConnect,
+    sessionMode = "demo",
     onPrefetch,
     onOpen = (id: string) => {
       void controller.select(id);
     },
   }: {
     controller: MaintenanceController;
+    sessionMode?: "demo" | "github";
     onConnect: () => void;
     onOpen?: (id: string) => void;
     onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
@@ -34,6 +38,8 @@
         ></Empty.Content
       ></Empty.Root
     >
+  {:else if controller.view === "operations"}
+    <OperationsPanel {controller} {sessionMode} />
   {:else}
     <div class="maintenance-board-heading">
       <h2>
@@ -46,6 +52,7 @@
           : "Columns reflect observed status"}</span
       >
     </div>
+    {#if controller.view === "inbox"}<OperationsAttention {controller} />{/if}
     {#if controller.phase === "loading" && !controller.snapshot?.items.length}<div
         class="maintenance-loading"
         role="status"
