@@ -31,3 +31,14 @@
 - Monitoring exclusions remove default entries, duplicate monitoring entries preserve existing consumer holds, and legacy configurations without monitoring remain supported.
 - Explicit operator additions/exclusions retain their existing precedence; legitimate dot-prefixed repository names such as `lapismd/.github` are accepted, while path traversal and URL injection are rejected.
 - Malformed monitoring policy produces an explicit discovery coverage gap; the coordinator and explicit valid additions remain inspectable without silently using partial defaults.
+
+## LM-GH-004 — Coordinator evidence and open issues
+
+**Requirement.** The authenticated read adapter MUST expose open GitHub issues and version 1 public coordinator reports without granting command authority.
+
+### Acceptance details
+
+- Read open issues with pagination, omit pull requests, preserve issue links and report denied/incomplete issue coverage explicitly.
+- Lazily read `report.json` from coordinator branch `automation/dependency-wave-state` independently of cached inbox startup, resolving the branch before reading bytes at its immutable source commit.
+- Unsupported, missing, malformed, older-than-24-hour, future-dated and policy-revision-mismatched reports remain explicit and never authorize writes.
+- Expose only the versioned public report contract, keep private coverage opaque and preserve browser credentials within the existing session transport without forwarding them to coordinator Actions.

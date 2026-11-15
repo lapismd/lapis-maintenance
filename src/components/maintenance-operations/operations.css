@@ -1,0 +1,54 @@
+.maintenance-operations {
+  padding: 1rem;
+  overflow: auto;
+  min-width: 0;
+  width: 100%;
+}
+.maintenance-operations header {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.maintenance-operations section {
+  margin-top: 1.25rem;
+}
+.maintenance-operations article {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+  margin: 0.5rem 0;
+}
+.maintenance-operations h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.maintenance-operations h3,
+.maintenance-operations h4 {
+  font-weight: 600;
+}
+.maintenance-operations p {
+  margin: 0.4rem 0;
+}
+.maintenance-operations a {
+  color: var(--foreground);
+  text-decoration: underline;
+}
+.maintenance-operations code,
+.operations-batch-targets code {
+  overflow-wrap: anywhere;
+}
+.operations-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+}
+.operations-batch-targets {
+  overflow: auto;
+  max-height: 50vh;
+}
+.operations-batch-targets li {
+  padding-block: 0.5rem;
+  overflow-wrap: anywhere;
+}

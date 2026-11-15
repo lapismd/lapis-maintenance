@@ -17,10 +17,13 @@ import { readItemDetails } from "./item-details";
 import type { ResponseCache } from "../cache/response-cache";
 import { readCachedDetail, saveCachedDetail } from "../cache/detail-cache";
 import { viewKey } from "../cache/view-cache";
+import { ResourceCache } from "../cache/resource-cache";
+import { readCoordinatorReport } from "./coordinator-report";
 import { GithubSnapshots } from "./snapshot-reader";
 
 export class GithubReadPort implements MaintenanceReadPort {
   #snapshots: GithubSnapshots;
+  #reports: ResourceCache;
   #writes = new Set<Promise<void>>();
   #previews = new Map<
     string,
@@ -39,6 +42,7 @@ export class GithubReadPort implements MaintenanceReadPort {
     private cache?: ResponseCache,
     onDefaults?: (defaults: RepositoryDefault[]) => void,
   ) {
+    this.#reports = new ResourceCache(cache, now);
     this.#snapshots = new GithubSnapshots(
       client,
       selection,
@@ -66,6 +70,21 @@ export class GithubReadPort implements MaintenanceReadPort {
   ): Promise<MaintenanceSnapshot> {
     return this.#snapshots.readSnapshot(signal, options);
   }
+  readCoordinatorReport(signal: AbortSignal, options: ReadOptions = {}) {
+    return this.#reports.read(
+      "coordinator-evidence:v1",
+      () => 0,
+      (readOptions, ownedSignal) =>
+        readCoordinatorReport(
+          this.client,
+          ownedSignal,
+          readOptions,
+          this.now(),
+        ),
+      signal,
+      { force: options.force },
+    );
+  }
   readCommandTarget(command: MaintenanceCommand, signal: AbortSignal) {
     const existing = this.#snapshots.details.get(command.itemId);
     if (!existing || !this.actor)
@@ -87,6 +106,7 @@ export class GithubReadPort implements MaintenanceReadPort {
   async drain() {
     await Promise.allSettled([...this.#writes]);
     await this.#snapshots.drain();
+    await this.#reports.drain();
   }
   async readDetails(
     id: string,

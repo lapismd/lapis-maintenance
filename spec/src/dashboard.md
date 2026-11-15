@@ -5,6 +5,8 @@
 **Requirement.** The dashboard MUST use public Design Core AppShell and controls for a responsive,
 accessible action inbox with light and dark themes.
 
+The Operations view implements LM-OPS-001 using fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
+
 Repository settings include monitoring-only defaults from LM-GH-003, retain consumer hold explanations, and distinguish unavailable discovery from an empty healthy repository list.
 
 ### Acceptance details

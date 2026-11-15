@@ -22,3 +22,12 @@ workflows through the supplied token and owning workflow contracts.
 - Approve/reject only currently pending environments the user may review.
 - Discover active workflow_dispatch definitions through safe YAML parsing and render required/default/choice/boolean/number/environment inputs; require an explicit branch or tag, bind confirmation to its commit and workflow definition SHA, revalidate input contracts immediately before one POST, reject changed targets, never replay uncertain dispatches and link the identified run or workflow Actions page while distinguishing submission from publication.
 - Signing keys and publication credentials remain in owning GitHub workflows.
+
+## LM-ACT-003 — Individually confirmed batch targets
+
+**Requirement.** Batch commands MUST include only individually eligible reruns or workflow/environment approvals and revalidate every immutable target immediately before writing.
+
+### Acceptance details
+
+- Confirmation lists every effect, repository, source SHA, run attempt and environment; environment approvals include an explicit comment and eligibility comes from live command ports, never coordinator reports.
+- Execute each confirmed target at most once, retain separate completed/accepted/rejected/uncertain receipts, reject concurrent submissions, stop on disposal and never replay uncertain targets; a partial failure cannot erase earlier results.

@@ -1,3 +1,4 @@
+import { OperatorReports } from "./operator-report.svelte";
 import { MaintenanceCommands } from "./commands.svelte";
 import { patchRepository } from "./repository-snapshot";
 import {
@@ -39,6 +40,7 @@ export class MaintenanceController {
   view = $state<View>("inbox");
   connected = $state(true);
   readonly commands: MaintenanceCommands;
+  readonly reports: OperatorReports;
   #read: MaintenanceReadPort;
   #disposed = false;
   #readSequence = 0;
@@ -52,6 +54,7 @@ export class MaintenanceController {
     connected = true,
   ) {
     this.#read = read;
+    this.reports = new OperatorReports(read);
     this.connected = connected;
     this.commands = new MaintenanceCommands(read, write, (command) =>
       this.refreshAffected(command),
@@ -62,7 +65,8 @@ export class MaintenanceController {
     return (this.snapshot?.items ?? [])
       .filter(
         (item) =>
-          (this.view === "inbox" ||
+          (this.view === "operations" ||
+            this.view === "inbox" ||
             this.view === "activity" ||
             item.kind === this.view) &&
           (!this.repositories.length ||
@@ -123,6 +127,7 @@ export class MaintenanceController {
     this.#repositoryAbort?.abort();
     this.refreshingRepository = null;
     this.connected = false;
+    this.reports.clear();
     this.snapshot = null;
     this.detail = null;
     this.selectedId = null;
@@ -140,6 +145,7 @@ export class MaintenanceController {
     this.#readAbort = new AbortController();
     this.phase = this.snapshot ? "refreshing" : "loading";
     this.error = null;
+    if (this.reports.evidence) void this.reports.refresh(force);
     try {
       const snapshot = await this.#read.readSnapshot(this.#readAbort.signal, {
         force,
@@ -279,5 +285,6 @@ export class MaintenanceController {
     this.#detailAbort?.abort();
     this.#repositoryAbort?.abort();
     this.commands.dispose();
+    this.reports.dispose();
   }
 }

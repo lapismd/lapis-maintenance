@@ -18,3 +18,12 @@
 | R2 — Live actions/links | Authorized 2026-11-14 | Implemented | Combined green-head delivery         |
 | R3 — Faster reads       | Authorized 2026-11-14 | In progress | Combined green-head delivery         |
 | R4 — Live PR workspace  | Authorized 2026-11-14 | In progress | Combined green-head delivery         |
+
+## Coordinator operator integration — 2026-11-15
+
+The user authorized the remaining consolidated dependency-automation plan,
+including S4, deployment and workflow approvals. LM-GH-004, LM-OPS-001 and
+LM-ACT-003 implement versioned reports, issue discovery, operator explanations
+and confirmed batches. Hosted Pages/PWA and designated disposable action
+acceptance remain separate qualification gates; fixture stories remain
+visual-pending and contain only synthetic public data.

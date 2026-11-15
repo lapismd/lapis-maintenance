@@ -1,5 +1,6 @@
 /** Serializable domain contracts; adapters own all external authority and secrets. */
 export type View =
+  | "operations"
   | "inbox"
   | "activity"
   | "pull-request"
@@ -61,7 +62,7 @@ export interface MaintenanceItem {
   repository: string;
   title: string;
   number?: number;
-  kind: Exclude<View, "inbox" | "activity">;
+  kind: "pull-request" | "workflow" | "approval";
   status: ItemStatus;
   category:
     | "dependency"
@@ -84,7 +85,18 @@ export interface RepositoryCoverage {
   holdReason?: string;
   loading?: boolean;
 }
+export interface OpenIssue {
+  id: number;
+  number: number;
+  repository: string;
+  title: string;
+  url: string;
+  updatedAt: string;
+  category: "compatibility" | "product";
+}
 export interface MaintenanceSnapshot {
+  issues?: OpenIssue[];
+  coordinator?: import("./operator-types").CoordinatorEvidence;
   items: MaintenanceItem[];
   repositories: RepositoryCoverage[];
   fetchedAt: string;
@@ -116,6 +128,10 @@ export interface MaintenanceDetail {
   workflowApprovals?: MaintenanceItem[];
 }
 export interface MaintenanceReadPort {
+  readCoordinatorReport?(
+    signal: AbortSignal,
+    options?: { force?: boolean },
+  ): Promise<import("./operator-types").CoordinatorEvidence>;
   refreshRepository(
     repository: string,
     signal: AbortSignal,

@@ -53,6 +53,7 @@ function fixture(checksUnavailable = false, missingConfig = false) {
     if (path === "/repos/owner/denied")
       return Response.json({}, { status: 403 });
     if (path === "/repos/owner/active/pulls/7") return Response.json(pull);
+    if (path.endsWith("/issues")) return Response.json([]);
     if (path.endsWith("/pulls"))
       return Response.json(
         path.includes("owner/active")

@@ -38,6 +38,7 @@
   });
   const title = $derived(
     {
+      operations: "Operations",
       inbox: "Inbox",
       activity: "Activity",
       "pull-request": "Pull requests",
@@ -98,6 +99,7 @@
       />
       <AppShell.Body layout="regions"
         ><MaintenanceInbox
+          {sessionMode}
           {controller}
           {onConnect}
           onOpen={openDetail}

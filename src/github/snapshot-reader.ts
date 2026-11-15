@@ -118,6 +118,10 @@ export class GithubSnapshots {
       );
       if (generation === this.#generation && !signal.aborted)
         this.onDefaults?.(defaults);
+      const completedIssues = new Map<
+        string,
+        import("../maintenance/types").OpenIssue[]
+      >();
       const completed = new Map<string, MaintenanceDetail[]>();
       const pendingCoverage = new Map<string, RepositoryCoverage>(
         [...repositories.values()].map((entry) => [
@@ -134,10 +138,17 @@ export class GithubSnapshots {
       const publish = (checkpoint = false) => {
         signal.throwIfAborted();
         if (generation !== this.#generation) return;
-        this.scopes.fold(updates, completed, pendingCoverage);
+        this.scopes.fold(updates, completed, pendingCoverage, completedIssues);
         const details = [...completed.values()].flat();
         for (const detail of details) this.details.set(detail.item.id, detail);
         const progress: MaintenanceSnapshot = {
+          issues: [...completedIssues.values()]
+            .flat()
+            .concat(
+              cached?.issues?.filter(
+                (issue) => pendingCoverage.get(issue.repository)?.loading,
+              ) ?? [],
+            ),
           items: [
             ...details.map((detail) => detail.item),
             ...(cached?.items.filter(
@@ -179,6 +190,7 @@ export class GithubSnapshots {
               this.actor,
             );
             completed.set(entry.repository, result.details);
+            completedIssues.set(entry.repository, result.issues);
             pendingCoverage.set(entry.repository, result.coverage);
             publish(true);
             return result;
@@ -248,6 +260,7 @@ export class GithubSnapshots {
         if (rate?.status === "rejected") throw rate.reason;
       }
       const snapshot: MaintenanceSnapshot = {
+        issues: [...completedIssues.values()].flat(),
         items: details.map((detail) => detail.item),
         repositories: mergeCoverage(coverage),
         fetchedAt: new Date(validatedAt).toISOString(),

@@ -60,6 +60,7 @@
   let previousView = untrack(() => inbox.view);
   const title = $derived(
     {
+      operations: "Operations",
       inbox: "Inbox",
       activity: "Activity",
       "pull-request": "Pull requests",
@@ -260,6 +261,7 @@
             onOpen={open}
             onRepository={openRepository}
           />{:else}<MaintenanceInbox
+            {sessionMode}
             controller={inbox}
             onConnect={() => {}}
             onOpen={open}

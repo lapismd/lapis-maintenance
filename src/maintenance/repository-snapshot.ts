@@ -6,6 +6,11 @@ export function patchRepository(
   repository: string,
 ): MaintenanceSnapshot {
   return {
+    ...base,
+    issues: [
+      ...(base.issues ?? []).filter((issue) => issue.repository !== repository),
+      ...(patch.issues ?? []),
+    ],
     items: [
       ...base.items.filter((item) => item.repository !== repository),
       ...patch.items,
