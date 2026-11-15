@@ -100,7 +100,7 @@ export interface RepositoryDefault {
   holdReason?: string;
 }
 export const validRepository = (value: string): boolean =>
-  /^[a-zA-Z0-9][\w.-]*\/[a-zA-Z0-9][\w.-]*$/.test(value);
+  /^[a-zA-Z0-9][\w.-]*\/(?!(?:\.|\.\.)$)[\w.-]+$/.test(value);
 export function category(
   title: string,
   repository: string,

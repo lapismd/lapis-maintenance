@@ -5,6 +5,8 @@
 **Requirement.** The dashboard MUST use public Design Core AppShell and controls for a responsive,
 accessible action inbox with light and dark themes.
 
+Repository settings include monitoring-only defaults from LM-GH-003, retain consumer hold explanations, and distinguish unavailable discovery from an empty healthy repository list.
+
 ### Acceptance details
 
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
