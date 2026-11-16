@@ -10,7 +10,7 @@ const lanes = [
   {
     id: "failed",
     label: "Failing",
-    color: "var(--destructive)",
+    color: "color-mix(in oklch, var(--destructive), var(--foreground) 20%)",
     statuses: ["failed"],
   },
   {
@@ -26,10 +26,16 @@ const lanes = [
     statuses: ["blocked", "unavailable"],
   },
   {
+    id: "running",
+    label: "Running",
+    color: "color-mix(in oklch, var(--chart-2), var(--foreground) 20%)",
+    statuses: ["running"],
+  },
+  {
     id: "waiting",
     label: "Activity",
-    color: "color-mix(in oklch, var(--chart-2), black 20%)",
-    statuses: ["running", "cancelled", "passed"],
+    color: "color-mix(in oklch, var(--chart-2), var(--foreground) 20%)",
+    statuses: ["cancelled", "passed"],
   },
 ];
 export function maintenanceColumns(

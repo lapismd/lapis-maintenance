@@ -31,8 +31,8 @@ importers:
         version: 2.9.1
     devDependencies:
       '@lapismd/spec-validator':
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.2.1
+        version: 0.2.1
       '@resvg/resvg-js':
         specifier: ^2.6.2
         version: 2.6.2
@@ -511,8 +511,8 @@ packages:
     peerDependencies:
       svelte: ^5.0.0
 
-  '@lapismd/spec-validator@0.2.0':
-    resolution: {integrity: sha512-fUMh7fpoZXuMRAc5Jdo+Y2sUhAPeO5o5R5AIdwKEs/xNLS2W3mSSHimscxI58JuUEFPPk/SI+jE0Vcvv7gXdlw==}
+  '@lapismd/spec-validator@0.2.1':
+    resolution: {integrity: sha512-aHLByppZkay1axSm8KvCwOJz0si8aDyZBXDGWW+d2VQw+66f1KLimw2rEMjYIpLdoSG9+yN5Kd1MKlAJw7xUVw==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -3287,7 +3287,7 @@ snapshots:
       - supports-color
       - tailwindcss
 
-  '@lapismd/spec-validator@0.2.0':
+  '@lapismd/spec-validator@0.2.1':
     dependencies:
       jiti: 2.7.0
       typescript: 5.9.3

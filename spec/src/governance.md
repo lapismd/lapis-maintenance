@@ -13,6 +13,9 @@ submission for required-input forms.
 
 Public RepositoryIdentifiers controls used for shortened custom-label identifiers are prebundled by the Storybook and browser-test startup configuration to avoid late dependency-optimizer reloads.
 
+The inbox presentation follow-up uses the released Deno-free Spec Validator ^0.2.1
+with ordinary registry resolution and unchanged specification checks.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

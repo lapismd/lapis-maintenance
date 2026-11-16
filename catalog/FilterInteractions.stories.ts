@@ -37,10 +37,17 @@ export const MultipleStatuses: Story = {
     await expect(
       c.getByRole("heading", { name: "2 items in view" }),
     ).toBeVisible();
+    const summary = c.getByLabelText("Repository summary");
+    await expect(
+      Array.from(summary.querySelectorAll("strong"), (tile) =>
+        Number(tile.textContent),
+      ),
+    ).toEqual([2, 1, 1, 0]);
     await userEvent.click(c.getByRole("button", { name: "Clear filters" }));
     await expect(
       c.getByRole("heading", { name: "10 items in view" }),
     ).toBeVisible();
+    await expect(summary.querySelector("strong")).toHaveTextContent(/^10$/);
   },
 };
 
@@ -82,6 +89,9 @@ export const MultipleRepositories: Story = {
       canvas.getByRole("heading", { name: "4 items in view" }),
     ).toBeVisible();
     await expect(
+      canvas.getByLabelText("Repository summary").querySelector("strong"),
+    ).toHaveTextContent(/^4$/);
+    await expect(
       canvas.getByRole("button", { name: "Show lapismd/lapis-notes" }),
     ).toHaveAttribute("aria-pressed", "true");
     await userEvent.click(
@@ -105,7 +115,13 @@ export const EmptyColumnsAcrossViews: Story = {
     await c.findByRole("button", { name: "Expand 0 Failing" });
     await c.findByRole("button", { name: "Expand 0 Approval waiting" });
     await userEvent.click(c.getByRole("button", { name: /^Approvals$/ }));
-    for (const label of ["Failing", "Needs review", "Blocked", "Activity"]) {
+    for (const label of [
+      "Failing",
+      "Needs review",
+      "Blocked",
+      "Running",
+      "Activity",
+    ]) {
       await expect(
         await c.findByRole("button", { name: `Expand 0 ${label}` }),
       ).toHaveAttribute("aria-expanded", "false");

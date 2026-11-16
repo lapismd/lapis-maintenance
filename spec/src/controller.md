@@ -9,7 +9,7 @@ Repository discovery policy under LM-GH-003 affects read coverage only; adding a
 
 Cache retirement drains writes and closes its connection before a same-partition successor opens, preserving cached responses across rapid remounts under LM-CACHE-001.
 
-Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands.
+Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
 
 ### Acceptance details
 
@@ -27,4 +27,4 @@ Branch-action filters are host-owned presentation state under LM-UI-004. They in
 - Host-owned report resources warm in the background after session startup and load on demand without blocking cached board startup, reuse persisted response resources, retain prior evidence during refresh and reject stale/disposed reads.
 - Distinguish running work, upstream/publication/qualification waits, approval waits, compatibility decisions, manual repair ownership, publication failures, discovered updates, admitted candidates, scoped branch holds and opaque coverage gaps while ordinary manual controls remain independent of coordinator evidence.
 - Design Core ScrollArea contains borderless timeline sections with opaque collapsible sticky headers flush beneath the app toolbar with empty sections closed initially, an icon-only fold/expand-all control covers sections and details, compact rows start collapsed and reveal details on activation, source commits and repositories link to GitHub with padded neutral hover, and paired operation/report and policy digests use the public joined identifier control with custom labels and independent exact-value copying while integrity retains its single copy control.
-- The existing Operations navigation and collapsed Inbox summary show filter-scoped actionable-node and open-issue counts excluding expected progress, while batch actions remain in a fixed page footer outside the scrolling report with icons, bounded outcomes and no heading or description, preserving narrow-layout access without overlap.
+- The existing Operations navigation and single-row Inbox summary show filter-scoped actionable-node and open-issue counts excluding expected progress; the Inbox row aligns with the header controls, links to Operations and has no expandable report details, while batch actions remain in a fixed page footer outside the scrolling report with icons, bounded outcomes and no heading or description, preserving narrow-layout access without overlap.

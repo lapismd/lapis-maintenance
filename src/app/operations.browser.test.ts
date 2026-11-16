@@ -52,7 +52,9 @@ it("navigates to operator evidence and submits each eligible batch target once",
   try {
     await controller.refresh();
     expect(read.readCoordinatorReport).not.toHaveBeenCalled();
-    await page.getByRole("button", { name: "Operations", exact: true }).click();
+    await page
+      .getByRole("button", { name: "View waves, issues and decisions" })
+      .click();
     await vi.waitFor(() =>
       expect(read.readCoordinatorReport).toHaveBeenCalledOnce(),
     );
