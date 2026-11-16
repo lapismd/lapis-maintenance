@@ -44,7 +44,7 @@
     "yaml": "^2.9.1"
   },
   "devDependencies": {
-    "@lapismd/spec-validator": "^0.2.0",
+    "@lapismd/spec-validator": "^0.2.1",
     "@resvg/resvg-js": "^2.6.2",
     "@storybook/addon-a11y": "10.6.5",
     "@storybook/addon-docs": "10.6.5",

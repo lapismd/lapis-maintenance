@@ -18,6 +18,7 @@
     dark = false,
     uncertain = false,
     action = "rerun-failed",
+    view = "operations",
   }: {
     part?: "page" | "attention" | "footer";
     shell?: boolean;
@@ -26,6 +27,7 @@
     dark?: boolean;
     uncertain?: boolean;
     action?: "rerun-failed" | "approve-run" | "approve-deployment";
+    view?: "inbox" | "operations";
   } = $props();
   const snapshot = operatorFixture();
   snapshot.coordinator!.state = untrack(() => state);
@@ -73,7 +75,7 @@
           }
         : { status: "accepted", message: "Fixture rerun accepted." },
   });
-  controller.view = "operations";
+  controller.view = untrack(() => view);
   const profile = {
     principal: "fixture",
     revision: 0,

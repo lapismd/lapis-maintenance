@@ -65,7 +65,7 @@ export class MaintenanceController {
     return visibleItems(this.snapshot, this);
   }
   get counts() {
-    const items = this.snapshot?.items ?? [];
+    const items = this.items;
     return {
       total: items.length,
       approvals: items.filter((i) => i.status === "approval-wait").length,

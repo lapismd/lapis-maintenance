@@ -127,15 +127,22 @@ export const AttentionSummary: Story = {
   args: { part: "attention" },
   play: async ({ canvasElement }) => {
     const c = within(canvasElement);
-    const toggle = await c.findByRole("button", {
-      name: "Toggle automation attention",
-    });
-    await expect(toggle).toHaveAttribute("aria-expanded", "false");
-    await userEvent.click(toggle);
-    await c.findByText("Manual repair ownership");
+    await c.findByText("Automation attention");
+    await expect(
+      c.queryByRole("button", {
+        name: "Toggle automation attention",
+      }),
+    ).not.toBeInTheDocument();
+    await expect(
+      c.queryByText("Manual repair ownership"),
+    ).not.toBeInTheDocument();
+    await expect(
+      c.queryByText(/Synthetic coordinator evidence/),
+    ).not.toBeInTheDocument();
     await expect(
       c.getByRole("button", { name: "View waves, issues and decisions" }),
     ).toBeVisible();
+    await expect(canvasElement.querySelector("[aria-expanded]")).toBeNull();
   },
 };
 export const Workspace: Story = {

@@ -46,3 +46,25 @@ export const EmptyColumnsCollapsed: Story = {
     await c.findByRole("button", { name: "Collapse 0 Approval waiting" });
   },
 };
+export const RunningLane: Story = {
+  render: () => ({ Component: Demo, props: { part: "board" } }),
+  play: async ({ canvasElement }) => {
+    const { expect, within, userEvent } = await import("storybook/test");
+    const c = within(canvasElement);
+    await c.findByRole("button", { name: /Open card: Notebook release/ });
+    const expand = c.queryByRole("button", { name: "Expand 1 Running" });
+    if (expand) await userEvent.click(expand);
+    const card = await c.findByRole("button", { name: /Open card: Mira CI/ });
+    const lane = card.closest('[data-ui-component="kanban-column"]')!;
+    await expect(
+      within(lane as HTMLElement).getByRole("heading", {
+        name: "Running",
+      }),
+    ).toBeVisible();
+    await expect(
+      within(lane as HTMLElement).queryByRole("button", {
+        name: /Open card: Previous CI/,
+      }),
+    ).not.toBeInTheDocument();
+  },
+};

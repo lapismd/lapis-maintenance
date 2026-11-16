@@ -1,15 +1,33 @@
 .operations-attention {
-  margin: 0 0.75rem 0.65rem;
+  container-type: inline-size;
+  margin-block-end: 0.65rem;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--card);
+  font-size: 0.8rem;
 }
 .operations-attention-heading {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.5rem;
   align-items: center;
-  padding: 0.3rem;
+  padding: 0.3rem 0.6rem;
+  min-width: 0;
+}
+.operations-attention-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.operations-attention-title > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.operations-attention-title > svg,
+.operations-attention-heading > :not(.operations-attention-title) {
+  flex-shrink: 0;
 }
 .operations-attention-heading > :last-child {
   margin-inline-start: auto;
@@ -17,50 +35,15 @@
 .operations-attention-counts {
   color: var(--muted-foreground);
   font-size: 0.75rem;
+  white-space: nowrap;
 }
-.operations-attention-content {
-  padding: 0.7rem 0.85rem;
-  border-top: 1px solid var(--border);
-}
-.operations-attention-content > p {
-  margin: 0 0 0.7rem;
-}
-.operations-attention .operations-timeline > li {
-  position: relative;
-  padding: 0 0 1rem 2.3rem;
-  min-height: 2rem;
-}
-.operations-attention .operations-timeline > li:not(:last-child)::before {
-  content: "";
-  position: absolute;
-  inset-block: 1.8rem 0;
-  inset-inline-start: 0.9rem;
-  border-inline-start: 1px solid var(--border);
-}
-.operations-attention .operations-timeline > li:last-child {
-  padding-bottom: 0;
-}
-.operations-timeline-marker {
-  position: absolute;
-  inset-block-start: 0;
-  inset-inline-start: 0;
-  display: grid;
-  place-items: center;
-  width: 1.8rem;
-  height: 1.8rem;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  color: var(--muted-foreground);
-  background: var(--background);
-}
-.operations-entry-heading {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-@media (max-width: 600px) {
+@container (max-width: 44rem) {
   .operations-attention-counts {
+    display: none;
+  }
+}
+@container (max-width: 30rem) {
+  .operations-attention-heading > button > span {
     display: none;
   }
 }
