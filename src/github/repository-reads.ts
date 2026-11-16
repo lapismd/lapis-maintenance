@@ -161,6 +161,15 @@ export async function readRepository(
     details,
     coverage: {
       repository,
+      actions:
+        runs.status === "fulfilled"
+          ? runs.value.actions
+          : {
+              branch: metadata.default_branch,
+              state: "unknown" as const,
+              workflows: 0,
+              reason: "Workflow coverage unavailable.",
+            },
       available: !gaps.length,
       reason: [...new Set(gaps)].join(" ") || undefined,
       holdReason: entry.holdReason,

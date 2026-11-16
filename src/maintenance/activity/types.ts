@@ -29,6 +29,7 @@ export interface ActivityEvent extends ActivityEntryContent {
 export interface ActivityQuery {
   search: string;
   repositories: string[];
+  repositoriesRestricted?: boolean;
   statuses: ItemStatus[];
   kinds: ActivityKind[];
 }

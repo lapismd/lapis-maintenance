@@ -41,6 +41,7 @@ export default mergeConfig(
               "@lapismd/design-core/shadcn/dropdown-menu",
               "@lapismd/design-core/shadcn/avatar",
               "@lapismd/design-core/shadcn/breadcrumb",
+              "@lapismd/repository-ui/jj",
               "@tanstack/svelte-virtual",
             ],
           },

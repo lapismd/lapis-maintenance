@@ -79,6 +79,7 @@ export interface MaintenanceItem {
   actions: ActionCapability[];
 }
 export interface RepositoryCoverage {
+  actions?: import("./repository-actions").RepositoryActions;
   repository: string;
   available: boolean;
   reason?: string;

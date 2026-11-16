@@ -1,3 +1,7 @@
+import {
+  repositoryActionLabels,
+  type RepositoryActionState,
+} from "../maintenance/repository-actions";
 import type { MaintenanceController } from "../maintenance/controller.svelte";
 import type { ReviewController } from "../maintenance/review/controller.svelte";
 import type { View } from "../maintenance/types";
@@ -20,6 +24,8 @@ export function workspaceHash(
     params.set("repositories", inbox.repositories.join(","));
   if (inbox.statuses.length) params.set("statuses", inbox.statuses.join(","));
   if (inbox.query) params.set("q", inbox.query);
+  if (inbox.repositoryStatuses.length)
+    params.set("branchStates", inbox.repositoryStatuses.join(","));
   const board = `${inbox.view}${params.size ? `?${params}` : ""}`;
   const identity = /^pr:([^:]+):(\d+)$/.exec(review.selectedId ?? "");
   if (review.workspaceOpen && identity)
@@ -58,6 +64,13 @@ export function bindWorkspaceNavigation(
         ].includes(v),
       ) as typeof inbox.statuses;
     inbox.query = params.get("q") ?? "";
+    inbox.repositoryStatuses = [
+      ...new Set(
+        (params.get("branchStates") ?? "")
+          .split(",")
+          .filter((state) => Object.hasOwn(repositoryActionLabels, state)),
+      ),
+    ] as RepositoryActionState[];
     if (pr) {
       const id = `pr:${decodeURIComponent(pr[1]!)}:${pr[2]}`;
       void review.select(id);

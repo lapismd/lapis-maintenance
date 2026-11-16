@@ -4,6 +4,8 @@
 
 **Requirement.** R1 MUST demonstrate the proposed PR, checks, activity and approval UI with repository-owned production components/controllers and disposable in-memory ports before live integration.
 
+The shared repository navigation and Run workflow picker follow LM-UI-004; the main PR shell preserves branch-status filters when returning to its board.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.

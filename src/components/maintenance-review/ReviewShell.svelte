@@ -251,8 +251,16 @@
             controller={activity}
             query={{
               search: inbox.query,
-              repositories:
-                sessionMode === "github" && !inbox.repositories.length
+              repositoriesRestricted: inbox.repositoryStatuses.length > 0,
+              repositories: inbox.repositoryStatuses.length
+                ? inbox.repositoryRows
+                    .filter(
+                      (r) =>
+                        !inbox.repositories.length ||
+                        inbox.repositories.includes(r.repository),
+                    )
+                    .map((r) => r.repository)
+                : sessionMode === "github" && !inbox.repositories.length
                   ? (inbox.snapshot?.repositories.map((r) => r.repository) ??
                     [])
                   : inbox.repositories,

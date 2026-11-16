@@ -11,7 +11,11 @@
   } from "../../src/maintenance/dispatch/types";
   let {
     scenario = "accepted",
-  }: { scenario?: "accepted" | "rejected" | "uncertain" } = $props();
+    repositories = [],
+  }: {
+    scenario?: "accepted" | "rejected" | "uncertain";
+    repositories?: string[];
+  } = $props();
   const workflow: DispatchWorkflow = {
     id: 12,
     name: "Verify release",
@@ -84,5 +88,5 @@
 >
   <Button onclick={() => controller.show("lapismd/lapis-maintenance")}
     ><Play aria-hidden="true" />Run workflow</Button
-  ><DispatchDialog {controller} live={false} />
+  ><DispatchDialog {controller} {repositories} live={false} />
 </div>

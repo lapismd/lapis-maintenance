@@ -36,6 +36,7 @@ export class ActivityController {
     if (this.#disposed) return Promise.resolve();
     const normalized = {
       search: query.search.trim().toLowerCase(),
+      ...(query.repositoriesRestricted ? { repositoriesRestricted: true } : {}),
       repositories: [...new Set(query.repositories)].sort(),
       statuses: [...new Set(query.statuses)].sort(),
       kinds: [...new Set(query.kinds)].sort(),

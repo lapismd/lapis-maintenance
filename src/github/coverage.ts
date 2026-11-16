@@ -18,6 +18,7 @@ export function mergeCoverage(
                 ...new Set([previous.reason, entry.reason].filter(Boolean)),
               ].join(" ") || undefined,
             holdReason: entry.holdReason ?? previous.holdReason,
+            actions: entry.actions ?? previous.actions,
           }
         : entry,
     );

@@ -202,7 +202,30 @@ export function snapshotFixture(): MaintenanceSnapshot {
     items,
     fetchedAt: fixtureTime,
     repositories: [...new Set(items.map((i) => i.repository))].map(
-      (repository) => ({ repository, available: true }),
+      (repository, index) => ({
+        repository,
+        available: true,
+        actions: {
+          branch: "main",
+          sha: "a".repeat(40),
+          workflows: 2,
+          state:
+            (
+              [
+                "passed",
+                "passed",
+                "failed",
+                "passed",
+                "passed",
+                "passed",
+                "pending",
+                "unknown",
+              ] as const
+            )[index] ?? "unknown",
+          reason:
+            "Illustrative current-branch workflow summary; fixture data only.",
+        },
+      }),
     ),
   };
 }

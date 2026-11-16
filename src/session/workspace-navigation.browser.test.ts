@@ -17,6 +17,7 @@ it("routes a PR/tab and restores board filters through browser Back", async () =
   try {
     inbox.repositories = ["lapismd/plugin-registry"];
     inbox.statuses = ["review-needed"];
+    inbox.repositoryStatuses = ["failed", "pending"];
     inbox.query = "publish";
     writeWorkspaceHash(inbox, review);
     await vi.waitFor(() => expect(location.hash).toContain("repositories="));
@@ -42,6 +43,7 @@ it("routes a PR/tab and restores board filters through browser Back", async () =
     expect(inbox.repositories).toEqual(["lapismd/plugin-registry"]);
     expect(inbox.query).toBe("publish");
     expect(inbox.statuses).toEqual(["review-needed"]);
+    expect(inbox.repositoryStatuses).toEqual(["failed", "pending"]);
   } finally {
     unbind();
     inbox.dispose();

@@ -45,3 +45,46 @@ export const TypedInputs: Story = {
 };
 export const ChangedDefinition: Story = { args: { scenario: "rejected" } };
 export const Uncertain: Story = { args: { scenario: "uncertain" } };
+
+export const SearchableRepository: Story = {
+  args: {
+    repositories: [
+      "lapismd/lapis-maintenance",
+      "lapismd/dependency-automation",
+      "lapismd/lapis-notes",
+    ],
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    await userEvent.click(c.getByRole("button", { name: "Run workflow" }));
+    const dialog = within(await page.findByRole("dialog"));
+    await userEvent.click(
+      dialog.getByRole("combobox", { name: "Choose repository" }),
+    );
+    const search = await page.findByRole("combobox", {
+      name: "Search workflow repositories",
+    });
+    await userEvent.type(search, "dependency");
+    await waitFor(() =>
+      expect(
+        page.queryByRole("option", {
+          name: "lapismd/lapis-notes",
+        }),
+      ).not.toBeInTheDocument(),
+    );
+    await userEvent.keyboard("{ArrowDown}{Enter}");
+    await waitFor(() =>
+      expect(
+        dialog.getByRole("combobox", { name: "Choose repository" }),
+      ).toHaveTextContent("lapismd/dependency-automation"),
+    );
+    await expect(
+      dialog.getByRole("combobox", { name: "Choose a workflow" }),
+    ).toHaveTextContent("Choose a workflow");
+    await expect(
+      dialog.getByRole("button", { name: "Simulate workflow dispatch" }),
+    ).toBeDisabled();
+    await userEvent.click(dialog.getByRole("button", { name: "Cancel" }));
+  },
+};

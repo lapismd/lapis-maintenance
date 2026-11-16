@@ -76,7 +76,9 @@ export class GithubSnapshots {
         const fresh =
           !options.force &&
           this.now() - Date.parse(cached.fetchedAt) < 300_000 &&
-          !cached.repositories.some((repo) => repo.loading);
+          !cached.repositories.some(
+            (repo) => repo.loading || (repo.available && !repo.actions),
+          );
         options.onProgress?.(
           fresh
             ? cached
@@ -132,6 +134,9 @@ export class GithubSnapshots {
             loading: true,
             reason: "Loading repository activity…",
             holdReason: entry.holdReason,
+            actions: cached?.repositories.find(
+              (row) => row.repository === entry.repository,
+            )?.actions,
           },
         ]),
       );

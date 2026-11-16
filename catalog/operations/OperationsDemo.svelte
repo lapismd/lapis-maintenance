@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
+  import OperationsFooter from "../../src/components/maintenance-operations/OperationsFooter.svelte";
+  import OperationsAttention from "../../src/components/maintenance-operations/OperationsAttention.svelte";
+  import MaintenanceScreen from "../../src/components/maintenance/MaintenanceScreen.svelte";
   import OperationsPanel from "../../src/components/maintenance-operations/OperationsPanel.svelte";
   import { MaintenanceController } from "../../src/maintenance/controller.svelte";
   import { operatorFixture } from "./fixtures";
@@ -9,10 +12,16 @@
   } from "../../src/maintenance/types";
   let {
     state = "current",
+    part = "page",
+    shell = false,
+    width,
     dark = false,
     uncertain = false,
     action = "rerun-failed",
   }: {
+    part?: "page" | "attention" | "footer";
+    shell?: boolean;
+    width?: number;
     state?: "current" | "stale" | "unsupported" | "unavailable";
     dark?: boolean;
     uncertain?: boolean;
@@ -65,6 +74,20 @@
         : { status: "accepted", message: "Fixture rerun accepted." },
   });
   controller.view = "operations";
+  const profile = {
+    principal: "fixture",
+    revision: 0,
+    details: {
+      display_name: "Demo maintainer",
+      description: "Fixture only",
+      avatar: null,
+      email: null,
+      gravatar: false,
+    },
+  };
+  $effect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+  });
   onMount(() => {
     document.documentElement.classList.toggle("dark", dark);
     void controller.refresh();
@@ -75,6 +98,21 @@
   });
 </script>
 
-<div class="maintenance-app" data-ui-theme="lapis">
-  <OperationsPanel {controller} />
+<div
+  class="maintenance-app"
+  data-ui-theme="lapis"
+  style:width={width ? `${width}px` : undefined}
+  style:max-width="100%"
+  style:height={part === "page" ? "100dvh" : undefined}
+>
+  {#if shell}<MaintenanceScreen
+      {controller}
+      {profile}
+      {dark}
+      onToggleTheme={() => (dark = !dark)}
+      onConnect={() => {}}
+    />
+  {:else if part === "footer"}<OperationsFooter {controller} />
+  {:else if part === "attention"}<OperationsAttention {controller} />
+  {:else}<OperationsPanel {controller} />{/if}
 </div>

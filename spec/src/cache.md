@@ -4,6 +4,8 @@
 
 **Requirement.** The application MUST cache repository reads in a bounded local Turso WASM database without treating cached data as GitHub authority.
 
+Persist branch-action summaries with assembled views under LM-UI-004, retaining cached badges during background refresh and recomputing legacy views without that field from the existing response cache.
+
 ### Acceptance details
 
 - Policy-versioned detail/review namespaces recompute action eligibility after upgrades while retaining raw API caches; resources publish verified results before persistence settles, drain writes before retirement, serialize same-partition Turso reopen after connection close and clear denied previews; persist reads, validators, assembled views and details separately from credentials, partitioned by token and repository selection; publish boards before discovery, checkpoint partial scans, serve fresh details directly and retain revision-matching details up to one day during revalidation with refresh/failure feedback, while commands bypass cached data.

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import RepositoryActionStatus from "./RepositoryActionStatus.svelte";
+  import RepositoryActionsFilter from "./RepositoryActionsFilter.svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import * as Popover from "@lapismd/design-core/shadcn/popover";
   import * as CommandView from "@lapismd/design-core/shadcn/command-view";
@@ -14,6 +16,17 @@
     onSelectRepository?: (repository?: string) => void;
   } = $props();
   let open = $state(false);
+  const id = $props.id();
+  let search = $state("");
+  // Apply repository-name and branch-status predicates together before presentation.
+  const rows = $derived(
+    controller.repositoryRows.filter((repo) =>
+      repo.repository.toLowerCase().includes(search.trim().toLowerCase()),
+    ),
+  );
+  $effect(() => {
+    if (!open) search = "";
+  });
   function select(repository?: string) {
     if (onSelectRepository) {
       onSelectRepository(repository);
@@ -35,7 +48,11 @@
     {#snippet child({ props })}
       <Button
         {...props}
-        variant={compact ? "ghost" : "outline"}
+        variant={controller.repositoryStatuses.length
+          ? "secondary"
+          : compact
+            ? "ghost"
+            : "outline"}
         size={compact ? "icon-sm" : "default"}
         aria-label={`Filter repositories: ${label}`}
       >
@@ -54,8 +71,14 @@
     style="width:min(22rem,calc(100vw - 2rem));padding:0.5rem"
     aria-label="Choose repositories"
   >
-    <CommandView.Root label="Search repositories" loop>
+    <div class="repository-picker-tools">
+      <span>Default-branch Actions</span><RepositoryActionsFilter
+        {controller}
+      />
+    </div>
+    <CommandView.Root label="Search repositories" shouldFilter={false} loop>
       <CommandView.Input
+        bind:value={search}
         aria-label="Search repositories"
         placeholder="Search repositories…"
       />
@@ -84,7 +107,7 @@
               </div>
             {/snippet}
           </CommandView.Item>
-          {#each controller.snapshot?.repositories ?? [] as repo (repo.repository)}
+          {#each rows as repo (repo.repository)}
             <CommandView.Item
               style="margin-block:0.125rem"
               value={repo.repository}
@@ -94,6 +117,8 @@
                 <div
                   {...props}
                   role="option"
+                  aria-label={repo.repository}
+                  aria-describedby={`${id}-${repo.repository}`}
                   aria-selected={controller.repositories.includes(
                     repo.repository,
                   )}
@@ -107,6 +132,10 @@
                   <CommandView.ItemLabel
                     >{repo.repository}</CommandView.ItemLabel
                   >
+                  <RepositoryActionStatus
+                    repository={repo}
+                    id={`${id}-${repo.repository}`}
+                  />
                   {#if controller.repositories.includes(repo.repository)}<Check
                       size={16}
                       aria-hidden="true"

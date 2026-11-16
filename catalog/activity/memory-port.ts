@@ -103,7 +103,7 @@ export class MemoryActivityPort implements ActivityReadPort {
         ? []
         : this.events.filter(
             (event) =>
-              (!query.repositories.length ||
+              ((!query.repositories.length && !query.repositoriesRestricted) ||
                 query.repositories.includes(event.repository)) &&
               (!query.statuses.length ||
                 query.statuses.includes(event.status)) &&

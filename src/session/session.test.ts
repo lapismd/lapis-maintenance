@@ -1,4 +1,5 @@
 import { expect, it, vi } from "vitest";
+import { OperatorReports } from "../maintenance/operator-report.svelte";
 import { MaintenanceSession } from "./session.svelte";
 import { MemoryResponseCache } from "../cache/response-cache";
 import type { DeviceStore } from "./device-store";
@@ -129,4 +130,24 @@ it("late cache construction after disconnect cannot restore identity or retain a
   expect(store.token()).toBeNull();
   expect(close).toHaveBeenCalledOnce();
   await session.dispose();
+});
+
+it("starts coordinator warming alongside the board without awaiting the report", async () => {
+  const pending = new Promise<void>(() => {});
+  const { session } = fixture("invented-report-token");
+  const refresh = vi
+    .spyOn(OperatorReports.prototype, "refresh")
+    .mockImplementation(() => {
+      expect(session.controller?.snapshot).toBeNull();
+      return pending;
+    });
+  try {
+    await session.restore();
+    expect(session.phase).toBe("connected");
+    expect(session.controller?.snapshot).not.toBeNull();
+    expect(refresh).toHaveBeenCalledOnce();
+  } finally {
+    await session.dispose();
+    refresh.mockRestore();
+  }
 });

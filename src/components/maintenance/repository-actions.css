@@ -1,0 +1,79 @@
+.repository-actions-badge {
+  inline-size: 1.25rem;
+  block-size: 1.25rem;
+  padding: 0;
+  border-radius: 50%;
+  margin-inline-start: auto;
+}
+.repository-actions-badge[data-state="pending"] svg {
+  animation: repository-actions-spin 1s linear infinite;
+}
+@keyframes repository-actions-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .repository-actions-badge[data-state="pending"] svg {
+    animation: none;
+  }
+}
+.maintenance-repository-header,
+.repository-picker-tools {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.maintenance-repository-header .maintenance-repository-heading {
+  flex: 1;
+  min-width: 0;
+}
+.maintenance-repository-label {
+  flex: 1;
+  text-align: start;
+}
+.repository-picker-tools {
+  justify-content: space-between;
+  padding: 0.125rem 0.5rem 0.375rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+.maintenance-repository-empty {
+  padding: 0.5rem;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.maintenance-repository-header {
+  margin-block: 0.5rem 0.25rem;
+}
+.maintenance-repository-header .maintenance-repository-heading {
+  margin-block: 0;
+}
+.repository-actions-filter-trigger,
+.maintenance-navigation .repository-actions-filter-trigger {
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  flex: none;
+  justify-content: center;
+  align-items: center;
+}
+.repository-actions-option {
+  margin-block: 0.2rem;
+  min-height: 2rem;
+  gap: 0.45rem;
+}
+.repository-actions-selection {
+  display: grid;
+  place-items: center;
+  width: 1rem;
+  height: 1rem;
+  margin-inline-start: auto;
+  flex: none;
+  color: var(--muted-foreground);
+}
+.repository-actions-selection svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}

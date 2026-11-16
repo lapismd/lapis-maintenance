@@ -40,6 +40,7 @@ it("scoped refresh invalidates only its repository and survives an older global 
       coverage: {
         repository,
         available: true,
+        actions: { branch: "main", state: "unknown" as const, workflows: 0 },
         reason: undefined,
         holdReason: undefined,
       },
@@ -131,6 +132,7 @@ it("checkpoints completed repositories so an interrupted scan can restore cards"
       coverage: {
         repository: entry.repository,
         available: true,
+        actions: { branch: "main", state: "unknown" as const, workflows: 0 },
         reason: undefined,
         holdReason: undefined,
       },
