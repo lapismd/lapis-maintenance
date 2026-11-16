@@ -421,3 +421,19 @@ Design Core `^0.13.4` registry floors. Final registry consumer validation passes
 the same full matrix, with 27 focused stories and a cold populated shell review.
 Exact-head hosted CI and merged-main Pages/PWA remain separate delivery gates.
 Evidence: `spec/records/2026-11-15-repository-actions-operations.md`.
+
+## 2026-11-16 — Hosted delivery and batch qualification
+
+PR #9 merged its checked head with an equal merge tree. Exact-head PR CI and
+merged-main CI/Pages passed; 17 public entry files match the deployment artifact.
+Live PWA isolation, installability, offline cold reload, reconnect and cache
+boundaries passed. Published Operations shows the released joined custom-label
+identifier control. Current live coordinator evidence contains 19 public nodes
+with no coverage gaps.
+
+Two designated no-op workflows qualified manual dispatch, intentional environment
+rejection, a two-target failed-job rerun batch and a two-target environment approval
+batch through production adapters. All eight writes were accepted; both new
+attempts completed successfully. The completed implementation, publication and
+hosted gates are recorded in `spec/records/2026-11-16-operations-delivery.md`.
+No further UI review stop is required under the user's standing approval.
