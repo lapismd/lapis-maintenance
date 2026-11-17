@@ -17,6 +17,7 @@ async function fixture() {
   const cache = new MemoryResponseCache();
   const clear = vi.spyOn(cache, "clear");
   const snapshot = snapshotFixture();
+  snapshot.items = snapshot.items.filter((item) => item.id !== "cancelled");
   snapshot.fetchedAt = new Date().toISOString();
   await saveCachedView(cache, selection, snapshot);
   let token: string | null = "invented-remembered-token";

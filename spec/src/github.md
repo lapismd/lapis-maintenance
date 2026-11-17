@@ -17,6 +17,8 @@ Repository branch-action summaries reuse the default-branch head and paginated w
 
 **Requirement.** Slice 2 MUST use direct browser GitHub reads with one user-supplied token; only separately authorized commands may write.
 
+Live cards and persisted snapshots are an attention queue under LM-CACHE-001; resolved workflow history is omitted while compact branch health and passing open PRs remain. PR/workflow inventory completeness is independent of optional-resource errors and controls retirement; partial coverage preserves unverified attention rows.
+
 ### Acceptance details
 
 - Discover defaults from dependency-automation's allowlist and show repositories while activity loads; icon-only repository settings expose icon/checkbox rows for defaults, retain explicit additions/exclusions and holds, and keep one coverage row per repository.

@@ -1,4 +1,5 @@
 import type { MaintenanceSnapshot } from "../maintenance/types";
+import { attentionSnapshot } from "../maintenance/attention";
 import type { RepositorySelection } from "../github/models";
 import { validRepository } from "../github/models";
 import type { ResponseCache } from "./response-cache";
@@ -42,7 +43,7 @@ export async function readCachedView(
     )
   )
     return;
-  return snapshot;
+  return attentionSnapshot(snapshot);
 }
 export async function saveCachedView(
   cache: ResponseCache | undefined,
@@ -50,7 +51,7 @@ export async function saveCachedView(
   snapshot: MaintenanceSnapshot,
 ) {
   await cache?.put(viewKey(selection), {
-    body: { schema: 1, snapshot },
+    body: { schema: 1, snapshot: attentionSnapshot(snapshot) },
     fetchedAt: Date.parse(snapshot.fetchedAt),
   });
 }
