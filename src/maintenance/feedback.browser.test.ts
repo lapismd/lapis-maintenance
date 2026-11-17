@@ -1,5 +1,9 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { FeedbackCenter } from "./feedback.svelte";
+import { mount, unmount } from "svelte";
+import { page } from "vitest/browser";
+import FeedbackHost from "../components/feedback/FeedbackHost.svelte";
+import "@lapismd/design-core/styles.css";
 const centers: FeedbackCenter[] = [];
 const center = () => {
   const feedback = new FeedbackCenter();
@@ -11,6 +15,28 @@ const error = {
   message: "GitHub unavailable",
   severity: "error" as const,
 };
+it("gives toast actions a themed background before hover", async () => {
+  const c = center();
+  c.sync("resource", [
+    { ...error, action: { label: "View details", run: () => {} } },
+  ]);
+  const target = document.createElement("div");
+  document.body.append(target);
+  const app = mount(FeedbackHost, { target, props: { center: c } });
+  try {
+    const button = page.getByRole("button", {
+      name: "View details",
+      exact: true,
+    });
+    await expect.element(button).toBeVisible();
+    expect(getComputedStyle(button.element()).backgroundColor).not.toBe(
+      "rgba(0, 0, 0, 0)",
+    );
+  } finally {
+    await unmount(app);
+    target.remove();
+  }
+});
 afterEach(() => {
   centers.splice(0).forEach((c) => c.dispose());
   vi.useRealTimers();

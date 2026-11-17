@@ -267,14 +267,20 @@ body {
 }
 
 .maintenance-brand-header {
-  display: grid;
-  justify-items: center;
   width: 100%;
 }
+.maintenance-brand[data-compact="false"] {
+  display: grid;
+  grid-template-columns: 26px max-content;
+  row-gap: 0.1rem;
+}
 .maintenance-build-version {
+  grid-column: 2;
+  grid-row: 2;
+  justify-self: stretch;
   display: block;
-  width: fit-content;
-  padding: 0.15rem 0.4rem;
+  text-align: center;
+  padding: 0.2rem 0.5rem;
   border-radius: var(--radius);
   color: var(--muted-foreground);
   font-size: 0.65rem;
@@ -283,8 +289,8 @@ body {
   text-decoration: none;
 }
 a.maintenance-build-version:hover {
-  background: var(--muted);
-  color: var(--foreground);
+  background: var(--sidebar-accent, var(--muted));
+  color: var(--sidebar-accent-foreground, var(--foreground));
 }
 a.maintenance-build-version:focus-visible {
   outline: 2px solid var(--ring);

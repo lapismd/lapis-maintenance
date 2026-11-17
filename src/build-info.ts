@@ -3,7 +3,7 @@ export const appBuild =
   sha && /^[a-f0-9]{40}$/.test(sha)
     ? {
         sha,
-        label: `v${sha.slice(0, 8)}`,
+        label: sha.slice(0, 8),
         url: `https://github.com/lapismd/lapis-maintenance/commit/${sha}`,
       }
     : null;

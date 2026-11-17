@@ -19,6 +19,7 @@
   import { Play } from "@lucide/svelte";
   import ReviewWorkspace from "./ReviewWorkspace.svelte";
   import ReviewInspector from "./ReviewInspector.svelte";
+  import ReviewStatus from "./ReviewStatus.svelte";
   import ReviewInputDialog from "./ReviewInputDialog.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
@@ -197,15 +198,9 @@
                   ></Breadcrumb.Item
                 >
               </Breadcrumb.List>
-            </Breadcrumb.Root>{#if review.overview}<Badge variant="outline"
-                >{review.overview.draft
-                  ? "Draft"
-                  : review.overview.state === "merged"
-                    ? "Merged"
-                    : review.overview.state === "closed"
-                      ? "Closed"
-                      : "Open"}</Badge
-              >{/if}{@render liveControls()}<Badge variant="secondary"
+            </Breadcrumb.Root>{#if review.overview}<ReviewStatus
+                overview={review.overview}
+              />{/if}{@render liveControls()}<Badge variant="secondary"
               >{sessionMode === "github" ? "Live" : "UI preview"}</Badge
             ><Button
               variant="ghost"

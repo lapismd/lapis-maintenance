@@ -61,7 +61,7 @@ export class FeedbackCenter {
           ? `${notice.message.slice(0, 217)}…`
           : notice.message,
       action: notice.action
-        ? { id: "activate", label: notice.action.label }
+        ? { id: "activate", label: notice.action.label, variant: "secondary" }
         : undefined,
     };
     this.history = [

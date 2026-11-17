@@ -41,7 +41,7 @@
       <Button
         size="sm"
         variant="outline"
-        title={reason ?? "Approve PR"}
+        title={reason ? `Approve PR — ${reason}` : "Approve PR"}
         aria-describedby={reason ? `${id}-reason` : undefined}
         disabled={!controller.canApprove || controller.pending}
         onclick={() => controller.invoke("approve-pr", pr.id, "Approve PR")}
@@ -59,8 +59,7 @@
           size="sm"
           variant="outline"
           disabled={!action.available || controller.pending}
-          title={action.reason ??
-            (action.kind === "comment" ? "Comment" : action.label)}
+          title={`${action.kind === "comment" ? "Comment" : action.label}${action.reason ? ` — ${action.reason}` : ""}`}
           aria-describedby={action.reason
             ? `${id}-${action.kind}-reason`
             : undefined}

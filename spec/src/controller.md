@@ -26,7 +26,8 @@ failures re-arm after recovery without replaying actions, and no notification is
 persisted in account caches.
 
 Application build identity is static public presentation metadata under
-LM-UI-001, independent of repository/card revisions and command authority.
+LM-UI-001, independent of repository/card revisions and command authority. Its
+short commit label links to the full application source commit.
 
 ### Acceptance details
 

@@ -25,6 +25,15 @@ Merge footers in the overview, Checks tab and inspector contain controls without
 an inline policy paragraph. Unavailable merge actions retain their reasons as
 button titles and accessible descriptions, preserving eligibility and preflight.
 
+PR header actions remain on one row at every width, using icons with accessible
+names and hover titles when labels no longer fit. Rendered PR Markdown retains
+bottom padding before its contextual note through the renderer's public token.
+
+PR lifecycle labels in the inspector and page header use the same rounded chip
+with a state icon and distinct theme colours: neutral Draft, success Open,
+primary Merged and destructive Closed. Text and icons identify the state without
+relying on colour; a closed or merged state takes precedence over a draft flag.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.

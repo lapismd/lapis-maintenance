@@ -32,7 +32,7 @@ Notification stories remain fixture-only and visual-pending.
 
 Vite embeds only the public full Git commit identity: GitHub Actions GITHUB_SHA
 for hosted builds, or local Git HEAD during development. Invalid configured
-identities fail the build; source archives without Git metadata use vdev.
+identities fail the build; source archives without Git metadata use dev.
 Build identity is shared by app and fixture Storybook without provider reads.
 
 ### Acceptance details
