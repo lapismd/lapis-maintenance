@@ -148,19 +148,6 @@
   font-size: 0.83rem;
   line-height: 1.7;
 }
-.review-description-content > p {
-  white-space: pre-line;
-}
-.review-description-content h3 {
-  margin-top: 1.5rem;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-.review-description-content ul {
-  list-style: disc;
-  padding-inline-start: 1.2rem;
-  margin: 0.5rem 0 1.5rem;
-}
 .review-description-note {
   display: flex;
   align-items: flex-start;

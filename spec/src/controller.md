@@ -9,6 +9,9 @@ Repository discovery policy under LM-GH-003 affects read coverage only; adding a
 
 Cache retirement drains writes and closes its connection before a same-partition successor opens, preserving cached responses across rapid remounts under LM-CACHE-001.
 
+PR descriptions remain raw Markdown in cached resources. Presentation alone
+renders them under LM-PR-001 without extra reads or changes to command authority.
+
 Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
 
 ### Acceptance details
