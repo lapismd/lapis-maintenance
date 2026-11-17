@@ -20,20 +20,19 @@ import { viewKey } from "../cache/view-cache";
 import { ResourceCache } from "../cache/resource-cache";
 import { readCoordinatorReport } from "./coordinator-report";
 import { GithubSnapshots } from "./snapshot-reader";
+import { PreviewMap } from "../cache/preview-map";
+import { requiresAttention } from "../maintenance/attention";
 
 export class GithubReadPort implements MaintenanceReadPort {
   #snapshots: GithubSnapshots;
   #reports: ResourceCache;
   #writes = new Set<Promise<void>>();
-  #previews = new Map<
-    string,
-    {
-      detail: MaintenanceDetail;
-      fetchedAt: number;
-      selection: string;
-      version: number;
-    }
-  >();
+  #previews = new PreviewMap<{
+    detail: MaintenanceDetail;
+    fetchedAt: number;
+    selection: string;
+    version: number;
+  }>();
   constructor(
     private client: GithubTransport,
     private selection: () => RepositorySelection,
@@ -215,6 +214,10 @@ export class GithubReadPort implements MaintenanceReadPort {
     version: number,
   ) {
     this.#previews.delete(detail.item.id);
+    if (!requiresAttention(detail.item)) {
+      this.#snapshots.details.delete(detail.item.id);
+      return;
+    }
     this.#previews.set(detail.item.id, {
       detail,
       fetchedAt,

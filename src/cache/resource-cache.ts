@@ -1,6 +1,7 @@
 import { MaintenanceReadError } from "../maintenance/types";
 import type { ReadOptions } from "../github/transport";
 import type { ResponseCache } from "./response-cache";
+import { PreviewMap } from "./preview-map";
 interface Retained {
   value: unknown;
   fetchedAt: number;
@@ -10,7 +11,7 @@ interface Retained {
 export class ResourceCache {
   #invalidated = new Set<string>();
   #epochs = new Map<string, number>();
-  #values = new Map<string, Retained>();
+  #values = new PreviewMap<Retained>();
   #lifetime = new AbortController();
   #writing: Promise<void> = Promise.resolve();
   constructor(

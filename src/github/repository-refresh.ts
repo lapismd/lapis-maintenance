@@ -9,6 +9,8 @@ import type { RepositorySelection } from "./models";
 import { readRepository } from "./repository-reads";
 import type { ResponseCache } from "../cache/response-cache";
 import { readCachedView, saveCachedView } from "../cache/view-cache";
+import { reconcileAttention } from "../cache/retention-policy";
+import { unverifiedItem } from "../maintenance/attention";
 type RepositoryResult = Awaited<ReturnType<typeof readRepository>>;
 /** Newer scoped results overlay any older, still-running global scan. */
 export class RepositoryRefreshes {
@@ -93,6 +95,17 @@ export class RepositoryRefreshes {
       this.actor,
     );
     signal.throwIfAborted();
+    if (!result.coverage.available) {
+      const observed = new Set(result.details.map((detail) => detail.item.id));
+      result.details.push(
+        ...[...this.details().values()].filter(
+          (detail) =>
+            detail.item.repository === repository &&
+            !observed.has(detail.item.id) &&
+            unverifiedItem(detail.item, result.coverage),
+        ),
+      );
+    }
     await this.cache?.removePrefix(`maintenance-detail:v4:${repository}:`);
     signal.throwIfAborted();
     this.#versions.set(repository, this.version(repository) + 1);
@@ -112,6 +125,7 @@ export class RepositoryRefreshes {
           selection,
           patchRepository(base, snapshot, repository),
         );
+      await reconcileAttention(this.cache, snapshot);
     });
     return snapshot;
   }

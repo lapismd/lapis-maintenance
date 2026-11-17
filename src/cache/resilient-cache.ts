@@ -1,6 +1,7 @@
 import {
   MemoryResponseCache,
   type CachedResponse,
+  type CacheTransform,
   type ResponseCache,
 } from "./response-cache";
 /** Disk failures degrade reads to memory; explicit cleanup still reports disk failures. */
@@ -66,5 +67,14 @@ export class ResilientResponseCache implements ResponseCache {
   async close() {
     await this.#memory.close();
     await this.persistent.close();
+  }
+  async sweep(transform: CacheTransform) {
+    await this.#memory.sweep(transform);
+    // Cleanup is still attempted after a read/write failure, just like disconnect.
+    try {
+      await this.persistent.sweep(transform);
+    } catch {
+      this.#fallback();
+    }
   }
 }

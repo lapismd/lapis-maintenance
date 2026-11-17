@@ -8,6 +8,7 @@ import { snapshotFixture } from "../../catalog/fixtures";
 it("publishes a fresh cached board before slow allowlist discovery finishes", async () => {
   const cache = new MemoryResponseCache();
   const snapshot = snapshotFixture();
+  snapshot.items = snapshot.items.filter((item) => item.id !== "cancelled");
   const selection = { additions: [], exclusions: [] };
   const now = Date.parse(snapshot.fetchedAt);
   await saveCachedView(cache, selection, snapshot);
@@ -46,6 +47,7 @@ it("restores an interrupted partial scan instead of discarding its cached cards"
   const cache = new MemoryResponseCache();
   const selection = { additions: [], exclusions: [] };
   const snapshot = snapshotFixture();
+  snapshot.items = snapshot.items.filter((item) => item.id !== "cancelled");
   snapshot.repositories[0]!.loading = true;
   await saveCachedView(cache, selection, snapshot);
   expect(

@@ -1,122 +1,57 @@
-import { IndexedDbResponseCache } from "./indexeddb-cache";
-import { ResilientResponseCache } from "./resilient-cache";
-import type { Database } from "@tursodatabase/database-wasm";
 import {
-  MemoryResponseCache,
-  type CachedResponse,
-  type ResponseCache,
-} from "./response-cache";
-
-// The WASM worker must finish closing an OPFS database before reopening it.
-const partitions = new Map<string, Promise<void>>();
-async function claimPartition(partition: string) {
-  const previous = partitions.get(partition);
-  let release!: () => void;
-  const retired = new Promise<void>((resolve) => {
-    release = resolve;
-  });
-  partitions.set(partition, retired);
-  void retired.then(() => {
-    if (partitions.get(partition) === retired) partitions.delete(partition);
-  });
-  await previous;
-  return release;
-}
-/** One database per high-entropy token digest; the database never receives the token. */
-export class TursoResponseCache implements ResponseCache {
-  readonly kind = "turso";
-  #closed = false;
-  constructor(
-    private db: Database,
-    private release: () => void,
-  ) {}
-  static async open(partition: string): Promise<TursoResponseCache> {
-    const release = await claimPartition(partition);
-    let db: Database | undefined;
+  IndexedDbResponseCache,
+  cleanLegacyBrowserCaches,
+} from "./indexeddb-cache";
+import { ResilientResponseCache } from "./resilient-cache";
+import { MemoryResponseCache, type ResponseCache } from "./response-cache";
+import { PartitionResponseCache } from "./partition-cache";
+import { SharedCacheStore } from "./shared-store";
+import { SqlResponseCache } from "./sql-cache";
+import { RetainedResponseCache } from "./retained-cache";
+import { migrateLegacyFiles, cleanLegacyFiles } from "./legacy-cache";
+import { databaseLease } from "./database-lease";
+const shared = new SharedCacheStore(async () => {
+  const release = await databaseLease();
+  try {
+    return await SqlResponseCache.open(
+      "lapis-maintenance-shared-v2.db",
+      release,
+    );
+  } catch (error) {
+    await release();
+    throw error;
+  }
+});
+/** A logical token partition; both persistent backends share fixed app-wide budgets. */
+export class TursoResponseCache extends PartitionResponseCache {
+  static async open(partition: string) {
+    const owned = await shared.acquire();
+    const cache = new TursoResponseCache(owned.store, partition, owned.release);
     try {
-      // Official prebuilt browser entry: 0.8.3's Vite entry fails in its worker pool.
-      const { connect } = (await import(
-        "@tursodatabase/database-wasm/bundle" as string
-      )) as { connect(path: string): Promise<Database> };
-      db = await connect(`lapis-maintenance-${partition}.db`);
-      await db.exec(
-        "CREATE TABLE IF NOT EXISTS responses (key TEXT PRIMARY KEY, value TEXT NOT NULL, touched INTEGER NOT NULL)",
-      );
-      await db.run(
-        "DELETE FROM responses WHERE touched < ?",
-        Date.now() - 86_400_000,
-      );
-      return new TursoResponseCache(db, release);
+      await migrateLegacyFiles(partition, cache);
+      return cache;
     } catch (error) {
-      try {
-        await db?.close();
-      } catch {}
-      release();
+      await cache.close();
       throw error;
     }
   }
+}
 
-  async get(key: string): Promise<CachedResponse | undefined> {
-    if (this.#closed) return;
-    const row = (await this.db.get(
-      "SELECT value FROM responses WHERE key = ?",
-      key,
-    )) as { value: string } | undefined;
-    if (row) {
-      try {
-        return JSON.parse(row.value) as CachedResponse;
-      } catch {
-        await this.remove(key);
-      }
-    }
-  }
-  async put(key: string, value: CachedResponse): Promise<void> {
-    if (this.#closed) return;
-    const json = JSON.stringify(value);
-    if (new TextEncoder().encode(json).byteLength > 1_048_576) return;
-    await this.db.run(
-      "INSERT OR REPLACE INTO responses (key, value, touched) VALUES (?, ?, ?)",
-      key,
-      json,
-      Date.now(),
-    );
-    let size = (await this.db.get(
-      "SELECT COALESCE(SUM(length(CAST(value AS BLOB))), 0) AS bytes, COUNT(*) AS count FROM responses",
-    )) as { bytes: number; count: number };
-    while (Number(size.bytes) > 25 * 1_048_576 || Number(size.count) > 1000) {
-      await this.db.exec(
-        "DELETE FROM responses WHERE key IN (SELECT key FROM responses ORDER BY touched ASC LIMIT 100)",
-      );
-      size = (await this.db.get(
-        "SELECT COALESCE(SUM(length(CAST(value AS BLOB))), 0) AS bytes, COUNT(*) AS count FROM responses",
-      )) as { bytes: number; count: number };
-    }
-  }
-  async remove(key: string) {
-    if (!this.#closed)
-      await this.db.run("DELETE FROM responses WHERE key = ?", key);
-  }
-  async clear() {
-    if (!this.#closed) await this.db.exec("DELETE FROM responses");
-  }
-  async removePrefix(prefix: string) {
-    if (!this.#closed)
-      await this.db.run(
-        "DELETE FROM responses WHERE substr(key, 1, ?) = ?",
-        prefix.length,
-        prefix,
-      );
-  }
-  async close() {
-    if (!this.#closed) {
-      this.#closed = true;
-      try {
-        await this.db.close();
-      } finally {
-        this.release();
-      }
-    }
-  }
+async function retained(cache: ResponseCache, onFallback: () => void) {
+  let cleaned = 0;
+  const result = new RetainedResponseCache(
+    new ResilientResponseCache(cache, onFallback),
+    async () => {
+      if (Date.now() - cleaned < 3_600_000) return;
+      cleaned = Date.now();
+      await Promise.allSettled([
+        cleanLegacyFiles(),
+        cleanLegacyBrowserCaches(),
+      ]);
+    },
+  );
+  await result.sweep((_key, value) => value);
+  return result;
 }
 
 export async function openResponseCache(
@@ -144,7 +79,9 @@ export async function openResponseCache(
           }, 10_000);
         }),
       ]);
-      return { cache: new ResilientResponseCache(cache, onFallback) };
+      return {
+        cache: await retained(cache, onFallback),
+      };
     } finally {
       clearTimeout(timer);
     }
@@ -152,13 +89,13 @@ export async function openResponseCache(
     try {
       const cache = await IndexedDbResponseCache.open(partition);
       return {
-        cache: new ResilientResponseCache(cache, onFallback),
+        cache: await retained(cache, onFallback),
         notice:
           "Turso is unavailable in this browser; data is cached on this device using browser storage.",
       };
     } catch {}
     return {
-      cache: new MemoryResponseCache(),
+      cache: new RetainedResponseCache(new MemoryResponseCache()),
       notice:
         "Persistent cache unavailable; using a memory cache for this session.",
     };

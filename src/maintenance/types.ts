@@ -79,6 +79,7 @@ export interface MaintenanceItem {
   actions: ActionCapability[];
 }
 export interface RepositoryCoverage {
+  inventory?: { pullRequests: boolean; workflows: boolean };
   actions?: import("./repository-actions").RepositoryActions;
   repository: string;
   available: boolean;

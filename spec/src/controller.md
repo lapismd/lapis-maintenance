@@ -7,7 +7,13 @@ and command ports; the host owns construction and disposal.
 
 Repository discovery policy under LM-GH-003 affects read coverage only; adding a monitored repository cannot prepare a command, remove a consumer hold or bypass the command adapter's fresh authority checks.
 
-Cache retirement drains writes and closes its connection before a same-partition successor opens, preserving cached responses across rapid remounts under LM-CACHE-001.
+Cache retirement drains owned writes before releasing its logical partition, preserving cached responses across rapid remounts under LM-CACHE-001.
+
+The attention policy under LM-CACHE-001 preserves unverified rows on partial
+inventories and retires resolved identities across saved selections only with
+complete PR or workflow evidence; those domains establish completeness separately
+from optional-resource gaps, and maintenance timers retire with their owning
+cache while the shared backend closes only after its last logical partition.
 
 PR descriptions remain raw Markdown in cached resources. Presentation alone
 renders them under LM-PR-001 without extra reads or changes to command authority.

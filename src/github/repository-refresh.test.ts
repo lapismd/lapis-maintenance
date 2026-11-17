@@ -39,6 +39,7 @@ it("scoped refresh invalidates only its repository and survives an older global 
       details: [detailFixture(item)],
       coverage: {
         repository,
+        inventory: { pullRequests: true, workflows: true },
         available: true,
         actions: { branch: "main", state: "unknown" as const, workflows: 0 },
         reason: undefined,
@@ -131,6 +132,7 @@ it("checkpoints completed repositories so an interrupted scan can restore cards"
       details: entry.repository === "owner/a" ? [detailFixture(item)] : [],
       coverage: {
         repository: entry.repository,
+        inventory: { pullRequests: true, workflows: true },
         available: true,
         actions: { branch: "main", state: "unknown" as const, workflows: 0 },
         reason: undefined,

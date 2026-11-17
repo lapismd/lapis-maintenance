@@ -15,6 +15,8 @@ import { mergeCoverage } from "./coverage";
 import { readCachedView, saveCachedView } from "../cache/view-cache";
 import type { ResponseCache } from "../cache/response-cache";
 import { RepositoryRefreshes } from "./repository-refresh";
+import { reconcileAttention } from "../cache/retention-policy";
+import { preserveUnverified, summaryDetails } from "../maintenance/attention";
 /** Full inventory reads and scoped overlays share one revision-aware materialization. */
 export class GithubSnapshots {
   details = new Map<string, MaintenanceDetail>();
@@ -61,12 +63,7 @@ export class GithubSnapshots {
       if (cached) cached = this.scopes.apply(cached, updates);
       signal.throwIfAborted();
       if (cached && generation === this.#generation) {
-        this.details = new Map(
-          cached.items.map((item) => [
-            item.id,
-            { item, description: "", checks: [] },
-          ]),
-        );
+        this.details = summaryDetails(cached.items);
         this.scopes.remember(updates);
         this.holds = new Map(
           cached.repositories
@@ -146,26 +143,29 @@ export class GithubSnapshots {
         this.scopes.fold(updates, completed, pendingCoverage, completedIssues);
         const details = [...completed.values()].flat();
         for (const detail of details) this.details.set(detail.item.id, detail);
-        const progress: MaintenanceSnapshot = {
-          issues: [...completedIssues.values()]
-            .flat()
-            .concat(
-              cached?.issues?.filter(
-                (issue) => pendingCoverage.get(issue.repository)?.loading,
-              ) ?? [],
-            ),
-          items: [
-            ...details.map((detail) => detail.item),
-            ...(cached?.items.filter(
-              (item) => pendingCoverage.get(item.repository)?.loading,
-            ) ?? []),
-          ],
-          repositories: mergeCoverage([
-            ...coverage,
-            ...pendingCoverage.values(),
-          ]),
-          fetchedAt: cached?.fetchedAt ?? new Date(validatedAt).toISOString(),
-        };
+        const progress = preserveUnverified(
+          {
+            issues: [...completedIssues.values()]
+              .flat()
+              .concat(
+                cached?.issues?.filter(
+                  (issue) => pendingCoverage.get(issue.repository)?.loading,
+                ) ?? [],
+              ),
+            items: [
+              ...details.map((detail) => detail.item),
+              ...(cached?.items.filter(
+                (item) => pendingCoverage.get(item.repository)?.loading,
+              ) ?? []),
+            ],
+            repositories: mergeCoverage([
+              ...coverage,
+              ...pendingCoverage.values(),
+            ]),
+            fetchedAt: cached?.fetchedAt ?? new Date(validatedAt).toISOString(),
+          },
+          cached,
+        );
         options.onProgress?.(progress);
         if (checkpoint)
           void this.persist(async () => {
@@ -264,19 +264,29 @@ export class GithubSnapshots {
         );
         if (rate?.status === "rejected") throw rate.reason;
       }
-      const snapshot: MaintenanceSnapshot = {
-        issues: [...completedIssues.values()].flat(),
-        items: details.map((detail) => detail.item),
-        repositories: mergeCoverage(coverage),
-        fetchedAt: new Date(validatedAt).toISOString(),
-      };
+      const snapshot = preserveUnverified(
+        {
+          issues: [...completedIssues.values()].flat(),
+          items: details.map((detail) => detail.item),
+          repositories: mergeCoverage(coverage),
+          fetchedAt: new Date(validatedAt).toISOString(),
+        },
+        cached,
+      );
       if (generation === this.#generation) {
+        for (const item of snapshot.items)
+          if (!this.details.has(item.id))
+            this.details.set(item.id, { item, description: "", checks: [] });
         signal.throwIfAborted();
         await this.persist(async () => {
           signal.throwIfAborted();
           await saveCachedView(
             this.cache,
             selection,
+            this.scopes.apply(snapshot, updates),
+          );
+          await reconcileAttention(
+            this.cache,
             this.scopes.apply(snapshot, updates),
           );
         });

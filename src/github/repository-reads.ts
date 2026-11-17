@@ -1,4 +1,5 @@
 import type { MaintenanceDetail } from "../maintenance/types";
+import { requiresAttention } from "../maintenance/attention";
 import type {
   RepositoryDefault,
   GithubRepository,
@@ -80,6 +81,7 @@ export async function readRepository(
     }
   }
   const runs = await inventory;
+  let workflowsComplete = false;
   if (runs.status === "fulfilled") {
     gaps.push(...runs.value.gaps);
     const latest = new Map<string, GithubRun>();
@@ -128,6 +130,13 @@ export async function readRepository(
         return runDetails;
       }),
     );
+    workflowsComplete =
+      !runs.value.gaps.length &&
+      runResults.every(
+        (result) =>
+          result.status === "fulfilled" &&
+          result.value.every((detail) => !detail.coverage?.length),
+      );
     for (const [index, result] of runResults.entries()) {
       if (result.status === "fulfilled") {
         details.push(...result.value);
@@ -158,9 +167,15 @@ export async function readRepository(
   signal.throwIfAborted();
   return {
     issues: issues.status === "fulfilled" ? issues.value : [],
-    details,
+    details: details.filter((detail) => requiresAttention(detail.item)),
     coverage: {
       repository,
+      inventory: {
+        pullRequests:
+          pulls.status === "fulfilled" &&
+          pullResults.every((result) => result.status === "fulfilled"),
+        workflows: workflowsComplete,
+      },
       actions:
         runs.status === "fulfilled"
           ? runs.value.actions

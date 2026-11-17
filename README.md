@@ -59,6 +59,26 @@ with an indicator on cards being re-fetched. Where Turso cannot start, a bounded
 IndexedDB cache preserves data across reloads; memory is the final fallback if
 both persistent stores are unavailable.
 
+The saved board is an attention queue: open PRs, failures, approvals, blocked,
+running and unavailable work. Confirmed successful or cancelled workflows are
+removed; passing PRs remain until merged or closed. Complete repository refreshes
+remove resolved identities and their cached details from all saved selections.
+PR and workflow inventories establish completeness independently, so unrelated
+optional-resource failures do not block verified cleanup. Partial inventories
+and uncertain action outcomes do not prove that work is resolved.
+
+All tokens share one Turso store and one IndexedDB store, each limited to
+**12.5 MiB and 1,000 records**, with a **1 MiB limit per record** including its key.
+Their combined serialized payload budget is **25 MiB**; database/index/WAL and
+browser overhead are additional. Records expire after **24 hours**, with cleanup
+during reads, writes and minute maintenance. Active legacy caches migrate through
+this policy; expired inactive legacy stores are removed when unlocked.
+Each memory fallback is capped at **25 MiB/1,000 records**, and synchronous
+detail/resource previews at **5 MiB/100 entries** per preview cache.
+Historical Activity and raw workflow/GraphQL inventories use only a **2 MiB,
+100-response, five-minute session cache**. Compact branch-health summaries remain
+available independently. These limits exclude the public offline app assets.
+
 ## Install the app
 
 Open the [live app](https://lapismd.github.io/lapis-maintenance/), then choose

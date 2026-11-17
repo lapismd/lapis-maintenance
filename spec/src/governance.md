@@ -19,6 +19,13 @@ entry for the same cold-start boundary, with safe HTML policy supplied upstream.
 The inbox presentation follow-up uses the released Deno-free Spec Validator ^0.2.1
 with ordinary registry resolution and unchanged specification checks.
 
+Attention-retention acceptance exercises the real origin-wide Turso/IndexedDB
+budgets, logical token isolation, legacy migration and tab leases under
+LM-CACHE-001; browser files run serially because they share that origin, with
+explicit token/tab concurrency tests and unchanged assertions, while all unit,
+browser, Storybook, production PWA, build and canonical specification lanes
+remain required before green-head merge and Pages acceptance.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

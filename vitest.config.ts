@@ -20,6 +20,8 @@ export default mergeConfig(
           extends: true,
           test: {
             name: "browser",
+            // Real cache tests share the app's origin and global storage budget.
+            fileParallelism: false,
             include: ["src/**/*.browser.test.ts"],
             testTimeout: 30_000,
             browser: {
