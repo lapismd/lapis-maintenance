@@ -81,6 +81,7 @@
       ><RefreshCw size={14} aria-hidden="true" /></Button
     >{/snippet}
   <ReviewResource
+    resourceKey={controller.selectedId ?? "none"}
     state={controller.resources.checks}
     label="Checks"
     onRetry={() => controller.load("checks", undefined, true)}

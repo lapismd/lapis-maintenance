@@ -7,6 +7,11 @@ accessible action inbox with light and dark themes.
 
 The existing Operations view implements LM-OPS-001 with an attention-count navigation badge and fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
 
+Automation decisions display the latest repository value in one compact row;
+expansion reveals current evidence and at most one previous decision with its
+status, time, source and identifiers, while search never resurrects superseded
+rows and the section count reflects repositories rather than historical records.
+
 Repository settings include monitoring-only defaults from LM-GH-003, retain consumer hold explanations, and distinguish unavailable discovery from an empty healthy repository list.
 
 Rapid authenticated remounts retain their persistent cache through the host-owned connection handoff, preserving cached content rather than selecting a transient fallback.
@@ -18,6 +23,15 @@ Historical Activity loads on demand into a bounded session cache.
 
 PR overview descriptions follow LM-PR-001's semantic full-width Markdown contract,
 using public renderer layout options rather than centered note styling.
+
+Transient repository/session errors, cached-resource refresh failures and command
+outcomes use the public Design Core toast host, without inline duplicate banners.
+Toasts are dismissible and pause their ten-second expiry on hover/focus; their
+full details remain in the session status log. Repeated background failures are
+deduplicated until recovery, command request IDs identify outcomes across panes,
+and notification memory is bounded to four visible and 100 log records. Empty
+states, loading indicators, contextual validation and eligibility reasons remain
+attached to their controls; toast actions only retry reads or open details/links.
 
 ### Acceptance details
 

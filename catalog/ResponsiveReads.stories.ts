@@ -42,11 +42,16 @@ export const FailedRefresh: Story = {
   args: { scenario: "detail-refresh-error" },
   play: async ({ canvasElement }) => {
     const c = await openPull(canvasElement);
+    const notifications = within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    );
     await expect(
-      await c.findByText(/Could not refresh details. Showing cached data/),
+      await notifications.findByText("Could not refresh details"),
     ).toBeVisible();
     await expect(c.getByRole("button", { name: "Approve PR" })).toBeDisabled();
-    await userEvent.click(c.getByRole("button", { name: "Retry details" }));
+    await userEvent.click(notifications.getByRole("button", { name: "Retry" }));
     await waitFor(() =>
       expect(c.getByRole("button", { name: "Approve PR" })).toBeEnabled(),
     );

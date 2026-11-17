@@ -23,6 +23,9 @@
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import "./review.css";
+  import { provideFeedback } from "../feedback/context";
+  import FeedbackHost from "../feedback/FeedbackHost.svelte";
+  const feedback = provideFeedback();
   let {
     inbox,
     activity,
@@ -128,6 +131,7 @@
       }}><Play aria-hidden="true" /></Button
     >{/if}{@render settings?.()}{/snippet}
 <div class="maintenance-app review-ui" data-ui-theme="lapis">
+  {#if feedback.owned}<FeedbackHost center={feedback.center} />{/if}
   <AppShell.Root
     controller={shell}
     mobileBreakpoint={800}

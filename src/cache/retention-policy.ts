@@ -1,4 +1,6 @@
 import { attentionSnapshot, requiresAttention } from "../maintenance/attention";
+import { compactCoordinatorEvidence } from "../maintenance/operation-decisions";
+import type { CoordinatorEvidence } from "../maintenance/operator-types";
 import type {
   MaintenanceDetail,
   MaintenanceSnapshot,
@@ -21,11 +23,36 @@ export const ephemeralResponse = (key: string) =>
 export const retainResponse: CacheTransform = (key, value) => {
   if (ephemeralResponse(key)) return;
   const body = value.body as Record<string, unknown> | undefined;
+  // Raw report bodies carry audit history and validators; never store a filtered HTTP body.
+  if (
+    key === "coordinator-evidence:v1" ||
+    /^[^:]+:\/repos\/lapismd\/dependency-automation\/contents\/report\.json(?:\?|$)/.test(
+      key,
+    )
+  )
+    return;
+  if (key === "coordinator-evidence:v2") {
+    if (
+      !body ||
+      !["current", "stale", "unsupported", "unavailable"].includes(
+        String(body.state),
+      )
+    )
+      return;
+    const evidence = body as unknown as CoordinatorEvidence;
+    if (evidence.report && !Array.isArray(evidence.report.operations)) return;
+    return {
+      body: compactCoordinatorEvidence(evidence),
+      fetchedAt: value.fetchedAt,
+    };
+  }
   if (key.startsWith("maintenance-view:") && body?.schema === 1) {
     const snapshot = body.snapshot as MaintenanceSnapshot | undefined;
     if (!Array.isArray(snapshot?.items)) return;
     const next = attentionSnapshot(snapshot);
-    return next.items.length === snapshot.items.length
+    if (snapshot.coordinator)
+      next.coordinator = compactCoordinatorEvidence(snapshot.coordinator);
+    return next.items.length === snapshot.items.length && !snapshot.coordinator
       ? value
       : { ...value, body: { ...body, snapshot: next } };
   }

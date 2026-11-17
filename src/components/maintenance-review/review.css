@@ -67,37 +67,6 @@
     animation: none;
   }
 }
-.review-inline-error {
-  font-size: 0.8rem;
-  padding: 0.75rem;
-  color: var(--destructive);
-}
-.review-inline-error button {
-  text-decoration: underline;
-}
-.review-feedback {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.65rem;
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  background: var(--muted);
-  padding: 0.75rem 1rem;
-  margin: 0.5rem 0;
-  font-size: 0.8rem;
-}
-.review-feedback > svg {
-  flex: none;
-  margin-top: 0.1rem;
-}
-.review-feedback strong {
-  font-size: 0.75rem;
-}
-.review-feedback p {
-  margin: 0.25rem 0;
-  line-height: 1.5;
-}
-.review-feedback a,
 .review-external {
   display: inline-flex;
   align-items: center;
@@ -106,10 +75,7 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.review-feedback[data-state="rejected"],
-.review-feedback[data-state="uncertain"] {
-  border-color: color-mix(in srgb, var(--destructive) 40%, var(--border));
-}
+
 .review-approvals {
   border: 1px solid var(--border);
   border-radius: 0.65rem;
@@ -250,4 +216,19 @@
   max-width: 64rem;
   margin: 0 auto;
   padding: 2rem;
+}
+
+.review-pr-actions-compact {
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+}
+.review-pr-actions-compact > button {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.review-action-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

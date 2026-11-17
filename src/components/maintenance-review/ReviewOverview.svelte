@@ -20,6 +20,7 @@
 </script>
 
 <ReviewResource
+  resourceKey={controller.selectedId ?? "none"}
   state={controller.resources.overview}
   label="Overview"
   onRetry={() => controller.load("overview", undefined, true)}

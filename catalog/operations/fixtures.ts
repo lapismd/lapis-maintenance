@@ -145,3 +145,39 @@ export function operatorFixture(): MaintenanceSnapshot {
     })),
   };
 }
+
+/** Deliberately out of array order, like a full coordinator audit report. */
+export function decisionHistoryFixture(): MaintenanceSnapshot {
+  const snapshot = operatorFixture();
+  const report = snapshot.coordinator!.report!,
+    base = report.operations[0]!;
+  report.operations = [
+    {
+      ...base,
+      id: "3".repeat(64),
+      observedAt: "2026-11-15T20:00:00Z",
+      status: "held",
+      reason: "Latest verified policy decision",
+    },
+    {
+      ...base,
+      id: "1".repeat(64),
+      observedAt: "2026-11-15T18:00:00Z",
+      status: "unchanged",
+      reason: "Obsolete poll result",
+    },
+    {
+      ...base,
+      id: "2".repeat(64),
+      observedAt: "2026-11-15T19:00:00Z",
+      status: "failed",
+      reason: "Previous qualification failed",
+    },
+  ];
+  report.nodes[0] = {
+    ...report.nodes[0]!,
+    status: "held",
+    operationId: "3".repeat(64),
+  };
+  return snapshot;
+}

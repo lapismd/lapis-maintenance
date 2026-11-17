@@ -1,12 +1,13 @@
 import { expect, it, vi } from "vitest";
-import { page } from "vitest/browser";
-import { mount, unmount } from "svelte";
+import { page, userEvent } from "vitest/browser";
+import { mount, unmount, tick } from "svelte";
 import MaintenanceScreen from "../components/maintenance/MaintenanceScreen.svelte";
 import { MaintenanceController } from "../maintenance/controller.svelte";
 import { operatorFixture } from "../../catalog/operations/fixtures";
 import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
+import OperationsPanel from "../components/maintenance-operations/OperationsPanel.svelte";
 it("navigates to operator evidence and submits each eligible batch target once", async () => {
   const snapshot = operatorFixture();
   snapshot.coordinator = {
@@ -93,6 +94,190 @@ it("navigates to operator evidence and submits each eligible batch target once",
       "accepted",
       "accepted",
     ]);
+  } finally {
+    controller.dispose();
+    await unmount(app);
+    target.remove();
+  }
+});
+
+it("shows repository refresh errors as a dismissible toast with details in the status log instead of inline Operations text", async () => {
+  const snapshot = operatorFixture();
+  snapshot.repositories[0] = {
+    repository: "example/consumer",
+    available: false,
+    reason: "Workflow CI: GitHub data unavailable (HTTP 422).",
+  };
+  const controller = new MaintenanceController(
+    {
+      readSnapshot: async () => structuredClone(snapshot),
+      readDetails: vi.fn(),
+      refreshRepository: async () => structuredClone(snapshot),
+    },
+    { execute: vi.fn() },
+  );
+  controller.view = "operations";
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  const app = mount(MaintenanceScreen, {
+    target,
+    props: {
+      controller,
+      profile: {
+        principal: "fixture",
+        revision: 0,
+        details: {
+          display_name: "Fixture",
+          description: "",
+          avatar: null,
+          email: null,
+          gravatar: false,
+        },
+      },
+      dark: false,
+      onToggleTheme: () => {},
+      onConnect: () => {},
+    },
+  });
+  try {
+    await controller.refresh();
+    expect(
+      target.querySelector('[aria-label="Open GitHub issues"]')?.textContent,
+    ).not.toContain("HTTP 422");
+    await expect
+      .element(page.getByRole("region", { name: "Notifications" }))
+      .toBeVisible();
+    await expect
+      .element(
+        page.getByText("Could not refresh example/consumer", { exact: true }),
+      )
+      .toBeVisible();
+    await controller.refresh(true);
+    await tick();
+    expect(document.querySelectorAll("[data-notification-id]")).toHaveLength(1);
+    await page
+      .getByRole("button", { name: "View details", exact: true })
+      .click();
+    await expect
+      .element(
+        page.getByRole("region", { name: "Status log" }).getByText(/HTTP 422/),
+      )
+      .toBeVisible();
+    await userEvent.keyboard("{Escape}");
+    snapshot.repositories[0] = {
+      repository: "example/consumer",
+      available: true,
+    };
+    await controller.refresh(true);
+    await tick();
+    snapshot.repositories[0] = {
+      repository: "example/consumer",
+      available: false,
+      reason: "Workflow CI: GitHub data unavailable (HTTP 422).",
+    };
+    await controller.refresh(true);
+    await tick();
+    const dismiss = page.getByRole("button", {
+      name: "Dismiss Could not refresh example/consumer",
+    });
+    await expect.element(dismiss).toBeVisible();
+    dismiss.element().focus();
+    await userEvent.keyboard("{Enter}");
+    await expect
+      .element(page.getByRole("region", { name: "Notifications" }))
+      .not.toBeInTheDocument();
+  } finally {
+    controller.dispose();
+    await unmount(app);
+    target.remove();
+  }
+});
+
+it("shows one current repository decision with only one previous value in expanded details, filtering after selection", async () => {
+  const snapshot = operatorFixture();
+  const base = snapshot.coordinator!.report!.operations[0]!;
+  snapshot.coordinator!.report!.operations = [
+    {
+      ...base,
+      id: "3".repeat(64),
+      observedAt: "2026-11-15T20:00:00Z",
+      status: "held",
+      reason: "Latest verified policy decision",
+    },
+    {
+      ...base,
+      id: "1".repeat(64),
+      observedAt: "2026-11-15T18:00:00Z",
+      status: "unchanged",
+      reason: "Obsolete poll result",
+    },
+    {
+      ...base,
+      id: "2".repeat(64),
+      observedAt: "2026-11-15T19:00:00Z",
+      status: "failed",
+      reason: "Previous qualification failed",
+    },
+  ];
+  const execute = vi.fn();
+  const controller = new MaintenanceController(
+    {
+      readSnapshot: async () => snapshot,
+      readDetails: vi.fn(),
+      refreshRepository: async () => snapshot,
+    },
+    { execute },
+  );
+  await controller.refresh();
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  const app = mount(OperationsPanel, { target, props: { controller } });
+  try {
+    await expect
+      .element(
+        page.getByRole("button", {
+          name: "Automation decisions 1",
+          exact: true,
+        }),
+      )
+      .toBeVisible();
+    const row = page.getByRole("button", {
+      name: "example/consumer Latest verified policy decision held",
+      exact: true,
+    });
+    await expect.element(row).toHaveAttribute("aria-expanded", "false");
+    await expect
+      .element(page.getByText("Previous qualification failed", { exact: true }))
+      .not.toBeVisible();
+    await row.click();
+    await expect
+      .element(
+        page.getByRole("heading", { name: "Previous decision", exact: true }),
+      )
+      .toBeVisible();
+    await expect
+      .element(page.getByText("Previous qualification failed", { exact: true }))
+      .toBeVisible();
+    expect(target.textContent).not.toContain("Obsolete poll result");
+    controller.query = "Obsolete poll result";
+    await expect
+      .element(
+        page.getByRole("button", {
+          name: "Automation decisions 0",
+          exact: true,
+        }),
+      )
+      .toBeVisible();
+    controller.query = "Latest verified policy decision";
+    await expect
+      .element(
+        page.getByRole("button", {
+          name: "Automation decisions 1",
+          exact: true,
+        }),
+      )
+      .toBeVisible();
+    expect(execute).not.toHaveBeenCalled();
   } finally {
     controller.dispose();
     await unmount(app);

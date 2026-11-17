@@ -71,7 +71,7 @@ export class GithubReadPort implements MaintenanceReadPort {
   }
   readCoordinatorReport(signal: AbortSignal, options: ReadOptions = {}) {
     return this.#reports.read(
-      "coordinator-evidence:v1",
+      "coordinator-evidence:v2",
       () => 0,
       (readOptions, ownedSignal) =>
         readCoordinatorReport(

@@ -84,9 +84,7 @@
   border-radius: 0.25rem;
   background: var(--muted);
 }
-.review-workspace > .review-feedback {
-  margin-inline: 2rem;
-}
+
 .review-workspace-tabs {
   display: flex;
   flex-direction: column;

@@ -165,12 +165,19 @@ export const PageErrorAndRetry: Story = {
       name: "Activity timeline viewport",
     });
     viewport.scrollTop = viewport.scrollHeight - viewport.clientHeight;
-    await c.findByRole("alert");
+    const notifications = within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    );
+    await notifications.findByRole("alert");
     await expect(c.getAllByRole("listitem").length).toBeGreaterThan(1);
     await expect(c.getByText("40 of 240 events loaded")).toBeVisible();
     await userEvent.click(c.getByRole("button", { name: "Retry activity" }));
     await c.findByText("80 of 240 events loaded");
-    await expect(c.queryByRole("alert")).not.toBeInTheDocument();
+    await waitFor(() =>
+      expect(notifications.queryByRole("alert")).not.toBeInTheDocument(),
+    );
   },
 };
 export const Loading: Story = { render, args: { activityScenario: "loading" } };

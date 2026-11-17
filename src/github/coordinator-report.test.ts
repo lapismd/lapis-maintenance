@@ -87,3 +87,17 @@ it("pins report reads to a resolved immutable branch commit", async () => {
     `/repos/lapismd/dependency-automation/contents/report.json?ref=${"d".repeat(40)}`,
   );
 });
+
+it("rejects invalid or future decision times before selecting latest repository values", async () => {
+  const { operatorFixture } = await import("../../catalog/operations/fixtures");
+  for (const observedAt of [
+    "not-a-time",
+    new Date(now + 3_600_000).toISOString(),
+  ]) {
+    const value = operatorFixture().coordinator!.report!;
+    value.operations[0]!.observedAt = observedAt;
+    expect(parseCoordinatorReport(value, revision, now).state).toBe(
+      "unavailable",
+    );
+  }
+});

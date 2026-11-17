@@ -20,6 +20,11 @@ renders them under LM-PR-001 without extra reads or changes to command authority
 
 Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
 
+Session-owned feedback is disposable and bounded; shared request IDs deduplicate
+action outcomes across board, inspector and review surfaces. Background refresh
+failures re-arm after recovery without replaying actions, and no notification is
+persisted in account caches.
+
 ### Acceptance details
 
 - Reads supply snapshots/details with PR identity and workflow Actions links; commands bind to a PR SHA, run attempt or deployment identity, with check completeness independent of unrelated resource gaps and return completed, accepted, rejected or uncertain; the selected card remains available for immediate inspector presentation while ports load full cached details; subsequent cached progress replaces that summary and preserves disabled actions until the detail read settles.
@@ -30,6 +35,18 @@ Branch-action filters are host-owned presentation state under LM-UI-004. They in
 ## LM-OPS-001 — Operator wave state
 
 **Requirement.** The operator view MUST explain dependency/release progress, decision reasons, policy revisions and immutable source/operation targets, while retaining ordinary controls when reports are unavailable.
+
+Automation decisions show one current row per repository, selected by observation
+time rather than report-array order, with at most one previous distinct decision
+in that row's expanded details; timestamp ties prefer the later report entry,
+repository identity ignores case, and search/repository filters apply after
+selection so obsolete decisions cannot reappear as current results.
+Host-owned coordinator presentation retains only these two decisions per
+repository while the immutable source report remains the complete audit record;
+header counts reflect current repository rows, and opening comparison details
+never issues a command or fetches history. Decision timestamps retain a small
+bottom margin before identifier controls, and both observations use public Design
+Core RelativeTime with exact dates available on hover or keyboard focus.
 
 ### Acceptance details
 

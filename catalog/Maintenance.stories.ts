@@ -75,13 +75,20 @@ async function submitApproval(canvasElement: HTMLElement) {
     within(canvasElement.ownerDocument.body).queryByRole("dialog"),
   ).not.toBeInTheDocument();
 }
+async function notifications(canvasElement: HTMLElement) {
+  return within(
+    await within(canvasElement.ownerDocument.body).findByRole("region", {
+      name: "Notifications",
+    }),
+  );
+}
 export const ImmediateAction: Story = {
   play: async ({ canvasElement }) => {
     await submitApproval(canvasElement);
     await expect(
-      await within(canvasElement).findByText(
-        "Simulated action completed successfully.",
-      ),
+      await (
+        await notifications(canvasElement)
+      ).findByText("Simulated action completed successfully."),
     ).toBeVisible();
   },
 };
@@ -114,7 +121,11 @@ export const RetryCommand: Story = {
   play: async ({ canvasElement }) => {
     await submitApproval(canvasElement);
     const c = within(canvasElement);
-    await expect(await c.findByText(/simulated action failed/)).toBeVisible();
+    await expect(
+      await (
+        await notifications(canvasElement)
+      ).findByText(/simulated action failed/),
+    ).toBeVisible();
     await waitFor(() =>
       expect(
         within(canvasElement.ownerDocument.body).queryByRole("dialog", {
@@ -134,7 +145,9 @@ export const RetryCommand: Story = {
       within(canvasElement.ownerDocument.body).queryByRole("dialog"),
     ).not.toBeInTheDocument();
     await expect(
-      await c.findByText("Simulated action completed successfully."),
+      await (
+        await notifications(canvasElement)
+      ).findByText("Simulated action completed successfully."),
     ).toBeVisible();
   },
 };
@@ -143,7 +156,9 @@ export const ChangedTarget: Story = {
   play: async ({ canvasElement }) => {
     await submitApproval(canvasElement);
     await expect(
-      await within(canvasElement).findByText(/Target or permissions changed/),
+      await (
+        await notifications(canvasElement)
+      ).findByText(/Target or permissions changed/),
     ).toBeVisible();
   },
 };
@@ -152,7 +167,11 @@ export const UnknownOutcome: Story = {
   play: async ({ canvasElement }) => {
     await submitApproval(canvasElement);
     const c = within(canvasElement);
-    await expect(await c.findByText("Outcome unknown")).toBeVisible();
+    await expect(
+      await (
+        await notifications(canvasElement)
+      ).findByText("Preview · uncertain"),
+    ).toBeVisible();
     await expect(
       c.getByRole("button", { name: "Approve deployment" }),
     ).toBeDisabled();
@@ -193,7 +212,11 @@ export const AcceptedWorkflow: Story = {
     await expect(
       within(canvasElement.ownerDocument.body).queryByRole("dialog"),
     ).not.toBeInTheDocument();
-    await expect(await c.findByText("Accepted · still running")).toBeVisible();
+    await expect(
+      await (
+        await notifications(canvasElement)
+      ).findByText("Preview · accepted"),
+    ).toBeVisible();
   },
 };
 export const DemoConnection: Story = {

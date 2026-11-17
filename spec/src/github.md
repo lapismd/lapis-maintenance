@@ -40,6 +40,13 @@ Live cards and persisted snapshots are an attention queue under LM-CACHE-001; re
 
 **Requirement.** The authenticated read adapter MUST expose open GitHub issues and version 1 public coordinator reports without granting command authority.
 
+Validate the complete immutable source report before producing a host-owned
+latest-and-previous decision projection under LM-OPS-001; require parseable
+decision observation times no later than the report's observation tolerance,
+preserve the original report/source/policy identities, and retain the full audit
+history only at its authoritative source rather than in raw browser response
+caches under LM-CACHE-001.
+
 ### Acceptance details
 
 - Read open issues with pagination, omit pull requests, preserve issue links and report denied/incomplete issue coverage explicitly.

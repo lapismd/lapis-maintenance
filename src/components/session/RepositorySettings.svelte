@@ -1,4 +1,5 @@
 <script lang="ts">
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Textarea } from "@lapismd/design-core/shadcn/textarea";
   import { Checkbox } from "@lapismd/design-core/shadcn/checkbox";
@@ -16,7 +17,8 @@
   let open = $state(false),
     additions = $state(""),
     exclusions = $state(""),
-    error = $state("");
+    error = $state(""),
+    saveError = $state("");
   const id = $props.id();
   const split = (text: string) => [
     ...new Set(
@@ -28,6 +30,20 @@
   ];
 </script>
 
+<FeedbackFeed
+  scope="repository-settings"
+  notices={saveError
+    ? [
+        {
+          id: "repository-settings:save",
+          title: "Could not save repositories",
+          message: saveError,
+          severity: "error",
+        },
+      ]
+    : []}
+/>
+
 <Dialog.Root
   bind:open
   onOpenChange={(value) => {
@@ -35,6 +51,7 @@
       additions = session.selection.additions.join("\n");
       exclusions = session.selection.exclusions.join("\n");
       error = "";
+      saveError = "";
     }
   }}
 >
@@ -119,10 +136,11 @@
             return;
           }
           try {
+            saveError = "";
             await session.configure(selection);
             open = false;
           } catch {
-            error = "Repository settings could not be saved. Retry.";
+            saveError = "Repository settings could not be saved. Retry.";
           }
         }}>Save repositories</Button
       ></Dialog.Footer

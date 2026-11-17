@@ -21,6 +21,7 @@ export default defineConfig({
     include: [
       "@lapismd/design-core/shell",
       "@lapismd/design-core/chat",
+      "@lapismd/design-core/workspace/plugins/notifications",
       "@lapismd/design-core/shadcn/badge",
       "@lapismd/design-core/shadcn/button",
       "@lapismd/design-core/shadcn/button-group",
@@ -37,6 +38,7 @@ export default defineConfig({
       "@lapismd/design-core/shadcn/popover",
       "@lapismd/design-core/shadcn/input-group",
       "@lapismd/design-core/shadcn/tooltip",
+      "@lapismd/design-core/shadcn/relative-time",
       "@lapismd/design-core/shadcn/collapsible",
       "@lapismd/design-core/shadcn/checkbox",
       "@lapismd/design-core/shadcn/scroll-area",

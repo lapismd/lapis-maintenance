@@ -10,6 +10,7 @@
   import ActivityVirtualRows from "./ActivityVirtualRows.svelte";
   import ActivityEntry from "./ActivityEntry.svelte";
   import "./feed.css";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
   let {
     controller,
     onOpen,
@@ -36,6 +37,22 @@
     });
 </script>
 
+<FeedbackFeed
+  scope="workspace-activity"
+  pending={controller.pending}
+  notices={controller.error
+    ? [
+        {
+          id: "workspace-activity:error",
+          title: "Could not load activity",
+          message: controller.error,
+          severity: "error",
+          action: { label: "Retry", run: () => void controller.retry() },
+        },
+      ]
+    : []}
+/>
+
 <section
   class="activity-feed"
   aria-label="Workspace activity"
@@ -61,7 +78,8 @@
       ><Empty.Header
         ><Empty.Media variant="icon"><Activity /></Empty.Media><Empty.Title
           >Activity unavailable</Empty.Title
-        ><Empty.Description>{controller.error}</Empty.Description></Empty.Header
+        ><Empty.Description>Try loading activity again.</Empty.Description
+        ></Empty.Header
       ><Empty.Content
         ><Button variant="outline" onclick={() => controller.retry()}
           ><RotateCcw size={15} aria-hidden="true" />Retry activity</Button
@@ -131,7 +149,7 @@
             </div>
           {/key}
           <footer class="activity-feed-edge">
-            {#if controller.error}<p role="alert">{controller.error}</p>
+            {#if controller.error}
               <Button variant="outline" onclick={() => controller.retry()}
                 ><RotateCcw size={15} aria-hidden="true" />Retry activity</Button
               >

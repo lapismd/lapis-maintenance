@@ -19,6 +19,7 @@ export class DispatchController {
   pending = $state(false);
   error = $state("");
   warnings = $state<string[]>([]);
+  requestId = $state("");
   result = $state.raw<CommandResult | null>(null);
   #request?: AbortController;
   #command?: AbortController;
@@ -33,6 +34,8 @@ export class DispatchController {
     this.ref = "";
     this.target = null;
     this.result = null;
+    this.requestId = "";
+    this.warnings = [];
     const generation = ++this.#generation;
     this.#request?.abort();
     const request = (this.#request = new AbortController());
@@ -139,6 +142,7 @@ export class DispatchController {
         error instanceof Error ? error.message : "Invalid workflow inputs.";
       return;
     }
+    this.requestId = command.requestId;
     this.pending = true;
     this.error = "";
     const request = (this.#command = new AbortController());

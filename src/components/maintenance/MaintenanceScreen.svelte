@@ -8,6 +8,9 @@
   import ActionInputDialog from "./ActionInputDialog.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { PersonalProfile } from "@lapismd/repository-ui/settings";
+  import { provideFeedback } from "../feedback/context";
+  import FeedbackHost from "../feedback/FeedbackHost.svelte";
+  const feedback = provideFeedback();
   let {
     controller,
     profile,
@@ -106,7 +109,8 @@
         /></AppShell.Body
       >
     </AppShell.Main>
-    <MaintenanceInspector {controller} onClose={closeDetail} />
+    <MaintenanceInspector {controller} {sessionMode} onClose={closeDetail} />
   </AppShell.Root>
   <ActionInputDialog {controller} {sessionMode} />
+  {#if feedback.owned}<FeedbackHost center={feedback.center} />{/if}
 </div>

@@ -8,8 +8,13 @@
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
     controller,
+    sessionMode = "demo",
     onClose,
-  }: { controller: MaintenanceController; onClose: () => void } = $props();
+  }: {
+    controller: MaintenanceController;
+    sessionMode?: "demo" | "github";
+    onClose: () => void;
+  } = $props();
 </script>
 
 <AppShell.Sidebar
@@ -45,7 +50,11 @@
     </div></AppShell.Sidebar.Header
   >
   <AppShell.Sidebar.Body
-    ><MaintenanceDetails {controller} {onClose} /></AppShell.Sidebar.Body
+    ><MaintenanceDetails
+      {controller}
+      {sessionMode}
+      {onClose}
+    /></AppShell.Sidebar.Body
   >
   <AppShell.Sidebar.Footer style="padding:0"
     ><MaintenanceActions {controller} /></AppShell.Sidebar.Footer

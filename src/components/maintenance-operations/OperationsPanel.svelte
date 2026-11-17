@@ -120,13 +120,9 @@
               No open issues in the available coverage.
             </li>{/each}
         </ol>
-        {#each controller.unavailable.filter( (gap) => scope.matches(gap.repository, gap.reason), ) as gap}<p
-          >
-            {gap.repository}: {gap.reason}
-          </p>{/each}
       </OperationsSection>
     </section>
   </ScrollArea>
 
-  <OperationsFooter {controller} />
+  <OperationsFooter {controller} {sessionMode} />
 </div>

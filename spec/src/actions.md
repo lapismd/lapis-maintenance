@@ -5,6 +5,10 @@
 **Requirement.** Authorized Slice 3 MUST permit individual user-activated readiness, review, merge, auto-merge scheduling/cancellation,
 failed-job rerun, workflow-run approval and cancellation through the supplied token.
 
+Action outcomes follow LM-UI-001 toast policy across individual and batch
+surfaces; contextual input validation remains with the form. Feedback never
+executes or retries a mutation.
+
 ### Acceptance details
 
 - The production app and manual live story share the command adapter; one-click actions capture repository, PR/run, revision and selected method before submitting; only permanent deletion needs confirmation, while comments/change requests and dispatch use one input submission; fixtures remain explicitly simulated.
@@ -16,6 +20,9 @@ failed-job rerun, workflow-run approval and cancellation through the supplied to
 
 **Requirement.** Authorized Slice 4 and R2 environment review MUST permit deployment review and dispatch of existing manual
 workflows through the supplied token and owning workflow contracts.
+
+Dispatch discovery warnings, rejected submissions and accepted/uncertain results
+follow the same toast policy, preserving the workflow target link and input form.
 
 ### Acceptance details
 

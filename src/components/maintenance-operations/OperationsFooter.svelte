@@ -2,9 +2,15 @@
   import "./operations-content.css";
   import "./operations-footer.css";
   import { Button } from "@lapismd/design-core/shadcn/button";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
+  import { outcomeSeverity } from "../../maintenance/feedback.svelte";
   import MaintenanceActionIcon from "../maintenance/MaintenanceActionIcon.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
-  let { controller }: { controller: MaintenanceController } = $props();
+  let {
+    controller,
+    sessionMode = "demo",
+  }: { controller: MaintenanceController; sessionMode?: "demo" | "github" } =
+    $props();
   const actions = [
     { kind: "rerun-failed" as const, label: "Rerun eligible failures" },
     { kind: "approve-run" as const, label: "Approve eligible workflows" },
@@ -15,9 +21,21 @@
   ];
 </script>
 
+<FeedbackFeed
+  scope="batch-actions"
+  pending={controller.commands.busy}
+  notices={controller.commands.receipts.slice(-100).map((r) => ({
+    id: `command:${r.command.requestId}`,
+    title: `${sessionMode === "github" ? "GitHub" : "Preview"} · ${r.status}`,
+    message: r.message,
+    detail: `${r.command.repository} · ${r.status}: ${r.message}`,
+    severity: outcomeSeverity(r.status),
+  }))}
+/>
 <div class="operations-footer" role="region" aria-label="Batch actions">
   <div class="operations-actions">
     {#each actions as action}<Button
+        title={action.label}
         variant="outline"
         size="sm"
         disabled={controller.commands.busy ||
@@ -31,18 +49,10 @@
         ><MaintenanceActionIcon
           kind={action.kind}
           pending={controller.commands.active?.kind === action.kind}
-        />{action.label}</Button
+        /><span class="operations-action-label">{action.label}</span></Button
       >{/each}
   </div>
   {#if controller.commands.busy}<p role="status">
       Submitting eligible targets…
     </p>{/if}
-  {#if controller.commands.receipts.length}<ol aria-label="Action outcomes">
-      {#each controller.commands.receipts as receipt}<li>
-          {receipt.command.repository} · {receipt.command.kind} · {receipt.command.target.sha.slice(
-            0,
-            8,
-          )}: <strong>{receipt.status}</strong> — {receipt.message}
-        </li>{/each}
-    </ol>{/if}
 </div>

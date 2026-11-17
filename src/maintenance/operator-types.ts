@@ -55,6 +55,7 @@ export interface WaveReport {
   }[];
 }
 export interface CoordinatorEvidence {
+  operationHistory?: "latest-and-previous";
   state: "current" | "stale" | "unsupported" | "unavailable";
   reason: string;
   report?: WaveReport;

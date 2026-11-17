@@ -33,6 +33,7 @@
       >
     </header>{/if}
   <ReviewResource
+    resourceKey={controller.selectedId ?? "none"}
     state={controller.resources.approvals}
     label="Approvals"
     onRetry={() => controller.load("approvals", undefined, true)}
