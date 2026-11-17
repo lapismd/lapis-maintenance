@@ -13,6 +13,9 @@ submission for required-input forms.
 
 Public RepositoryIdentifiers controls used for shortened custom-label identifiers are prebundled by the Storybook and browser-test startup configuration to avoid late dependency-optimizer reloads.
 
+The PR overview's public Markdown renderer is prebundled through the shared chat
+entry for the same cold-start boundary, with safe HTML policy supplied upstream.
+
 The inbox presentation follow-up uses the released Deno-free Spec Validator ^0.2.1
 with ordinary registry resolution and unchanged specification checks.
 

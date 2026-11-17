@@ -1,5 +1,6 @@
 import { snapshotFixture } from "../fixtures";
 import { reviewAvatars } from "./avatars";
+import { reviewMarkdown } from "./markdown-fixture";
 import type {
   ReviewResources,
   ReviewOverview,
@@ -7,6 +8,7 @@ import type {
   ReviewEvent,
 } from "../../src/maintenance/review/types";
 export type ReviewScenario =
+  | "markdown-body"
   | "auto-merge"
   | "merge-options"
   | "long-inspector"
@@ -114,6 +116,7 @@ export function reviewFixture(
   const pr = structuredClone(overview),
     root = `https://github.com/${pr.repository}`,
     failing = scenario === "failed-checks" || pr.id === "failure";
+  if (scenario === "markdown-body") pr.description = reviewMarkdown;
   if (scenario === "auto-merge")
     pr.mergeMethods = ["squash", "merge", "rebase"];
   if (scenario === "auto-merge")

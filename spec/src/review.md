@@ -6,6 +6,12 @@
 
 The shared repository navigation and Run workflow picker follow LM-UI-004; the main PR shell preserves branch-status filters when returning to its board.
 
+PR descriptions render through public full-width Markdown content, without Mira's
+centered note column. Headings, links, lists, tables and code retain semantic
+formatting, comment markers stay hidden, safe HTML policy keeps active content
+inert, and a Design Core horizontal ScrollArea contains wide content without page
+overflow in light, dark and narrow layouts.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.

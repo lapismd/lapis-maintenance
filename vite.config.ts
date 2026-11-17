@@ -20,6 +20,7 @@ export default defineConfig({
   optimizeDeps: {
     include: [
       "@lapismd/design-core/shell",
+      "@lapismd/design-core/chat",
       "@lapismd/design-core/shadcn/badge",
       "@lapismd/design-core/shadcn/button",
       "@lapismd/design-core/shadcn/button-group",

@@ -13,6 +13,9 @@ Rapid authenticated remounts retain their persistent cache through the host-owne
 
 Running work has its own Kanban lane; Activity retains completed and cancelled items.
 
+PR overview descriptions follow LM-PR-001's semantic full-width Markdown contract,
+using public renderer layout options rather than centered note styling.
+
 ### Acceptance details
 
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.

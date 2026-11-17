@@ -1,6 +1,8 @@
 <script lang="ts">
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { Button } from "@lapismd/design-core/shadcn/button";
+  import { MarkdownContent } from "@lapismd/design-core/chat";
+  import { ScrollArea } from "@lapismd/design-core/shadcn/scroll-area";
   import {
     CircleCheck,
     GitBranch,
@@ -29,7 +31,19 @@
             <h2>About this pull request</h2>
           </header>
           <div class="review-description-content">
-            <p>{pr.description}</p>
+            <ScrollArea
+              orientation="horizontal"
+              style="width:100%;min-width:0"
+              viewportProps={{
+                role: "region",
+                "aria-label": "Pull request description",
+              }}
+              ><MarkdownContent
+                content={pr.description}
+                fullWidth
+                style="--ui-chat-markdown-padding:0;--mira-preview-background:transparent"
+              /></ScrollArea
+            >
             <div class="review-description-note">
               <CircleCheck size={16} aria-hidden="true" /><span
                 >Changes are scoped to the displayed commit. Repository rules
