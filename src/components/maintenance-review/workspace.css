@@ -212,9 +212,6 @@
   .review-workspace-title {
     align-items: flex-start;
   }
-  .review-workspace-title .review-pr-actions {
-    display: none;
-  }
   .review-tabs-list {
     padding-inline: 0.5rem;
   }
@@ -237,4 +234,25 @@
 }
 .review-tabs-list [role="tab"][data-state="active"]:is(:hover, :focus-visible) {
   border-bottom-color: var(--primary);
+}
+
+.review-workspace-title > .review-pr-actions {
+  flex: none;
+  flex-wrap: nowrap;
+}
+@container (max-width:52rem) {
+  .review-workspace-title .review-action-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .review-workspace-title .review-pr-actions > button {
+    flex: none;
+    width: 2rem;
+    padding-inline: 0;
+  }
 }

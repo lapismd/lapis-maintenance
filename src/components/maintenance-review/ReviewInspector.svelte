@@ -1,7 +1,7 @@
 <script lang="ts">
   import { AppShell } from "@lapismd/design-core/shell";
   import { Button } from "@lapismd/design-core/shadcn/button";
-  import { Badge } from "@lapismd/design-core/shadcn/badge";
+  import ReviewStatus from "./ReviewStatus.svelte";
   import { Maximize2, RefreshCw } from "@lucide/svelte";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ReviewChecks from "./ReviewChecks.svelte";
@@ -55,17 +55,7 @@
         >
         <h2>{pr.title}</h2>
         <div class="review-button-row">
-          <Badge variant="outline"
-            >{pr.draft
-              ? "Draft"
-              : pr.kind !== "pull-request"
-                ? "Workflow"
-                : pr.state === "merged"
-                  ? "Merged"
-                  : pr.state === "closed"
-                    ? "Closed"
-                    : "Open"}</Badge
-          ><code>{pr.sha.slice(0, 8)}</code>
+          <ReviewStatus overview={pr} /><code>{pr.sha.slice(0, 8)}</code>
         </div>
         <p class="review-muted review-inspector-summary">{pr.review}</p>
         {#if pr.kind === "pull-request"}<Button

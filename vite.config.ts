@@ -1,8 +1,10 @@
 import { defineConfig } from "vite";
 import { svelte } from "@sveltejs/vite-plugin-svelte";
+import { buildCommit } from "./scripts/build-commit.ts";
 import { pwaAssets } from "./scripts/pwa-assets.ts";
 export default defineConfig({
   plugins: [svelte(), pwaAssets()],
+  define: { "import.meta.env.VITE_APP_COMMIT": JSON.stringify(buildCommit()) },
   base: "./",
   server: {
     headers: {

@@ -17,6 +17,7 @@
   import lapisLogo from "../../assets/lapis-logo.svg";
   import MaintenanceProfile from "./MaintenanceProfile.svelte";
   import type { PersonalProfile } from "@lapismd/repository-ui/settings";
+  import { appBuild } from "../../build-info";
   import type { View } from "../../maintenance/types";
   let {
     controller,
@@ -67,18 +68,31 @@
   variant="rail"
   constraintPriority={0}
 >
-  <AppShell.Sidebar.Header
-    ><div class="maintenance-brand" data-compact={compact}>
-      <img
-        src={lapisLogo}
-        alt="Lapis logo"
-        width="26"
-        height="26"
-      />{#if !compact}<span
-          >Lapis<span class="maintenance-brand-sub">Maintenance</span></span
-        >{/if}
-    </div></AppShell.Sidebar.Header
-  >
+  <AppShell.Sidebar.Header>
+    <div class="maintenance-brand-header">
+      <div class="maintenance-brand" data-compact={compact}>
+        <img src={lapisLogo} alt="Lapis logo" width="26" height="26" />
+        {#if !compact}
+          <span class="maintenance-brand-text"
+            >Lapis<span class="maintenance-brand-sub">Maintenance</span></span
+          >
+          {#if appBuild}<a
+              class="maintenance-build-version"
+              href={appBuild.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              title={appBuild.sha}
+              aria-label={`App version ${appBuild.label} — view commit on GitHub`}
+              >{appBuild.label}</a
+            >
+          {:else}<span
+              class="maintenance-build-version"
+              title="Development build">dev</span
+            >{/if}
+        {/if}
+      </div>
+    </div>
+  </AppShell.Sidebar.Header>
   <AppShell.Sidebar.Body
     ><Tooltip.Provider
       ><nav

@@ -42,7 +42,7 @@
               ><MarkdownContent
                 content={pr.description}
                 fullWidth
-                style="--ui-chat-markdown-padding:0;--mira-preview-background:transparent"
+                style="--ui-chat-markdown-padding:0 0 0.75rem;--mira-preview-background:transparent"
               /></ScrollArea
             >
             <div class="review-description-note">

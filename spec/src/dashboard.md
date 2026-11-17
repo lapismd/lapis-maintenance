@@ -32,6 +32,14 @@ deduplicated until recovery, command request IDs identify outcomes across panes,
 and notification memory is bounded to four visible and 100 log records. Empty
 states, loading indicators, contextual validation and eligibility reasons remain
 attached to their controls; toast actions only retry reads or open details/links.
+Toast action buttons use the shared secondary variant with a visible themed
+background at rest and a distinct hover state.
+
+Expanded sidebar branding retains its original logo/text alignment and centres
+only a small bare short Git commit link directly below the Maintenance text,
+with a padded sidebar-style hover background; it opens the exact full build commit on GitHub, with the full SHA
+available on hover. Collapsed navigation omits the label, and source archives
+without commit metadata disclose dev without inventing a commit link.
 
 ### Acceptance details
 

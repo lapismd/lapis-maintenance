@@ -28,7 +28,7 @@
     <header class="review-workspace-heading">
       <div class="review-workspace-title">
         <h1>{pr.title} <span class="review-pr-number">#{pr.number}</span></h1>
-        <ReviewActions {controller} />
+        <ReviewActions {controller} compact />
       </div>
       <div class="review-workspace-meta">
         <Bot size={14} aria-hidden="true" /><span>{pr.author}</span><span

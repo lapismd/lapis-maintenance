@@ -25,6 +25,10 @@ action outcomes across board, inspector and review surfaces. Background refresh
 failures re-arm after recovery without replaying actions, and no notification is
 persisted in account caches.
 
+Application build identity is static public presentation metadata under
+LM-UI-001, independent of repository/card revisions and command authority. Its
+short commit label links to the full application source commit.
+
 ### Acceptance details
 
 - Reads supply snapshots/details with PR identity and workflow Actions links; commands bind to a PR SHA, run attempt or deployment identity, with check completeness independent of unrelated resource gaps and return completed, accepted, rejected or uncertain; the selected card remains available for immediate inspector presentation while ports load full cached details; subsequent cached progress replaces that summary and preserves disabled actions until the detail read settles.
