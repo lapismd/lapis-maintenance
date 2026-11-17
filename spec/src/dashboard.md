@@ -33,6 +33,11 @@ and notification memory is bounded to four visible and 100 log records. Empty
 states, loading indicators, contextual validation and eligibility reasons remain
 attached to their controls; toast actions only retry reads or open details/links.
 
+Expanded sidebar branding centres a small v-prefixed short Git commit link below
+Maintenance; it opens the exact full build commit on GitHub, with the full SHA
+available on hover. Collapsed navigation omits the label, and source archives
+without commit metadata disclose vdev without inventing a commit link.
+
 ### Acceptance details
 
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.

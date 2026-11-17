@@ -36,7 +36,7 @@
 {#if pr?.kind === "pull-request"}
   <div class="review-pr-actions" class:review-pr-actions-compact={compact}>
     {#if mode === "merge"}
-      <ReviewMergeControl {controller} />
+      <ReviewMergeControl {controller} disabledReason={reason} />
     {:else}
       <Button
         size="sm"
@@ -84,7 +84,7 @@
           >{/if}
       {/each}
     {/if}
-    {#if reason}
+    {#if reason && mode === "review"}
       {#if compact}<span id={`${id}-reason`} class="maintenance-sr-only"
           >{reason}</span
         >

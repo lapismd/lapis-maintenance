@@ -21,6 +21,10 @@ Inspector review actions use one compact row without an inline description;
 Comment has a short visible label, constrained labels truncate, and unavailable
 action reasons remain in accessible descriptions and hover titles.
 
+Merge footers in the overview, Checks tab and inspector contain controls without
+an inline policy paragraph. Unavailable merge actions retain their reasons as
+button titles and accessible descriptions, preserving eligibility and preflight.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.

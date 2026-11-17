@@ -30,6 +30,11 @@ The public Design Core notifications and RelativeTime entries are prebundled for
 Storybook cold startup, using the existing package without new dependencies.
 Notification stories remain fixture-only and visual-pending.
 
+Vite embeds only the public full Git commit identity: GitHub Actions GITHUB_SHA
+for hosted builds, or local Git HEAD during development. Invalid configured
+identities fail the build; source archives without Git metadata use vdev.
+Build identity is shared by app and fixture Storybook without provider reads.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

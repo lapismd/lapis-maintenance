@@ -6,7 +6,11 @@
   import { ChevronDown, GitMerge } from "@lucide/svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   type MergeMethod = "merge" | "squash" | "rebase";
-  let { controller }: { controller: ReviewController } = $props();
+  let {
+    controller,
+    disabledReason,
+  }: { controller: ReviewController; disabledReason?: string } = $props();
+  const id = $props.id();
   const pr = $derived(controller.pullRequest);
   const methods = $derived<MergeMethod[]>(pr?.mergeMethods ?? ["squash"]);
   let choice = $state<MergeMethod>("squash");
@@ -50,7 +54,12 @@
 </script>
 
 <ButtonGroup.Root aria-label="Pull request merge controls">
-  <Button size="sm" {disabled} onclick={() => invoke()}
+  <Button
+    size="sm"
+    {disabled}
+    title={disabled ? disabledReason : undefined}
+    aria-describedby={disabled && disabledReason ? `${id}-reason` : undefined}
+    onclick={() => invoke()}
     ><MaintenanceActionIcon
       kind="merge-pr"
       pending={controller.active?.kind === "merge-pr" &&
@@ -96,6 +105,10 @@
     </DropdownMenu.Root>
   {/if}
 </ButtonGroup.Root>
+{#if disabled && disabledReason}<span
+    id={`${id}-reason`}
+    class="maintenance-sr-only">{disabledReason}</span
+  >{/if}
 
 <Button
   size="sm"
