@@ -6,6 +6,9 @@
 
 Repository branch-status filters constrain both remote events and current observations. An explicitly restricted empty repository scope returns no events or provider requests; it never falls back to all repositories.
 
+Read/paging errors follow LM-UI-001 toast policy while preserving loaded rows
+and explicit Retry controls; empty-state recovery remains within the timeline.
+
 ### Acceptance details
 
 - Workspace and PR activity share an avatar/byline/body renderer with GitHub links, icon-only details and colored status chips; explicit success/failure events have subtle theme tints and icon/text labels, neutral events remain unboxed, and repository icon buttons open the inbox with only that repository selected.

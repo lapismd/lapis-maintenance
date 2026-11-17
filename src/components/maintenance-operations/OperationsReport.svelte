@@ -8,12 +8,15 @@
   } from "@lucide/svelte";
   import type { WaveReport, WaveNode } from "../../maintenance/operator-types";
   import { attentionReason } from "../../maintenance/operator-types";
+  import { RelativeTime } from "@lapismd/design-core/shadcn/relative-time";
   import { RepositoryIdentifiers } from "@lapismd/repository-ui/jj";
   import { copyIdentifier } from "../../maintenance/copy-identifier";
   import OperationsNodeDetails from "./OperationsNodeDetails.svelte";
   import OperationsSection from "./OperationsSection.svelte";
   import OperationsSource from "./OperationsSource.svelte";
   import OperationsTimelineItem from "./OperationsTimelineItem.svelte";
+  import OperationsStatus from "./OperationsStatus.svelte";
+  import { repositoryDecisions } from "../../maintenance/operation-decisions";
   let {
     report,
     nodes,
@@ -27,7 +30,7 @@
     report.releases.filter((r) => matches(r.repository, r.name)),
   );
   const decisions = $derived(
-    report.operations.filter((o) =>
+    repositoryDecisions(report.operations).filter(({ current: o }) =>
       matches(o.repository, `${o.status} ${o.reason}`),
     ),
   );
@@ -82,7 +85,7 @@
   icon={GitCommitHorizontal}
 >
   <ol class="operations-timeline">
-    {#each decisions as operation}<OperationsTimelineItem
+    {#each decisions as { current: operation, previous } (operation.repository.toLowerCase())}<OperationsTimelineItem
         title={operation.repository}
         summary={operation.reason}
         status={operation.status}
@@ -99,7 +102,9 @@
         {#each operation.targets as target}<p>
             {target.path} · {target.type} · {target.name}@{target.target}
           </p>{/each}
-        <time datetime={operation.observedAt}>{operation.observedAt}</time>
+        <div class="operations-observed-at">
+          <RelativeTime timestamp={operation.observedAt} />
+        </div>
         <RepositoryIdentifiers
           placement="inline"
           copyText={copyIdentifier}
@@ -110,6 +115,31 @@
           commitChipLabel="Operation"
           changeChipLabel="Policy"
         />
+        {#if previous}<section
+            class="operations-detail-section"
+            aria-label="Previous decision"
+          >
+            <h4>Previous decision</h4>
+            <div class="operations-detail-row">
+              <OperationsStatus status={previous.status} />
+              <RelativeTime timestamp={previous.observedAt} />
+            </div>
+            <p>{previous.reason}</p>
+            <OperationsSource
+              repository={previous.repository}
+              sha={previous.sourceSha}
+            />
+            <RepositoryIdentifiers
+              placement="inline"
+              copyText={copyIdentifier}
+              commitId={previous.id}
+              changeId={previous.policyRevision}
+              commitLabel="previous operation ID"
+              changeLabel="previous policy revision"
+              commitChipLabel="Operation"
+              changeChipLabel="Policy"
+            />
+          </section>{/if}
       </OperationsTimelineItem>{:else}<li class="operations-empty">
         No automation decisions in this view.
       </li>{/each}

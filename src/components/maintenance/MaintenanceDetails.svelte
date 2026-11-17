@@ -4,14 +4,21 @@
   import { Skeleton } from "@lapismd/design-core/shadcn/skeleton";
   import * as Empty from "@lapismd/design-core/shadcn/empty";
   import { FileSearch, CircleAlert } from "@lucide/svelte";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
+  import { outcomeSeverity } from "../../maintenance/feedback.svelte";
   import RepositoryReview from "./RepositoryReview.svelte";
   import MaintenanceRunPanel from "./MaintenanceRunPanel.svelte";
   import { statusLabels, type MaintenanceItem } from "../../maintenance/types";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
     controller,
+    sessionMode = "demo",
     onClose,
-  }: { controller: MaintenanceController; onClose: () => void } = $props();
+  }: {
+    controller: MaintenanceController;
+    sessionMode?: "demo" | "github";
+    onClose: () => void;
+  } = $props();
   const detail = $derived(controller.detail);
   const selected = $derived(
     controller.snapshot?.items.find(
@@ -32,6 +39,39 @@
     <Badge variant="outline">{statusLabels[item.status]}</Badge>
   </div>
 {/snippet}
+
+<FeedbackFeed
+  scope="inspector"
+  pending={controller.detailLoading || controller.commands.busy}
+  notices={[
+    ...(controller.detailError
+      ? [
+          {
+            id: `detail:${controller.selectedId}`,
+            title: "Could not refresh details",
+            message: controller.detailError,
+            severity: "error" as const,
+            action: {
+              label: "Retry",
+              run: () =>
+                controller.selectedId &&
+                void controller.select(controller.selectedId, true),
+            },
+          },
+        ]
+      : []),
+    ...(receipt
+      ? [
+          {
+            id: `command:${receipt.command.requestId}`,
+            title: `${sessionMode === "github" ? "GitHub" : "Preview"} · ${receipt.status}`,
+            message: receipt.message,
+            severity: outcomeSeverity(receipt.status),
+          },
+        ]
+      : []),
+  ]}
+/>
 
 <div class="maintenance-details" aria-label="Maintenance item details">
   {#if controller.detailLoading && !detail}
@@ -72,39 +112,8 @@
     {#if controller.detailLoading}<p class="maintenance-muted" role="status">
         Showing cached details · Refreshing…
       </p>
-    {:else if controller.detailError}<div
-        role="status"
-        class="maintenance-feedback"
-      >
-        <p>
-          Could not refresh details. Showing cached data. {controller.detailError}
-        </p>
-        <Button
-          size="sm"
-          variant="outline"
-          onclick={() =>
-            controller.selectedId &&
-            controller.select(controller.selectedId, true)}
-          >Retry details</Button
-        >
-      </div>{/if}
+    {/if}
     {@render itemHeading(detail.item)}
-    {#if receipt}<div
-        class="maintenance-feedback"
-        data-outcome={receipt.status}
-        role="status"
-      >
-        <strong
-          >{receipt.status === "accepted"
-            ? "Accepted · still running"
-            : receipt.status === "uncertain"
-              ? "Outcome unknown"
-              : receipt.status === "rejected"
-                ? "Action not completed"
-                : "Completed"}</strong
-        >
-        <p>{receipt.message}</p>
-      </div>{/if}
     {#if detail.item.kind === "pull-request" || detail.pullRequest}
       <RepositoryReview
         detail={detail.pullRequest ?? detail}

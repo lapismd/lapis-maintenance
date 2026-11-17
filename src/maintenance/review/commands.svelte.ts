@@ -13,9 +13,11 @@ export class ReviewCommands {
   draft = $state.raw<ReviewCommand | null>(null);
   pending = $state(false);
   active = $state.raw<ReviewCommand | null>(null);
+  validationError = $state("");
   inputResult = $state.raw<CommandResult | null>(null);
   receipt = $state.raw<{
     itemId: string;
+    requestId: string;
     label: string;
     result: CommandResult;
   } | null>(null);
@@ -63,6 +65,7 @@ export class ReviewCommands {
     );
     if (this.#uncertain.has(reviewCommandKey(command))) return;
     this.inputResult = null;
+    this.validationError = "";
     if (interaction !== "direct") {
       this.draft = command;
       return;
@@ -74,6 +77,7 @@ export class ReviewCommands {
     if (!this.pending) {
       this.draft = null;
       this.inputResult = null;
+      this.validationError = "";
     }
   }
   async submitInput(comment = "") {
@@ -88,6 +92,7 @@ export class ReviewCommands {
     const error = inputError(actionKindForReview(command.kind), {
       body: comment,
     });
+    this.validationError = error ?? "";
     if (error) {
       this.inputResult = { status: "rejected", message: error };
       return;
@@ -115,7 +120,12 @@ export class ReviewCommands {
       if (this.#disposed) return;
       if (result.status === "uncertain")
         this.#uncertain.add(reviewCommandKey(command));
-      this.receipt = { itemId: command.itemId, label: command.label, result };
+      this.receipt = {
+        itemId: command.itemId,
+        requestId: command.requestId,
+        label: command.label,
+        result,
+      };
       if (this.draft?.requestId === draftId && !!draftId) {
         this.inputResult = result;
         if (["completed", "accepted"].includes(result.status))

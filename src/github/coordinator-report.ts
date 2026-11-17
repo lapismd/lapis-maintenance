@@ -3,6 +3,7 @@ import type {
   WaveReport,
 } from "../maintenance/operator-types";
 import { validRepository } from "./models";
+import { compactCoordinatorEvidence } from "../maintenance/operation-decisions";
 import {
   GithubError,
   type GithubTransport,
@@ -143,6 +144,9 @@ export function parseCoordinatorReport(
         !sha(o.policyRevision) ||
         !string(o.status) ||
         !string(o.observedAt) ||
+        !Number.isFinite(Date.parse(o.observedAt)) ||
+        Date.parse(o.observedAt) >
+          Date.parse(value.observedAt as string) + 60_000 ||
         !string(o.reason) ||
         !string(o.ownership) ||
         !string(o.acceptance) ||
@@ -202,11 +206,11 @@ export async function readCoordinatorReport(
       { ...options, accept: "application/vnd.github.raw+json" },
     );
     const decoded = typeof value === "string" ? JSON.parse(value) : value;
-    return {
+    return compactCoordinatorEvidence({
       ...parseCoordinatorReport(decoded, revision.sha, now),
       sourceRevision: ref.object.sha,
       url: "https://github.com/lapismd/dependency-automation/tree/automation/dependency-wave-state",
-    };
+    });
   } catch (error) {
     signal.throwIfAborted();
     if (error instanceof GithubError && error.status === 401) throw error;

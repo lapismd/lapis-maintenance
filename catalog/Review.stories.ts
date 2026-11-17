@@ -139,7 +139,7 @@ export const WorkflowApproval: Story = {
     await userEvent.click(approve);
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await within(
-      c.getByRole("region", { name: "Pull request workspace" }),
+      await page.findByRole("region", { name: "Notifications" }),
     ).findByText("Preview · accepted");
     await expect(
       c.getByRole("button", { name: /^Approve workflow run$/ }),
@@ -159,7 +159,7 @@ export const EnvironmentApproval: Story = {
     await userEvent.click(approve);
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await within(
-      c.getByRole("region", { name: "Pull request workspace" }),
+      await page.findByRole("region", { name: "Notifications" }),
     ).findByText("Preview · accepted");
     await expect(approve).toBeDisabled();
   },

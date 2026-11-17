@@ -88,6 +88,7 @@
           {controller}
           {notice}
           {messages}
+          {sessionMode}
         />{@render settings?.()}<MaintenanceFreshness {controller} /><Badge
           variant="secondary">{sessionMode === "demo" ? "Demo" : "Live"}</Badge
         >

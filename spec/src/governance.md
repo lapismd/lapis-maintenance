@@ -26,6 +26,10 @@ explicit token/tab concurrency tests and unchanged assertions, while all unit,
 browser, Storybook, production PWA, build and canonical specification lanes
 remain required before green-head merge and Pages acceptance.
 
+The public Design Core notifications and RelativeTime entries are prebundled for app, browser and
+Storybook cold startup, using the existing package without new dependencies.
+Notification stories remain fixture-only and visual-pending.
+
 ### Acceptance details
 
 - Each requirement has one verification row; future behavior remains planned; the 2026-11-14 follow-up authorizes local Storybook UI and controller/fixture ports only, including the filtered activity timeline, with R2–R4 live implementation, push, green-head merge and Pages acceptance authorized by the later 2026-11-14 continuation while components remain local.

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import "./maintenance-status.css";
   import * as Popover from "@lapismd/design-core/shadcn/popover";
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
@@ -11,14 +12,22 @@
     CircleHelp,
   } from "@lucide/svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
+  import FeedbackHost from "../feedback/FeedbackHost.svelte";
+  import { provideFeedback } from "../feedback/context";
+  import { maintenanceNotices } from "../../maintenance/feedback-notices";
+  const feedback = provideFeedback();
+  let open = $state(false);
   let {
     controller,
     notice = "",
     messages: suppliedMessages = [],
+    sessionMode = "demo",
   }: {
     controller: MaintenanceController;
     notice?: string;
     messages?: string[];
+    sessionMode?: "demo" | "github";
   } = $props();
   const entries = $derived.by(() => [
     ...suppliedMessages.map((message) => ({ message, kind: "warning" })),
@@ -59,9 +68,21 @@
         ]
       : []),
   ]);
-  const messages = $derived(entries.map((entry) => entry.message));
+  const allEntries = $derived.by(() => {
+    const known = new Set(entries.map((e) => e.message));
+    return [
+      ...feedback.center.history
+        .filter((e) => !known.has(e.detail))
+        .map((e) => ({
+          message: e.detail,
+          kind: e.severity === "error" ? "warning" : e.severity,
+        })),
+      ...entries,
+    ];
+  });
+  const messages = $derived(allEntries.map((entry) => entry.message));
   const latest = $derived(
-    messages.at(-1) ??
+    entries.at(-1)?.message ??
       (controller.connected
         ? "Repository data is up to date"
         : "No session connected"),
@@ -72,8 +93,23 @@
   );
 </script>
 
+<FeedbackFeed
+  scope="maintenance"
+  pending={["loading", "refreshing"].includes(controller.phase) ||
+    !!controller.refreshingRepository ||
+    controller.reports.loading}
+  notices={maintenanceNotices(
+    controller,
+    notice,
+    suppliedMessages,
+    sessionMode,
+    () => (open = true),
+  )}
+/>
+{#if feedback.owned}<FeedbackHost center={feedback.center} />{/if}
+
 <div class="maintenance-header-status">
-  <Popover.Root>
+  <Popover.Root bind:open>
     <Popover.Trigger>
       {#snippet child({ props })}
         <Button
@@ -113,7 +149,7 @@
         >
       </div>
       {#if messages.length}<ol class="maintenance-status-messages">
-          {#each entries as entry}<li>
+          {#each allEntries as entry}<li>
               <span class="maintenance-status-marker" data-kind={entry.kind}>
                 {#if entry.kind === "hold"}<Pause
                     size={14}
@@ -148,95 +184,3 @@
     </Popover.Content>
   </Popover.Root>
 </div>
-
-<style>
-  .maintenance-header-status {
-    flex: 1 1 10rem;
-    width: 20rem;
-    max-width: 20rem;
-    min-width: min(8rem, 100%);
-    display: flex;
-    justify-content: center;
-    overflow: hidden;
-    margin-inline: auto;
-  }
-  .maintenance-header-status :global(.maintenance-status-trigger) {
-    max-width: 100%;
-    width: 100%;
-    min-width: 0;
-    overflow: hidden;
-    gap: 0.4rem;
-    color: var(--muted-foreground);
-  }
-  .maintenance-header-status :global(svg),
-  .maintenance-header-status :global([data-slot="badge"]) {
-    flex: none;
-  }
-  .maintenance-status-latest {
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .maintenance-status-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 1rem;
-    margin-bottom: 0.75rem;
-    font-size: 0.85rem;
-  }
-  .maintenance-status-messages {
-    max-height: min(24rem, 65dvh);
-    overflow: auto;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    font-size: 0.8rem;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-  }
-  .maintenance-status-messages li {
-    position: relative;
-    display: grid;
-    grid-template-columns: 1.5rem minmax(0, 1fr);
-    gap: 0.65rem;
-    padding: 0.4rem 0.1rem 0.8rem;
-  }
-  .maintenance-status-messages li:not(:last-child)::before {
-    content: "";
-    position: absolute;
-    left: 0.8rem;
-    width: 1px;
-    top: 1.9rem;
-    bottom: -0.4rem;
-    background: var(--border);
-  }
-  .maintenance-status-marker {
-    width: 1.5rem;
-    height: 1.5rem;
-    border: 1px solid var(--border);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    color: var(--muted-foreground);
-    background: var(--background);
-  }
-  .maintenance-status-marker[data-kind="warning"],
-  .maintenance-status-marker[data-kind="rejected"] {
-    color: var(--destructive);
-  }
-  :global(.maintenance-status-spinner) {
-    animation: maintenance-status-spin 1s linear infinite;
-  }
-  @keyframes maintenance-status-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    :global(.maintenance-status-spinner) {
-      animation: none;
-    }
-  }
-</style>

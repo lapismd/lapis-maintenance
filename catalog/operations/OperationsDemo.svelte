@@ -5,7 +5,7 @@
   import MaintenanceScreen from "../../src/components/maintenance/MaintenanceScreen.svelte";
   import OperationsPanel from "../../src/components/maintenance-operations/OperationsPanel.svelte";
   import { MaintenanceController } from "../../src/maintenance/controller.svelte";
-  import { operatorFixture } from "./fixtures";
+  import { operatorFixture, decisionHistoryFixture } from "./fixtures";
   import type {
     CommandResult,
     MaintenanceReadPort,
@@ -19,6 +19,8 @@
     uncertain = false,
     action = "rerun-failed",
     view = "operations",
+    decisionHistory = false,
+    refreshError = "",
   }: {
     part?: "page" | "attention" | "footer";
     shell?: boolean;
@@ -28,8 +30,12 @@
     uncertain?: boolean;
     action?: "rerun-failed" | "approve-run" | "approve-deployment";
     view?: "inbox" | "operations";
+    decisionHistory?: boolean;
+    refreshError?: string;
   } = $props();
-  const snapshot = operatorFixture();
+  const snapshot = untrack(() =>
+    decisionHistory ? decisionHistoryFixture() : operatorFixture(),
+  );
   snapshot.coordinator!.state = untrack(() => state);
   if (untrack(() => state === "unsupported" || state === "unavailable")) {
     snapshot.coordinator!.report = undefined;
@@ -65,6 +71,14 @@
       checks: [],
     }),
   };
+  untrack(() => {
+    if (refreshError)
+      snapshot.repositories[0] = {
+        repository: "example/consumer",
+        available: false,
+        reason: refreshError,
+      };
+  });
   let calls = 0;
   const controller = new MaintenanceController(read, {
     execute: async (): Promise<CommandResult> =>

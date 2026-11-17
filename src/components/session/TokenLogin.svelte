@@ -5,6 +5,7 @@
   import { Checkbox } from "@lapismd/design-core/shadcn/checkbox";
   import { Skeleton } from "@lapismd/design-core/shadcn/skeleton";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
   import logo from "../../assets/lapis-logo.svg";
   let {
     busy = false,
@@ -25,6 +26,21 @@
   let remember = $state(true);
   const id = $props.id();
 </script>
+
+<FeedbackFeed
+  scope="login"
+  pending={busy || restoring}
+  notices={notice
+    ? [
+        {
+          id: "session:notice",
+          title: "Session notice",
+          message: notice,
+          severity: "info",
+        },
+      ]
+    : []}
+/>
 
 <main class="maintenance-login" data-ui-theme="lapis">
   <section class="maintenance-login-card" aria-labelledby={`${id}-title`}>
@@ -69,7 +85,6 @@
           and the active cache.</small
         >
         {#if error}<p role="alert">{error}</p>{/if}
-        {#if notice}<p role="status">{notice}</p>{/if}
         <Button type="submit" disabled={busy || !token.trim()}
           ><GitHubIcon />{busy ? "Connecting…" : "Connect GitHub"}</Button
         >

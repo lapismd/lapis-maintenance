@@ -12,6 +12,15 @@ formatting, comment markers stay hidden, safe HTML policy keeps active content
 inert, and a Design Core horizontal ScrollArea contains wide content without page
 overflow in light, dark and narrow layouts.
 
+Cached-resource failures and completed/accepted/rejected/uncertain command
+outcomes follow LM-UI-001 toast policy, retaining cached content and recovery
+controls rather than inserting banners into the review layout. Optional toast
+links capture the completed command's original target URL.
+
+Inspector review actions use one compact row without an inline description;
+Comment has a short visible label, constrained labels truncate, and unavailable
+action reasons remain in accessible descriptions and hover titles.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.

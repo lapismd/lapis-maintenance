@@ -16,6 +16,7 @@ export class MaintenanceCommands {
   draft = $state.raw<{ command: MaintenanceCommand; label: string } | null>(
     null,
   );
+  validationError = $state("");
   inputResult = $state.raw<CommandResult | null>(null);
   active = $state.raw<MaintenanceCommand | null>(null);
   receipts = $state.raw<ActionReceipt[]>([]);
@@ -67,6 +68,7 @@ export class MaintenanceCommands {
     const command = this.#capture(item, kind, inputs);
     if (!command) return;
     this.inputResult = null;
+    this.validationError = "";
     if (interactionFor(kind) !== "direct") {
       this.draft = {
         command,
@@ -81,6 +83,7 @@ export class MaintenanceCommands {
     if (!this.busy) {
       this.draft = null;
       this.inputResult = null;
+      this.validationError = "";
     }
   }
   async submitInput(inputs: CommandInputs = {}) {
@@ -98,6 +101,7 @@ export class MaintenanceCommands {
       inputs: { ...draft.command.inputs, ...structuredClone(inputs) },
     };
     const error = inputError(command.kind, command.inputs);
+    this.validationError = error ?? "";
     if (error) {
       this.inputResult = { status: "rejected", message: error };
       return;

@@ -20,11 +20,19 @@ export const ReviewThenMerge: Story = {
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findByText("Preview · completed");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("Preview · completed");
     const merge = c.getByRole("button", { name: "Squash and merge" });
     await waitFor(() => expect(merge).toBeEnabled());
     await userEvent.click(merge);
-    await c.findByText("The displayed PR revision was merged in this preview.");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("The displayed PR revision was merged in this preview.");
     await expect(merge).toBeDisabled();
   },
 };
@@ -41,7 +49,11 @@ export const MergeWithoutApproval: Story = {
     const merge = await c.findByRole("button", { name: "Squash and merge" });
     await waitFor(() => expect(merge).toBeEnabled());
     await userEvent.click(merge);
-    await c.findByText("The displayed PR revision was merged in this preview.");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("The displayed PR revision was merged in this preview.");
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await expect(merge).toBeDisabled();
   },
@@ -55,8 +67,18 @@ export const RepositoryRuleRejection: Story = {
     const merge = await c.findByRole("button", { name: "Squash and merge" });
     await waitFor(() => expect(merge).toBeEnabled());
     await userEvent.click(merge);
-    await c.findByText(/GitHub rejected the merge/);
-    await expect(c.getByText("Preview · rejected")).toBeVisible();
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText(/GitHub rejected the merge/);
+    await expect(
+      within(
+        await within(canvasElement.ownerDocument.body).findByRole("region", {
+          name: "Notifications",
+        }),
+      ).getByText("Preview · rejected"),
+    ).toBeVisible();
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     await waitFor(() => expect(merge).toBeEnabled());
   },
@@ -98,7 +120,11 @@ export const MergeMethodDropdown: Story = {
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
     const merge = c.getByRole("button", { name: "Rebase and merge" });
     await userEvent.click(merge);
-    await c.findByText("The displayed PR revision was merged in this preview.");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("The displayed PR revision was merged in this preview.");
     await expect(merge).toBeDisabled();
   },
 };
@@ -128,7 +154,7 @@ export const RequiredComment: Story = {
     const c = within(canvasElement),
       page = within(canvasElement.ownerDocument.body);
     const comment = await c.findByRole("button", {
-      name: "Leave review comment",
+      name: "Comment",
     });
     await waitFor(() => expect(comment).toBeEnabled());
     await userEvent.click(comment);
@@ -140,7 +166,11 @@ export const RequiredComment: Story = {
       "Review feedback for this revision.",
     );
     await userEvent.click(submit);
-    await c.findByText("Preview · completed");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("Preview · completed");
     await waitFor(() =>
       expect(
         page.queryByRole("dialog", { hidden: true }),

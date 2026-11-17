@@ -10,6 +10,7 @@
 </script>
 
 <ReviewResource
+  resourceKey={controller.selectedId ?? "none"}
   state={controller.resources.activity}
   label="Activity"
   onRetry={() => controller.load("activity", undefined, true)}

@@ -20,7 +20,29 @@ const render: Story["render"] = (args) => ({
   Component: Demo,
   props: { ...args, workspace: false },
 });
-export const PullRequest: Story = { render };
+export const PullRequest: Story = {
+  render,
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    await c.findByRole("button", { name: "Open PR view" });
+    const footer = canvasElement.querySelector<HTMLElement>(
+      ".review-inspector-footer",
+    )!;
+    const buttons = within(footer)
+      .getAllByRole("button")
+      .filter((b) => b.closest(".review-pr-actions"));
+    await expect(
+      within(footer).getByRole("button", { name: "Comment" }),
+    ).toBeVisible();
+    await expect(footer.querySelector(".review-pr-actions > p")).toBeNull();
+    const bounds = buttons.map((b) => b.getBoundingClientRect());
+    for (const rect of bounds)
+      await expect(rect.top).toBeCloseTo(bounds[0]!.top, 0);
+    await expect(bounds.at(-1)!.right).toBeLessThanOrEqual(
+      footer.getBoundingClientRect().right,
+    );
+  },
+};
 export const WorkflowApproval: Story = {
   render,
   args: { scenario: "workflow-approval", selected: "compatibility" },

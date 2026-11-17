@@ -90,8 +90,8 @@ export const ImmediatePartialBatch: Story = {
       await c.findByRole("button", { name: "Rerun eligible failures" }),
     );
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findByText(/Fixture outcome unknown/);
-    await c.findByText(/Fixture rerun accepted/);
+    await page.findByText(/Fixture outcome unknown/);
+    await page.findByText(/Fixture rerun accepted/);
   },
 };
 export const MissingReport: Story = { args: { state: "unavailable" } };
@@ -107,7 +107,7 @@ export const WorkflowBatch: Story = {
       await c.findByRole("button", { name: "Approve eligible workflows" }),
     );
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findAllByText(/Fixture rerun accepted/);
+    await page.findAllByText(/Fixture rerun accepted/);
   },
 };
 export const EnvironmentBatch: Story = {
@@ -119,7 +119,7 @@ export const EnvironmentBatch: Story = {
       await c.findByRole("button", { name: "Approve eligible environments" }),
     );
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findAllByText(/Fixture rerun accepted/);
+    await page.findAllByText(/Fixture rerun accepted/);
   },
 };
 
@@ -165,7 +165,33 @@ export const Workspace: Story = {
     ).toBeVisible();
   },
 };
-export const Narrow: Story = { args: { width: 390 } };
+export const Narrow: Story = {
+  args: { width: 390 },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const footer = within(
+      await c.findByRole("region", { name: "Batch actions" }),
+    );
+    const buttons = footer.getAllByRole("button"),
+      bounds = buttons.map((b) => b.getBoundingClientRect());
+    await expect(buttons).toHaveLength(3);
+    const labels = buttons.map(
+      (b) => b.querySelector<HTMLElement>(".operations-action-label")!,
+    );
+    await expect(
+      labels.some((label) => label.scrollWidth > label.clientWidth),
+    ).toBe(true);
+    for (const rect of bounds)
+      await expect(rect.top).toBeCloseTo(bounds[0]!.top, 0);
+    await expect(bounds.at(-1)!.right).toBeLessThanOrEqual(
+      canvasElement.querySelector(".operations-footer")!.getBoundingClientRect()
+        .right,
+    );
+    await expect(
+      footer.getByRole("button", { name: "Approve eligible environments" }),
+    ).toHaveAttribute("title", "Approve eligible environments");
+  },
+};
 
 export const StickySections: Story = {
   play: async ({ canvasElement }) => {
@@ -304,5 +330,51 @@ export const IdentifierPairs: Story = {
         0,
       );
     }
+  },
+};
+
+export const RefreshErrorToast: Story = {
+  args: {
+    shell: true,
+    refreshError:
+      "Workflow CI: GitHub data unavailable (HTTP 422). " +
+      "Additional diagnostic detail. ".repeat(20),
+  },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement),
+      page = within(canvasElement.ownerDocument.body);
+    const notifications = within(
+      await page.findByRole("region", { name: "Notifications" }),
+    );
+    await expect(
+      await notifications.findByText("Could not refresh example/consumer"),
+    ).toBeVisible();
+    await expect(
+      within(
+        c.getByRole("region", { name: "Maintenance operations" }),
+      ).queryByText(/Workflow CI: GitHub data unavailable/),
+    ).not.toBeInTheDocument();
+    await userEvent.click(
+      notifications.getByRole("button", { name: "View details" }),
+    );
+    const log = within(await page.findByRole("region", { name: "Status log" }));
+    await waitFor(() =>
+      expect(
+        log.getByText(/Workflow CI: GitHub data unavailable/),
+      ).toBeVisible(),
+    );
+    await userEvent.keyboard("{Escape}");
+    await userEvent.click(c.getByRole("button", { name: /^Refresh$/ }));
+    await expect(
+      notifications.queryByText("Could not refresh example/consumer"),
+    ).not.toBeInTheDocument();
+  },
+};
+export const DarkNarrowToast: Story = {
+  args: {
+    shell: true,
+    dark: true,
+    width: 390,
+    refreshError: "Workflow CI: GitHub data unavailable (HTTP 422).",
   },
 };

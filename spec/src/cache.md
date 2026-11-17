@@ -12,6 +12,15 @@ One shared Turso store and one shared IndexedDB store isolate logical token keys
 
 Repository/PR activity, GraphQL inventory batches and raw workflow inventories stay in a bounded 2 MiB/100-response/five-minute session cache; never persist a filtered body under the original ETag. Persist compact branch-action summaries independently of resolved workflow cards. Migrate the active legacy partition through the attention policy before deleting its old store; prune expired inactive legacy stores by app-owned names, leave locked files for retry and never touch credentials or another application's storage. Dispose maintenance timers and drain cleanup before closing.
 
+Coordinator presentation uses a versioned v2 cache containing only the latest
+and one previous distinct decision per repository, tagged as a host projection
+while retaining original source/report identities; prune v1 full-history
+resources and raw report responses on startup/maintenance, refuse new raw-report
+cache writes, and never associate a filtered body with an HTTP ETag.
+The five-minute derived cache still supports immediate reopening without GitHub
+reads; explicitly stale/unavailable evidence retains the existing read-only
+feedback and never grants command authority.
+
 ### Acceptance details
 
 - Policy-versioned detail/review namespaces recompute action eligibility after upgrades while retaining eligible responses; resources publish verified results before persistence settles, drain writes before retirement, serialize same-partition Turso reopen after connection close and clear denied previews; persist reads, validators, assembled views and details separately from credentials, partitioned by token and repository selection; publish boards before discovery, checkpoint partial scans, serve fresh details directly and retain revision-matching details up to one day during revalidation with refresh/failure feedback, while commands bypass cached data.

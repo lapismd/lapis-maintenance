@@ -4,6 +4,7 @@
   import { Button } from "@lapismd/design-core/shadcn/button";
   import { Play, LoaderCircle, ExternalLink, X } from "@lucide/svelte";
   import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
+  import DispatchFeedback from "./DispatchFeedback.svelte";
   import DispatchRepositoryPicker from "./DispatchRepositoryPicker.svelte";
   import DispatchSelect from "./DispatchSelect.svelte";
   import DispatchInputs from "./DispatchInputs.svelte";
@@ -18,6 +19,8 @@
   } = $props();
   const id = $props.id();
 </script>
+
+<DispatchFeedback {controller} {live} />
 
 <Dialog.Root
   open={controller.open}
@@ -52,8 +55,7 @@
         <LoaderCircle class="review-spinner" aria-hidden="true" />Loading
         workflow definitions…
       </p>{/if}
-    {#if controller.error}<p role="alert">{controller.error}</p>{/if}
-    {#if controller.result}<p role="status">{controller.result.message}</p>
+    {#if controller.result}
       {#if controller.result.url}<a
           href={controller.result.url}
           target="_blank"
@@ -92,12 +94,10 @@
         ></Field.FieldGroup
       >
       {#if controller.target}<DispatchInputs {controller} />{/if}
-      {#if !controller.loading && !controller.workflows.length}<p>
+      {#if !controller.loading && !controller.error && !controller.workflows.length}<p
+        >
           No active manual workflows were discovered.
         </p>{/if}
-      {#each controller.warnings as warning}<p class="review-muted">
-          {warning}
-        </p>{/each}
       {#if controller.target}<dl class="review-confirm-facts">
           <div>
             <dt>Ref</dt>

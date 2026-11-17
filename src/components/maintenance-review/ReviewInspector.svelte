@@ -81,7 +81,10 @@
   </AppShell.Sidebar.Body>
   <AppShell.Sidebar.Footer style="padding:0"
     ><div class="review-inspector-footer">
-      <ReviewActions {controller} /><ReviewApprovals {controller} compact />
+      <ReviewActions {controller} compact /><ReviewApprovals
+        {controller}
+        compact
+      />
     </div></AppShell.Sidebar.Footer
   >
 </AppShell.Sidebar>

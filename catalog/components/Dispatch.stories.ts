@@ -38,7 +38,9 @@ export const TypedInputs: Story = {
     await userEvent.click(
       dialog.getByRole("button", { name: "Simulate workflow dispatch" }),
     );
-    await dialog.findByText(
+    await within(
+      await page.findByRole("region", { name: "Notifications" }),
+    ).findByText(
       "Preview: workflow dispatch accepted. Publication is not confirmed.",
     );
   },

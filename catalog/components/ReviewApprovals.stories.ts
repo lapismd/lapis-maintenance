@@ -29,7 +29,11 @@ export const Workflow: Story = {
     await expect(
       within(canvasElement.ownerDocument.body).queryByRole("dialog"),
     ).not.toBeInTheDocument();
-    await c.findByText("Preview · accepted");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("Preview · accepted");
   },
 };
 export const Denied: Story = {
@@ -64,7 +68,11 @@ export const Stale: Story = {
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findByText("Preview · rejected");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("Preview · rejected");
   },
 };
 export const Uncertain: Story = {
@@ -79,7 +87,11 @@ export const Uncertain: Story = {
     await waitFor(() => expect(approve).toBeEnabled());
     await userEvent.click(approve);
     await expect(page.queryByRole("dialog")).not.toBeInTheDocument();
-    await c.findByText("Preview · uncertain");
+    await within(
+      await within(canvasElement.ownerDocument.body).findByRole("region", {
+        name: "Notifications",
+      }),
+    ).findByText("Preview · uncertain");
     await expect(
       c.getByRole("button", { name: /^Approve environment$/ }),
     ).toBeDisabled();

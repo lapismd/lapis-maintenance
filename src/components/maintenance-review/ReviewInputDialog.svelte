@@ -72,8 +72,8 @@
             /></Field.Field
           ></Field.FieldGroup
         >
-        {#if controller.inputResult}<p role="alert">
-            {controller.inputResult.message}
+        {#if controller.commands.validationError}<p role="alert">
+            {controller.commands.validationError}
           </p>{/if}
         <Dialog.Footer
           ><Button

@@ -9,18 +9,22 @@
 .operations-footer .operations-actions {
   margin: 0;
 }
-.operations-footer ol {
-  max-height: 7rem;
-  overflow: auto;
-  padding-inline-start: 1.3rem;
-  margin: 0.5rem 0 0;
-  overflow-wrap: anywhere;
-}
+
 .operations-footer p {
   margin: 0.5rem 0 0;
 }
 .operations-footer .operations-actions {
   display: flex;
   gap: 0.5rem;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+}
+.operations-footer .operations-actions > button {
+  min-width: 0;
+  flex: 0 1 auto;
+}
+.operations-action-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -69,20 +69,7 @@
   font-size: 0.75rem;
   color: var(--muted-foreground);
 }
-.maintenance-feedback {
-  border: 1px solid var(--border);
-  border-radius: 0.5rem;
-  padding: 0.75rem;
-  background: var(--muted);
-  font-size: 0.8rem;
-}
-.maintenance-feedback p {
-  margin-top: 0.3rem;
-}
-.maintenance-feedback[data-outcome="uncertain"],
-.maintenance-feedback[data-outcome="rejected"] {
-  border-color: var(--destructive);
-}
+
 .maintenance-github-link {
   display: inline-flex;
   gap: 0.35rem;

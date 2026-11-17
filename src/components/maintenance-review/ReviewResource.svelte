@@ -6,18 +6,37 @@
   import { CircleAlert, LoaderCircle, RotateCcw } from "@lucide/svelte";
   import type { ResourceState } from "../../maintenance/review/types";
   import "./review.css";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
   let {
     state,
+    resourceKey = "resource",
     label,
     onRetry,
     children,
   }: {
     state: ResourceState<unknown>;
+    resourceKey?: string;
     label: string;
     onRetry: () => void;
     children: Snippet;
   } = $props();
 </script>
+
+<FeedbackFeed
+  scope={`review-resource:${label}`}
+  pending={state.loading}
+  notices={state.error
+    ? [
+        {
+          id: `review-resource:${resourceKey}:${label}`,
+          title: `Could not refresh ${label.toLowerCase()}`,
+          message: state.error,
+          severity: "error",
+          action: { label: "Retry", run: onRetry },
+        },
+      ]
+    : []}
+/>
 
 {#if state.loading && !state.data}
   <div class="review-skeleton" role="status" aria-label={`Loading ${label}`}>
@@ -31,7 +50,8 @@
     ><Empty.Header
       ><Empty.Media variant="icon"><CircleAlert /></Empty.Media><Empty.Title
         >{label} unavailable</Empty.Title
-      ><Empty.Description>{state.error}</Empty.Description></Empty.Header
+      ><Empty.Description>Try loading this resource again.</Empty.Description
+      ></Empty.Header
     ><Empty.Content
       ><Button variant="outline" onclick={onRetry}
         ><RotateCcw size={15} aria-hidden="true" />Retry {label.toLowerCase()}</Button
@@ -46,11 +66,5 @@
         aria-hidden="true"
       />Refreshing {label.toLowerCase()}
     </div>{/if}
-  {#if state.error}<p class="review-inline-error" role="alert">
-      {state.error}
-      <Button size="sm" variant="ghost" onclick={onRetry}
-        ><RotateCcw size={15} aria-hidden="true" />Retry</Button
-      >
-    </p>{/if}
   {@render children()}
 {/if}
