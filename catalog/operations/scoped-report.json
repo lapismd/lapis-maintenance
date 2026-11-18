@@ -1,0 +1,196 @@
+{
+  "schemaVersion": 1,
+  "kind": "lapis-dependency-waves",
+  "observedAt": "2026-11-18T04:00:00Z",
+  "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "generation": 1,
+  "coverage": [],
+  "nodes": [
+    {
+      "repository": "lapismd/lapis-desktop",
+      "sourceSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "visibility": "public",
+      "acceptance": {
+        "state": "qualified",
+        "reason": "all observed current workflows and checks completed"
+      },
+      "ownership": {
+        "state": "bot-owned",
+        "reason": "PR and branch commit authors verified"
+      },
+      "branchHolds": [],
+      "updates": [
+        {
+          "name": "@lapismd/spec-validator",
+          "range": "0.2.0",
+          "type": "devDependencies",
+          "repository": "lapismd/lapis-desktop",
+          "path": "package.json",
+          "consumer": "@lapismd/lapis-desktop",
+          "current": "0.2.0",
+          "target": "0.2.1",
+          "targetRange": "0.2.1",
+          "updateType": "patch",
+          "compatibility": "compatible",
+          "releaseIntent": null,
+          "basis": "lock"
+        }
+      ],
+      "holds": [],
+      "sourceHoldFacts": [
+        {
+          "message": "package.json:dependencies:@lapismd/ai: unpublished registry dependency",
+          "kind": "unpublished-registry",
+          "path": "package.json",
+          "type": "dependencies",
+          "name": "@lapismd/ai",
+          "range": "^0.2.0"
+        },
+        {
+          "message": "@lapismd/ai: unavailable registry prerequisite",
+          "kind": "unavailable-registry",
+          "path": "package.json",
+          "type": "dependencies",
+          "name": "@lapismd/ai",
+          "range": "^0.2.0"
+        },
+        {
+          "message": "@lapis-notes/app-profile: unavailable registry prerequisite",
+          "kind": "unavailable-registry",
+          "path": "package.json",
+          "type": "dependencies",
+          "name": "@lapis-notes/app-profile",
+          "range": "^0.2.2"
+        },
+        {
+          "message": "@lapis-notes/lapis-plugin-tasks: unavailable registry prerequisite",
+          "kind": "unavailable-registry",
+          "path": "package.json",
+          "type": "devDependencies",
+          "name": "@lapis-notes/lapis-plugin-tasks",
+          "range": "^0.2.0"
+        }
+      ],
+      "waits": [],
+      "status": "admitted",
+      "scopedAdmission": {
+        "kind": "desktop-sdk-development",
+        "grantSha256": "f2404e30a71030804653a51770467dcabf06e58985a650540ea8d54f9694541d",
+        "policySha256": "8385a1e70a704404c49e3b600bda57dabd63bcdff04302537815d67b7da9b89a",
+        "descriptorSha256": "203f8bbef81221c426e28c0636b1b6a75fc307a588a5524874bcac04c739b839",
+        "deferredUpdates": [
+          {
+            "name": "@lapismd/design-core",
+            "range": "^0.13.4",
+            "type": "dependencies",
+            "repository": "lapismd/lapis-desktop",
+            "path": "package.json",
+            "consumer": "@lapismd/lapis-desktop",
+            "current": "0.13.4",
+            "target": "0.13.5",
+            "targetRange": "^0.13.5",
+            "updateType": "patch",
+            "compatibility": "compatible",
+            "releaseIntent": null,
+            "basis": "lock"
+          }
+        ],
+        "deferredHolds": [
+          "package.json:dependencies:@lapismd/ai: unpublished registry dependency",
+          "@lapismd/ai: unavailable registry prerequisite",
+          "@lapis-notes/app-profile: unavailable registry prerequisite",
+          "@lapis-notes/lapis-plugin-tasks: unavailable registry prerequisite"
+        ],
+        "deferredHoldFacts": [
+          {
+            "message": "package.json:dependencies:@lapismd/ai: unpublished registry dependency",
+            "kind": "unpublished-registry",
+            "path": "package.json",
+            "type": "dependencies",
+            "name": "@lapismd/ai",
+            "range": "^0.2.0"
+          },
+          {
+            "message": "@lapismd/ai: unavailable registry prerequisite",
+            "kind": "unavailable-registry",
+            "path": "package.json",
+            "type": "dependencies",
+            "name": "@lapismd/ai",
+            "range": "^0.2.0"
+          },
+          {
+            "message": "@lapis-notes/app-profile: unavailable registry prerequisite",
+            "kind": "unavailable-registry",
+            "path": "package.json",
+            "type": "dependencies",
+            "name": "@lapis-notes/app-profile",
+            "range": "^0.2.2"
+          },
+          {
+            "message": "@lapis-notes/lapis-plugin-tasks: unavailable registry prerequisite",
+            "kind": "unavailable-registry",
+            "path": "package.json",
+            "type": "devDependencies",
+            "name": "@lapis-notes/lapis-plugin-tasks",
+            "range": "^0.2.0"
+          }
+        ],
+        "deferredWaits": []
+      },
+      "admittedUpdates": [
+        {
+          "name": "@lapismd/spec-validator",
+          "range": "0.2.0",
+          "type": "devDependencies",
+          "repository": "lapismd/lapis-desktop",
+          "path": "package.json",
+          "consumer": "@lapismd/lapis-desktop",
+          "current": "0.2.0",
+          "target": "0.2.1",
+          "targetRange": "0.2.1",
+          "updateType": "patch",
+          "compatibility": "compatible",
+          "releaseIntent": null,
+          "basis": "lock"
+        }
+      ],
+      "operationId": "dea4383d29623ee2a7e74e2081d7e7c82b91a3ba47821ba1462ec263c194d622"
+    }
+  ],
+  "releases": [],
+  "publications": [
+    {
+      "name": "@lapismd/spec-validator",
+      "version": "0.2.1",
+      "integrity": "sha512-aHLByppZkay1axSm8KvCwOJz0si8aDyZBXDGWW+d2VQw+66f1KLimw2rEMjYIpLdoSG9+yN5Kd1MKlAJw7xUVw=="
+    },
+    {
+      "name": "@lapismd/design-core",
+      "version": "0.13.5",
+      "integrity": "sha512-aHLByppZkay1axSm8KvCwOJz0si8aDyZBXDGWW+d2VQw+66f1KLimw2rEMjYIpLdoSG9+yN5Kd1MKlAJw7xUVw=="
+    }
+  ],
+  "operations": [
+    {
+      "id": "dea4383d29623ee2a7e74e2081d7e7c82b91a3ba47821ba1462ec263c194d622",
+      "repository": "lapismd/lapis-desktop",
+      "sourceSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "policyRevision": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "targets": [
+        {
+          "name": "@lapismd/spec-validator",
+          "target": "0.2.1",
+          "path": "package.json",
+          "type": "devDependencies"
+        }
+      ],
+      "status": "planned",
+      "firstObservedAt": "2026-11-18T04:00:00Z",
+      "observedAt": "2026-11-18T04:00:00Z",
+      "ownership": "bot-owned",
+      "reason": "all observed current workflows and checks completed",
+      "acceptance": "qualified"
+    }
+  ],
+  "reportId": "c53284da7817bac34279e66ef4202b669436fd7cc736681ef5d3a0efa9b7ed53"
+}

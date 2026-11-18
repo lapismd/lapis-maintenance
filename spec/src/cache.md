@@ -21,6 +21,12 @@ The five-minute derived cache still supports immediate reopening without GitHub
 reads; explicitly stale/unavailable evidence retains the existing read-only
 feedback and never grants command authority.
 
+LM-GH-004 optional scoped/source-hold fields are revalidated when compacting
+retained evidence, including old v2 resources that previously accepted unknown
+fields; invalid scoped data becomes unavailable and over-age scoped data stays
+explicitly stale, while legacy reports and original audit/source identities keep
+their existing retention and command-authority boundaries.
+
 ### Acceptance details
 
 - Policy-versioned detail/review namespaces recompute action eligibility after upgrades while retaining eligible responses; resources publish verified results before persistence settles, drain writes before retirement, serialize same-partition Turso reopen after connection close and clear denied previews; persist reads, validators, assembled views and details separately from credentials, partitioned by token and repository selection; publish boards before discovery, checkpoint partial scans, serve fresh details directly and retain revision-matching details up to one day during revalidation with refresh/failure feedback, while commands bypass cached data.

@@ -26,6 +26,11 @@
     nodes: WaveNode[];
     matches: (repository: string, text?: string) => boolean;
   } = $props();
+  const scopedDecisions = $derived(
+    new Set(
+      report.nodes.filter((n) => n.scopedAdmission).map((n) => n.operationId),
+    ),
+  );
   const releases = $derived(
     report.releases.filter((r) => matches(r.repository, r.name)),
   );
@@ -45,7 +50,7 @@
     {#each nodes as node}<OperationsTimelineItem
         title={node.repository}
         summary={attentionReason(node)}
-        status={node.status}
+        status={node.scopedAdmission ? `sdk-only-${node.status}` : node.status}
         icon={GitBranch}
       >
         <OperationsNodeDetails {node} policy={report.policyRevision} />
@@ -87,8 +92,12 @@
   <ol class="operations-timeline">
     {#each decisions as { current: operation, previous } (operation.repository.toLowerCase())}<OperationsTimelineItem
         title={operation.repository}
-        summary={operation.reason}
-        status={operation.status}
+        summary={scopedDecisions.has(operation.id)
+          ? `SDK-only · ${operation.reason}`
+          : operation.reason}
+        status={scopedDecisions.has(operation.id)
+          ? `sdk-only-${operation.status}`
+          : operation.status}
         icon={GitCommitHorizontal}
       >
         <OperationsSource

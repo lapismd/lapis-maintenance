@@ -47,6 +47,13 @@ preserve the original report/source/policy identities, and retain the full audit
 history only at its authoritative source rather than in raw browser response
 caches under LM-CACHE-001.
 
+Scoped SDK report data is optional and strictly validated before exposure under
+LM-GH-004; unknown kinds, malformed/bounded source facts, digest or selected/deferred
+identity drift make evidence explicitly unavailable without disabling manual
+GitHub controls. Existing report-age, future-time and current-policy checks also
+apply to scoped observations; displayed hashes are evidence coordinates rather
+than client-side permission or grant verification.
+
 ### Acceptance details
 
 - Read open issues with pagination, omit pull requests, preserve issue links and report denied/incomplete issue coverage explicitly.

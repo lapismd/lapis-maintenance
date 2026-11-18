@@ -1,3 +1,36 @@
+export interface WaveUpdate {
+  name: string;
+  current: string;
+  target: string;
+  compatibility: string;
+  path?: string;
+  type?: string;
+  repository?: string;
+  range?: string;
+  targetRange?: string;
+  updateType?: string;
+  releaseIntent?: string | null;
+  consumer?: string;
+  basis?: string;
+}
+export interface SourceHoldFact {
+  message: string;
+  kind: string;
+  path?: string;
+  type?: string;
+  name?: string;
+  range?: string;
+}
+export interface ScopedAdmission {
+  kind: "desktop-sdk-development";
+  grantSha256: string;
+  policySha256: string;
+  descriptorSha256: string;
+  deferredUpdates: WaveUpdate[];
+  deferredHolds: string[];
+  deferredHoldFacts: SourceHoldFact[];
+  deferredWaits: WaveNode["waits"];
+}
 export interface WaveNode {
   visibility: "public";
   repository: string;
@@ -5,13 +38,15 @@ export interface WaveNode {
   operationId: string;
   status: string;
   holds: string[];
-  waits: { package: string; repository: string; reason: string }[];
-  updates: {
-    name: string;
-    current: string;
-    target: string;
-    compatibility: string;
+  waits: {
+    package: string;
+    repository: string;
+    reason: string;
+    path?: string;
   }[];
+  updates: WaveUpdate[];
+  scopedAdmission?: ScopedAdmission;
+  sourceHoldFacts?: SourceHoldFact[];
   admittedUpdates?: WaveNode["updates"];
   branchHolds?: {
     branch: string;
@@ -63,6 +98,11 @@ export interface CoordinatorEvidence {
   sourceRevision?: string;
 }
 export function attentionReason(node: WaveNode): string {
+  if (node.scopedAdmission)
+    return `SDK-only · ${ordinaryAttentionReason(node)} · repository work remains deferred`;
+  return ordinaryAttentionReason(node);
+}
+function ordinaryAttentionReason(node: WaveNode): string {
   if (node.ownership.state === "repair-owned") return "Manual repair ownership";
   if (node.updates.some((u) => u.compatibility === "breaking"))
     return "Compatibility decision";

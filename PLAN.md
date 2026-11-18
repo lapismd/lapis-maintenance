@@ -437,3 +437,16 @@ batch through production adapters. All eight writes were accepted; both new
 attempts completed successfully. The completed implementation, publication and
 hosted gates are recorded in `spec/records/2026-11-16-operations-delivery.md`.
 No further UI review stop is required under the user's standing approval.
+
+## Scoped SDK evidence — 2026-11-18
+
+- [x] Bind the controlled producer fixture and preserve version1 legacy reports.
+- [x] Validate optional scoped/source-hold metadata on reads and retained resources.
+- [x] Show selected SDK status and deferred updates/holds/waits without command authority.
+- [x] Qualify parser/cache, real browser escaping, all unit/Storybook/a11y/static and application lanes.
+- [ ] Complete exact-head hosted review and merge.
+- [ ] Verify main and Pages deployment; producer grants remain independently inactive.
+
+The [source receipt](spec/records/2026-11-18-scoped-sdk-evidence.md) retains original
+failures and fixture-only qualification; this consumer slice cannot enable any
+Desktop capability, scope, security exception or rollout phase.

@@ -1,3 +1,7 @@
+import {
+  validOptionalScope,
+  invalidScopeReason,
+} from "../maintenance/scoped-admission";
 import type {
   CoordinatorEvidence,
   WaveReport,
@@ -107,6 +111,8 @@ export function parseCoordinatorReport(
     )
   )
     return unavailable();
+  if (!nodes.every(validOptionalScope))
+    return { state: "unavailable", reason: invalidScopeReason };
   if (
     coverage.some(
       (c) => !object(c) || !string(c.opaqueId) || !string(c.reason),
@@ -206,11 +212,14 @@ export async function readCoordinatorReport(
       { ...options, accept: "application/vnd.github.raw+json" },
     );
     const decoded = typeof value === "string" ? JSON.parse(value) : value;
-    return compactCoordinatorEvidence({
-      ...parseCoordinatorReport(decoded, revision.sha, now),
-      sourceRevision: ref.object.sha,
-      url: "https://github.com/lapismd/dependency-automation/tree/automation/dependency-wave-state",
-    });
+    return compactCoordinatorEvidence(
+      {
+        ...parseCoordinatorReport(decoded, revision.sha, now),
+        sourceRevision: ref.object.sha,
+        url: "https://github.com/lapismd/dependency-automation/tree/automation/dependency-wave-state",
+      },
+      now,
+    );
   } catch (error) {
     signal.throwIfAborted();
     if (error instanceof GithubError && error.status === 401) throw error;
