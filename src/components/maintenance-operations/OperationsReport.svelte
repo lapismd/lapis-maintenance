@@ -8,6 +8,7 @@
   } from "@lucide/svelte";
   import type { WaveReport, WaveNode } from "../../maintenance/operator-types";
   import { attentionReason } from "../../maintenance/operator-types";
+  import { primaryAttention } from "../../maintenance/attention";
   import { RelativeTime } from "@lapismd/design-core/shadcn/relative-time";
   import { RepositoryIdentifiers } from "@lapismd/repository-ui/jj";
   import { copyIdentifier } from "../../maintenance/copy-identifier";
@@ -47,10 +48,12 @@
   icon={GitBranch}
 >
   <ol class="operations-timeline">
-    {#each nodes as node}<OperationsTimelineItem
+    {#each nodes as node}{@const attention =
+        primaryAttention(node)}<OperationsTimelineItem
         title={node.repository}
         summary={attentionReason(node)}
         status={node.scopedAdmission ? `sdk-only-${node.status}` : node.status}
+        attentionCategory={attention?.category}
         icon={GitBranch}
       >
         <OperationsNodeDetails {node} policy={report.policyRevision} />

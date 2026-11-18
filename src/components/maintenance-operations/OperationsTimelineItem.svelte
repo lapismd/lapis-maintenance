@@ -4,6 +4,7 @@
   import { useOperationsDisclosure } from "./disclosure.svelte";
   import * as Collapsible from "@lapismd/design-core/shadcn/collapsible";
   import { Button } from "@lapismd/design-core/shadcn/button";
+  import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { CircleDot, ChevronRight, ChevronDown } from "@lucide/svelte";
   import { operationTone } from "../../maintenance/operations";
   import OperationsStatus from "./OperationsStatus.svelte";
@@ -13,12 +14,14 @@
     summary,
     status,
     icon: Icon = CircleDot,
+    attentionCategory,
     children,
   }: {
     title: string;
     summary: string;
     status: string;
     icon?: typeof CircleDot;
+    attentionCategory?: string;
     children: Snippet;
   } = $props();
   const disclosure = useOperationsDisclosure(() => false);
@@ -38,6 +41,12 @@
           <span class="operations-row-copy"
             ><strong>{title}</strong><span>{summary}</span></span
           >
+          {#if attentionCategory}<Badge
+              variant="outline"
+              class="operations-attention-category"
+              data-category={attentionCategory}
+              >{attentionCategory.replaceAll("-", " ")}</Badge
+            >{/if}
           <OperationsStatus {status} />
           <span class="operations-row-chevron"
             >{#if disclosure.open}<ChevronDown

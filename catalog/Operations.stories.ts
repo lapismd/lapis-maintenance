@@ -71,7 +71,26 @@ export const WavesAndIssues: Story = {
     await expect(
       canvasElement.querySelector(".operations-timeline"),
     ).not.toBeNull();
-    await c.findByText("Manual repair ownership");
+    await c.findAllByText("Manual repair ownership");
+    await expect(
+      c.getByText("branch reconciliation", { selector: "[data-category]" }),
+    ).toBeVisible();
+    await userEvent.click(
+      c.getByRole("button", {
+        name: /example\/repair Manual repair ownership branch reconciliation held/,
+      }),
+    );
+    await c.findByText(
+      "Review the retained branch, then merge it through a pull request or retire it.",
+    );
+    await expect(
+      c.getByRole("link", {
+        name: /lapis-dependencies\/lapis-first-party/,
+      }),
+    ).toHaveAttribute(
+      "href",
+      "https://github.com/example/repair/tree/lapis-dependencies/lapis-first-party",
+    );
     await c.findByText("Compatibility decision");
     await userEvent.click(
       c.getByRole("button", { name: /Review major framework compatibility/ }),

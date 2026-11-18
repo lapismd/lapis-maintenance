@@ -54,6 +54,11 @@ GitHub controls. Existing report-age, future-time and current-policy checks also
 apply to scoped observations; displayed hashes are evidence coordinates rather
 than client-side permission or grant verification.
 
+Optional structured attention is likewise bounded and reject-by-default before
+presentation. Categories, text and public repository/commit/branch/package/path
+coordinates are validated without accepting arbitrary URLs or action descriptors;
+the immutable holds, waits, qualification and ownership fields remain authority.
+
 ### Acceptance details
 
 - Read open issues with pagination, omit pull requests, preserve issue links and report denied/incomplete issue coverage explicitly.

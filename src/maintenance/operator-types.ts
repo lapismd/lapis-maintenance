@@ -1,3 +1,26 @@
+import { primaryAttention } from "./attention";
+
+export type AttentionCategory =
+  | "rollout"
+  | "branch-reconciliation"
+  | "publication"
+  | "source-preparation"
+  | "qualification"
+  | "policy-exclusion"
+  | "product-constraint"
+  | "other";
+export interface AttentionItem {
+  code: string;
+  category: AttentionCategory;
+  summary: string;
+  detail: string;
+  remediation: string;
+  repository?: string;
+  sourceSha?: string;
+  branch?: string;
+  package?: string;
+  path?: string;
+}
 export interface WaveUpdate {
   name: string;
   current: string;
@@ -38,6 +61,7 @@ export interface WaveNode {
   operationId: string;
   status: string;
   holds: string[];
+  attention?: AttentionItem[];
   waits: {
     package: string;
     repository: string;
@@ -103,6 +127,8 @@ export function attentionReason(node: WaveNode): string {
   return ordinaryAttentionReason(node);
 }
 function ordinaryAttentionReason(node: WaveNode): string {
+  const attention = primaryAttention(node);
+  if (attention) return attention.summary;
   if (node.ownership.state === "repair-owned") return "Manual repair ownership";
   if (node.updates.some((u) => u.compatibility === "breaking"))
     return "Compatibility decision";
@@ -124,7 +150,7 @@ function ordinaryAttentionReason(node: WaveNode): string {
         "qualification-wait": "Waiting for consumer qualification",
         uncertain: "Uncertain write: reconciliation required",
         admitted: "Running compatible update",
-        held: "Explicit hold",
+        held: node.holds[0] ?? "Explicit hold",
         unchanged: "No update required",
       } as Record<string, string>
     )[node.status] ?? `Coordinator state: ${node.status}`
