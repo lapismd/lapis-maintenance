@@ -59,6 +59,11 @@ authority. Deferred work participates in search and attention while legacy
 expected-progress rules and independently preflighted manual commands remain
 unchanged; zero selected SDK updates cannot imply a fully updated repository.
 
+Validated structured attention selects the highest-priority concrete compact-row
+reason, displays its category and expands to remediation with safe public links.
+Legacy reports fall back to their first concrete hold; report remediation remains
+presentation only and cannot prepare or authorize a command.
+
 ### Acceptance details
 
 - Host-owned report resources warm in the background after session startup and load on demand without blocking cached board startup, reuse persisted response resources, retain prior evidence during refresh and reject stale/disposed reads.

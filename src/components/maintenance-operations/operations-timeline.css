@@ -84,6 +84,16 @@
   flex: none;
   color: var(--muted-foreground);
 }
+.operations-attention-category {
+  flex: none;
+  max-width: 10rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: capitalize;
+  color: var(--muted-foreground);
+  background: color-mix(in srgb, var(--muted) 70%, transparent);
+}
 .operations-row-details {
   margin-inline: 3.25rem 1rem;
   padding: 0.15rem 0 0.9rem;

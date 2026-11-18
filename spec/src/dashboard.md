@@ -47,6 +47,10 @@ the existing expandable details, using escaped text and public controls. The
 controlled historical producer fixture is visibly separate from live Desktop
 qualification; stories remain fixture-only and visual review stays pending.
 
+Fixture-only Operations stories also exercise validated structured attention,
+including its compact category, remediation copy and an exact derived retained-
+branch link without introducing a fixture command or arbitrary report URL.
+
 LM-OPS-001 normal-size status text MUST retain at least 4.5:1 contrast in light
 and dark surfaces, including scoped SDK statuses, without changing functional
 accessibility gates or visual baselines.

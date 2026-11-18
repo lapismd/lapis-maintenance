@@ -33,12 +33,34 @@ export function operatorFixture(): MaintenanceSnapshot {
     acceptance: { state: "waiting", reason: "Consumer qualification pending." },
     ownership: { state: "bot-owned", reason: "Untouched automation branch." },
   };
-  const nodes = [
+  const nodes: WaveNode[] = [
     base,
     {
       ...base,
       repository: "example/repair",
       status: "held",
+      holds: ["retained dependency branch requires reconciliation"],
+      branchHolds: [
+        {
+          branch: "lapis-dependencies/lapis-first-party",
+          head: "d".repeat(40),
+          family: "lapis-first-party",
+          reason: "Retained branch requires review before automation resumes.",
+        },
+      ],
+      attention: [
+        {
+          code: "branch-reconciliation",
+          category: "branch-reconciliation",
+          summary: "Manual repair ownership",
+          detail: "Retained branch requires review before automation resumes.",
+          remediation:
+            "Review the retained branch, then merge it through a pull request or retire it.",
+          repository: "example/repair",
+          sourceSha: "d".repeat(40),
+          branch: "lapis-dependencies/lapis-first-party",
+        },
+      ],
       ownership: {
         state: "repair-owned",
         reason: "Manual repair commits require operator ownership.",

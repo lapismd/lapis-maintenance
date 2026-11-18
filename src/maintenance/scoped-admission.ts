@@ -1,5 +1,6 @@
 import type { CoordinatorEvidence } from "./operator-types";
 import { validRepository } from "../github/models";
+import { validAttentionEvidence } from "./attention";
 const object = (v: unknown): v is Record<string, unknown> =>
   !!v && typeof v === "object" && !Array.isArray(v);
 const text = (v: unknown): v is string =>
@@ -140,6 +141,7 @@ const signature = (value: unknown) =>
 /** Presentation validation only: no field or digest grants GitHub write authority. */
 export function validOptionalScope(node: unknown): boolean {
   if (!object(node)) return false;
+  if (!validAttentionEvidence(node)) return false;
   if (
     node.sourceHoldFacts !== undefined &&
     (!rows(node.sourceHoldFacts) ||
