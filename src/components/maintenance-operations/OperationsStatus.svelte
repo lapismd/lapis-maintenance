@@ -12,7 +12,7 @@
         : tone === "success"
           ? "color-mix(in srgb,var(--success, var(--chart-2)) 55%,var(--foreground))"
           : /wait|running|admitted|refresh/.test(status)
-            ? "color-mix(in srgb,var(--primary) 45%,var(--foreground))"
+            ? "color-mix(in srgb,var(--primary) 35%,var(--foreground))"
             : "var(--muted-foreground)",
   );
 </script>
@@ -27,5 +27,7 @@
     />{:else if tone === "failure" || tone === "attention"}<CircleAlert
       aria-hidden="true"
     />{:else}<Clock3 aria-hidden="true" />{/if}
-  {status.replaceAll("-", " ")}
+  {status.startsWith("sdk-only-")
+    ? `SDK-only ${status.slice(9).replaceAll("-", " ")}`
+    : status.replaceAll("-", " ")}
 </Badge>

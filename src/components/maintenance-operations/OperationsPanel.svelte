@@ -3,6 +3,7 @@
   import { ScrollArea } from "@lapismd/design-core/shadcn/scroll-area";
   import { onMount, setContext } from "svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import { scopedEvidence } from "../../maintenance/scoped-admission";
   import { operationsScope } from "../../maintenance/operations";
   import {
     Workflow,
@@ -31,8 +32,11 @@
     $props();
   const disclosures = new OperationsDisclosures();
   setContext(operationsDisclosureKey, disclosures);
-  const evidence = $derived(
+  const rawEvidence = $derived(
     controller.reports.evidence ?? controller.snapshot?.coordinator,
+  );
+  const evidence = $derived(
+    rawEvidence ? scopedEvidence(rawEvidence) : rawEvidence,
   );
   onMount(() => {
     if (!controller.reports.loading) void controller.reports.refresh();

@@ -1,3 +1,4 @@
+import { scopedEvidence } from "./scoped-admission";
 import type { CoordinatorEvidence, WaveReport } from "./operator-types";
 export type OperationDecision = WaveReport["operations"][number];
 export interface RepositoryDecision {
@@ -32,7 +33,9 @@ export function repositoryDecisions(
 /** A host-owned presentation projection, not a replacement for the immutable source report. */
 export function compactCoordinatorEvidence(
   evidence: CoordinatorEvidence,
+  now = Date.now(),
 ): CoordinatorEvidence {
+  evidence = scopedEvidence(evidence, now);
   if (!evidence.report) return evidence;
   return {
     ...evidence,

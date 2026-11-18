@@ -5,6 +5,7 @@
   import MaintenanceScreen from "../../src/components/maintenance/MaintenanceScreen.svelte";
   import OperationsPanel from "../../src/components/maintenance-operations/OperationsPanel.svelte";
   import { MaintenanceController } from "../../src/maintenance/controller.svelte";
+  import { scopedFixture } from "./scoped-fixture";
   import { operatorFixture, decisionHistoryFixture } from "./fixtures";
   import type {
     CommandResult,
@@ -20,6 +21,7 @@
     action = "rerun-failed",
     view = "operations",
     decisionHistory = false,
+    scoped = false,
     refreshError = "",
   }: {
     part?: "page" | "attention" | "footer";
@@ -31,10 +33,15 @@
     action?: "rerun-failed" | "approve-run" | "approve-deployment";
     view?: "inbox" | "operations";
     decisionHistory?: boolean;
+    scoped?: boolean;
     refreshError?: string;
   } = $props();
   const snapshot = untrack(() =>
-    decisionHistory ? decisionHistoryFixture() : operatorFixture(),
+    scoped
+      ? scopedFixture()
+      : decisionHistory
+        ? decisionHistoryFixture()
+        : operatorFixture(),
   );
   snapshot.coordinator!.state = untrack(() => state);
   if (untrack(() => state === "unsupported" || state === "unavailable")) {

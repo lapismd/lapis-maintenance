@@ -52,6 +52,13 @@ never issues a command or fetches history. Decision timestamps retain a small
 bottom margin before identifier controls, and both observations use public Design
 Core RelativeTime with exact dates available on hover or keyboard focus.
 
+LM-OPS-001 scoped SDK observations MUST distinguish the selected tooling status
+from deferred repository work, retain typed holds and upstream waits, and expose
+all three immutable grant/policy/descriptor coordinates without granting command
+authority. Deferred work participates in search and attention while legacy
+expected-progress rules and independently preflighted manual commands remain
+unchanged; zero selected SDK updates cannot imply a fully updated repository.
+
 ### Acceptance details
 
 - Host-owned report resources warm in the background after session startup and load on demand without blocking cached board startup, reuse persisted response resources, retain prior evidence during refresh and reject stale/disposed reads.

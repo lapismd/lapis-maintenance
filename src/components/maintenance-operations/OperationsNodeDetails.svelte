@@ -4,6 +4,7 @@
   import { Badge } from "@lapismd/design-core/shadcn/badge";
   import { ArrowRight, GitBranch, CircleAlert } from "@lucide/svelte";
   import type { WaveNode } from "../../maintenance/operator-types";
+  import OperationsScopedDetails from "./OperationsScopedDetails.svelte";
   import OperationsSource from "./OperationsSource.svelte";
   import "./operations-details.css";
   let { node, policy }: { node: WaveNode; policy: string } = $props();
@@ -14,16 +15,21 @@
   <dd>
     <OperationsSource repository={node.repository} sha={node.sourceSha} />
   </dd>
-  <dt>Qualification</dt>
+  <dt>{node.scopedAdmission ? "Source checks" : "Qualification"}</dt>
   <dd>{node.acceptance.reason}</dd>
   <dt>Ownership</dt>
   <dd>{node.ownership.reason}</dd>
   <dt>Updates</dt>
   <dd>
-    {node.updates.length} discovered · {node.admittedUpdates?.length ??
-      "unavailable"} admitted
+    {node.updates.length + (node.scopedAdmission?.deferredUpdates.length ?? 0)} discovered
+    · {#if node.scopedAdmission}{node.updates.length} selected SDK ·
+    {/if}{node.admittedUpdates?.length ?? "unavailable"} admitted
   </dd>
 </dl>
+{#if node.scopedAdmission}<OperationsScopedDetails
+    scope={node.scopedAdmission}
+    selected={node.updates.length}
+  />{/if}
 {#if node.holds.length || node.branchHolds?.length}<section
     class="operations-detail-section"
   >

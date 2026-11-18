@@ -1,3 +1,4 @@
+import { scopedEvidence } from "./scoped-admission";
 import type { CoordinatorEvidence, WaveNode } from "./operator-types";
 import type { MaintenanceSnapshot } from "./types";
 import {
@@ -16,6 +17,12 @@ export function operationNeedsAttention(node: WaveNode) {
     node.ownership.state === "repair-owned" ||
     node.updates.some((update) => update.compatibility === "breaking") ||
     node.holds.length > 0 ||
+    !!(
+      node.scopedAdmission &&
+      (node.scopedAdmission.deferredUpdates.length ||
+        node.scopedAdmission.deferredHolds.length ||
+        node.scopedAdmission.deferredWaits.length)
+    ) ||
     !!node.branchHolds?.length ||
     /approval|action.required/i.test(node.acceptance.reason)
   );
@@ -38,11 +45,12 @@ export function operationsScope(
     (!query ||
       `${repository} ${text}`.toLowerCase().includes(query.toLowerCase()));
   const nodes =
-    evidence?.report?.nodes.filter((n) =>
-      matches(
-        n.repository,
-        `${n.status} ${n.acceptance.reason} ${n.ownership.reason} ${n.holds.join(" ")}`,
-      ),
+    (evidence ? scopedEvidence(evidence).report : undefined)?.nodes.filter(
+      (n) =>
+        matches(
+          n.repository,
+          `${n.status} ${n.acceptance.reason} ${n.ownership.reason} ${n.holds.join(" ")} ${n.scopedAdmission ? JSON.stringify(n.scopedAdmission) : ""}`,
+        ),
     ) ?? [];
   const issues =
     snapshot?.issues?.filter((i) => matches(i.repository, i.title)) ?? [];

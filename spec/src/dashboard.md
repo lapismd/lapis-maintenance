@@ -41,6 +41,16 @@ with a padded sidebar-style hover background; it opens the exact full build comm
 available on hover. Collapsed navigation omits the label, and source archives
 without commit metadata disclose dev without inventing a commit link.
 
+The LM-OPS-001 read-only SDK view labels its timeline status as SDK-only and shows
+deferred package coordinates, private/prerequisite holds and upstream waits in
+the existing expandable details, using escaped text and public controls. The
+controlled historical producer fixture is visibly separate from live Desktop
+qualification; stories remain fixture-only and visual review stays pending.
+
+LM-OPS-001 normal-size status text MUST retain at least 4.5:1 contrast in light
+and dark surfaces, including scoped SDK statuses, without changing functional
+accessibility gates or visual baselines.
+
 ### Acceptance details
 
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
