@@ -37,6 +37,11 @@
 .review-check-group-toggle[data-state="open"] > svg {
   transform: none;
 }
+.review-check-group-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
 .review-check-list {
   border-top: 1px solid var(--border);
   list-style: none;
@@ -86,11 +91,21 @@
   overflow-wrap: anywhere;
   margin-top: 0.2rem;
 }
-.review-check-row span {
-  display: inline-block;
+.review-check-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
   margin-top: 0.3rem;
+}
+.review-check-meta span,
+.review-check-duration {
   font-size: 0.65rem;
   color: var(--muted-foreground);
+}
+.review-check-duration::before {
+  content: "·";
+  margin-right: 0.35rem;
 }
 .review-check-footer {
   border-top: 1px solid var(--border);

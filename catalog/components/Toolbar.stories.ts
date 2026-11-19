@@ -64,26 +64,3 @@ export const ToggleControls: Story = {
     ).toHaveValue("Version first-party");
   },
 };
-export const StatusLog: Story = {
-  render: () => ({
-    Component: Demo,
-    props: { part: "toolbar", scenario: "partial" },
-  }),
-  play: async ({ canvasElement }) => {
-    const c = within(canvasElement),
-      page = within(canvasElement.ownerDocument.body);
-    const trigger = await c.findByRole("button", {
-      name: /Open status log:.*cannot access/,
-    });
-    await expect(trigger).toBeVisible();
-    await userEvent.click(trigger);
-    const log = await page.findByRole("region", { name: "Status log" });
-    await waitFor(() =>
-      expect(
-        within(log).getByText(/cannot access this resource owner/),
-      ).toBeVisible(),
-    );
-    await expect(within(log).getByRole("list")).toBeVisible();
-    await userEvent.keyboard("{Escape}");
-  },
-};

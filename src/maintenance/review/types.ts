@@ -37,6 +37,8 @@ export interface ReviewCheck {
   state: "passed" | "failed" | "running" | "queued" | "unknown";
   description: string;
   url?: string;
+  startedAt?: string;
+  completedAt?: string;
 }
 export interface ReviewApproval {
   id: string;

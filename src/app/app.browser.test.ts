@@ -3,12 +3,14 @@ import { page } from "vitest/browser";
 import { mount, unmount } from "svelte";
 import App from "./App.svelte";
 import { credentialKey } from "../session/device-store";
+import { themePreferenceKey } from "../session/theme-preference";
 import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
 it("logs in, restores a remembered token against the real cache, and disconnects through the profile menu", async () => {
   const token = `invented-browser-${crypto.randomUUID()}`;
   localStorage.removeItem(credentialKey);
+  localStorage.setItem(themePreferenceKey, "light");
   const nativeFetch = globalThis.fetch.bind(globalThis);
   const requests: string[] = [];
   const send = vi
@@ -66,6 +68,15 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await expect
       .element(page.getByRole("button", { name: "Operations", exact: true }))
       .toHaveAttribute("aria-busy", "false");
+    await page
+      .getByRole("button", {
+        name: /Open profile menu for.*Browser Maintainer/,
+      })
+      .click();
+    await page.getByRole("menuitem", { name: "Settings" }).click();
+    await page.getByRole("button", { name: "Use dark theme" }).click();
+    expect(localStorage.getItem(themePreferenceKey)).toBe("dark");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
     const initialReads = requests.filter((path) => path !== "/user").length;
     await unmount(app);
     target.replaceChildren();
@@ -86,6 +97,8 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await expect
       .element(page.getByRole("button", { name: "Operations", exact: true }))
       .toHaveAttribute("aria-busy", "false");
+    expect(document.documentElement.classList.contains("dark")).toBe(true);
+    expect(localStorage.getItem(themePreferenceKey)).toBe("dark");
     expect(requests.filter((path) => path === "/user")).toHaveLength(2);
     expect(requests.filter((path) => path !== "/user")).toHaveLength(
       initialReads,
@@ -99,6 +112,9 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await expect
       .element(page.getByText("GitHub · actions follow token permissions"))
       .toBeVisible();
+    await expect
+      .element(page.getByRole("button", { name: "Use light theme" }))
+      .toBeVisible();
     await page.getByRole("button", { name: "Disconnect GitHub" }).click();
     await expect
       .element(page.getByRole("heading", { name: "Lapis Maintenance" }))
@@ -108,6 +124,8 @@ it("logs in, restores a remembered token against the real cache, and disconnects
     await unmount(app);
     target.remove();
     localStorage.removeItem(credentialKey);
+    localStorage.removeItem(themePreferenceKey);
+    document.documentElement.classList.remove("dark");
     send.mockRestore();
   }
 }, 30_000);

@@ -19,11 +19,21 @@
   } from "../session/device-store";
   import { startReviewRefresh } from "../session/review-refresh";
   import { startVisibleRefresh } from "../session/visible-refresh";
+  import {
+    BrowserThemePreferenceStore,
+    parseThemePreference,
+    themePreferenceKey,
+  } from "../session/theme-preference";
   let { pwa }: { pwa?: PwaController } = $props();
   let offline = $state(!navigator.onLine);
   let restored = false;
   const session = new MaintenanceSession({ store: new BrowserDeviceStore() });
-  let dark = $state(matchMedia("(prefers-color-scheme: dark)").matches);
+  const themePreferences = new BrowserThemePreferenceStore();
+  let dark = $state(
+    themePreferences.read(
+      matchMedia("(prefers-color-scheme: dark)").matches,
+    ) === "dark",
+  );
   $effect(() => {
     document.documentElement.classList.toggle("dark", dark);
   });
@@ -49,6 +59,10 @@
       void session.restore();
     } else void session.controller?.refresh();
   }
+  function toggleTheme() {
+    dark = !dark;
+    themePreferences.write(dark ? "dark" : "light");
+  }
   onMount(() => {
     reconnect();
     const lostConnection = () => {
@@ -57,6 +71,10 @@
     window.addEventListener("online", reconnect);
     window.addEventListener("offline", lostConnection);
     const synchronize = (event: StorageEvent) => {
+      if (event.key === themePreferenceKey) {
+        const preference = parseThemePreference(event.newValue);
+        if (preference) dark = preference === "dark";
+      }
       if (
         event.key === credentialKey &&
         !sameRememberedToken(event.oldValue, event.newValue)
@@ -106,7 +124,7 @@
       sessionMode="github"
       cacheLabel={session.cacheKind}
       notice={session.notice}
-      onToggleTheme={() => (dark = !dark)}
+      onToggleTheme={toggleTheme}
       onDisconnect={() => {
         void session.disconnect();
       }}
@@ -123,7 +141,7 @@
       sessionMode="github"
       cacheLabel={session.cacheKind}
       notice={session.notice}
-      onToggleTheme={() => (dark = !dark)}
+      onToggleTheme={toggleTheme}
       onConnect={() => {}}
       onDisconnect={() => {
         void session.disconnect();

@@ -18,6 +18,11 @@ cache while the shared backend closes only after its last logical partition.
 PR descriptions remain raw Markdown in cached resources. Presentation alone
 renders them under LM-PR-001 without extra reads or changes to command authority.
 
+Normalized check details retain optional provider start and completion times for
+LM-PR-001 presentation. Missing or invalid times remain absent, never affect
+check state, eligibility or command authority, and do not introduce a timer into
+the controller or persistent cache lifecycle.
+
 Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
 
 Session-owned feedback is disposable and bounded; shared request IDs deduplicate

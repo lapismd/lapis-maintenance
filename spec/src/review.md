@@ -34,10 +34,15 @@ with a state icon and distinct theme colours: neutral Draft, success Open,
 primary Merged and destructive Closed. Text and icons identify the state without
 relying on colour; a closed or merged state takes precedence over a draft flag.
 
+Running checks use a motion-aware spinner in their panel, state group and row.
+When GitHub supplies reliable start/completion timestamps, running checks show
+an updating elapsed duration and completed checks show their fixed duration;
+missing, invalid or reversed timestamps render no invented timing.
+
 ### Acceptance details
 
 - The AppShell/board/inspector provides navigation into Overview, Checks and Activity tabs with Files linked to GitHub; circular Back retains filters/selection, repository breadcrumbs and sidebar selection return to a singly filtered inbox, Open PR view has an expand icon, compact headings put the PR number beside its title and status in the toolbar, and breadcrumb hover targets retain padding.
-- Shared local components provide grouped linked checks with collapsed sidebar groups, shared borders and stateful chevrons, merge controls, Community-style avatar activity under LM-FEED-001 and distinct fork-workflow/environment reviews with explicit activation and eligibility/wait/denied/error/accepted/stale/uncertain states; dialogs retain target content while closing, inspector footers have separators, description/metadata/approval bodies follow the theme, details headers match description headers with right-aligned GitHub/count controls and neutral hover/focus states, approval counts use accent backgrounds, and tabs have visible bordered hover states.
+- Shared local components provide grouped linked checks with collapsed sidebar groups, shared borders, stateful chevrons, motion-aware running indicators and provider-backed elapsed/final durations, merge controls, Community-style avatar activity under LM-FEED-001 and distinct fork-workflow/environment reviews with explicit activation and eligibility/wait/denied/error/accepted/stale/uncertain states; dialogs retain target content while closing, inspector footers have separators, description/metadata/approval bodies follow the theme, details headers match description headers with right-aligned GitHub/count controls and neutral hover/focus states, approval counts use accent backgrounds, and tabs have visible bordered hover states.
 - One split merge control has non-wrapping method options and submits only on explicit activation; shared PR/inspector controls enable or disable auto-merge with current status and method; merge availability uses an open non-draft PR and merge permission independently of approval counts or review permission, commands can report repository-rule rejection without closing the PR or replaying, PR approval still requires checks, and action controls have suitable icons with accessible labels.
 - Hosts construct/dispose controllers and fixture ports with independent resources, stale-response guards and retained refresh content; shell/component stories cover keyboard/accessibility, focused controller tests, checks, static builds and cold populated browser review without credentials, network, persistence, real writes or live adapter changes, with visual review retained and live integration authorized under R2–R4.
 

@@ -64,9 +64,14 @@ async function inspectHeader(canvasElement: HTMLElement) {
     name: /Open status log:.*cannot access/,
   });
   await expect(status).toBeVisible();
-  const row = status.closest(".maintenance-toolbar-row")!;
+  const row = canvasElement.querySelector<HTMLElement>(
+    ".maintenance-toolbar-row",
+  )!;
   const breadcrumb = row.querySelector(".maintenance-breadcrumb")!;
-  const bounds = row.getBoundingClientRect();
+  const footer = status.closest<HTMLElement>(".maintenance-body-status")!;
+  const bounds = footer.getBoundingClientRect();
+  await expect(footer).toBeVisible();
+  await expect(row).not.toContainElement(status);
   await expect(breadcrumb.getBoundingClientRect().width).toBeLessThanOrEqual(
     96,
   );

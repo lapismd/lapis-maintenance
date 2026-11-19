@@ -1,14 +1,40 @@
-.maintenance-header-status {
-  flex: 1 1 10rem;
-  width: 20rem;
-  max-width: 20rem;
+.maintenance-status {
+  width: min(36rem, 100%);
   min-width: min(8rem, 100%);
   display: flex;
   justify-content: center;
   overflow: hidden;
   margin-inline: auto;
 }
-.maintenance-header-status .maintenance-status-trigger {
+.maintenance-shell-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.maintenance-shell-body-content {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.maintenance-shell-body-content > :first-child {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.maintenance-body-status {
+  display: flex;
+  flex: none;
+  justify-content: center;
+  min-width: 0;
+  padding: 0.25rem 0.75rem;
+  border-top: 1px solid var(--border);
+  background: var(--background);
+}
+.maintenance-status .maintenance-status-trigger {
   max-width: 100%;
   width: 100%;
   min-width: 0;
@@ -16,8 +42,8 @@
   gap: 0.4rem;
   color: var(--muted-foreground);
 }
-.maintenance-header-status svg,
-.maintenance-header-status [data-slot="badge"] {
+.maintenance-status svg,
+.maintenance-status [data-slot="badge"] {
   flex: none;
 }
 .maintenance-status-latest {

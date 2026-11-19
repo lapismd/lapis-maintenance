@@ -8,6 +8,7 @@
     CircleX,
     CircleHelp,
     Clock,
+    LoaderCircle,
     ChevronDown,
     ExternalLink,
     RefreshCw,
@@ -16,6 +17,7 @@
   import ReviewActions from "./ReviewActions.svelte";
   import type { ReviewController } from "../../maintenance/review/controller.svelte";
   import type { ReviewCheck } from "../../maintenance/review/types";
+  import CheckDuration from "./CheckDuration.svelte";
   import "./review.css";
   let {
     controller,
@@ -26,6 +28,9 @@
   const checks = $derived(controller.resources.checks.data ?? []);
   const passed = $derived(
     checks.filter((check) => check.state === "passed").length,
+  );
+  const hasRunning = $derived(
+    checks.some((check) => check.state === "running"),
   );
   const states: ReviewCheck["state"][] = [
     "failed",
@@ -69,7 +74,11 @@
   ariaLabel="PR checks"
   bind:expanded
 >
-  {#snippet leading()}<CircleCheck size={16} aria-hidden="true" />{/snippet}
+  {#snippet leading()}{#if hasRunning || controller.resources.checks.loading}<LoaderCircle
+        class="review-spinner"
+        size={16}
+        aria-hidden="true"
+      />{:else}<CircleCheck size={16} aria-hidden="true" />{/if}{/snippet}
   {#snippet context()}<Badge variant="secondary">{checks.length}</Badge
     >{/snippet}
   {#snippet actions()}<Button
@@ -127,11 +136,14 @@
                 {...props}
                 variant="ghost"
                 class="review-check-group-toggle"
-                >{group.checks.length}
-                {group.state[0]!.toUpperCase() + group.state.slice(1)} checks<ChevronDown
-                  size={14}
-                  aria-hidden="true"
-                /></Button
+                ><span class="review-check-group-label"
+                  >{#if group.state === "running"}<LoaderCircle
+                      class="review-spinner"
+                      size={14}
+                      aria-hidden="true"
+                    />{/if}{group.checks.length}
+                  {group.state[0]!.toUpperCase() + group.state.slice(1)} checks</span
+                ><ChevronDown size={14} aria-hidden="true" /></Button
               >{/snippet}</Collapsible.Trigger
           >
           <Collapsible.Content>
@@ -146,6 +158,10 @@
                     />{:else if check.state === "failed"}<CircleX
                       size={17}
                       aria-hidden="true"
+                    />{:else if check.state === "running"}<LoaderCircle
+                      class="review-spinner"
+                      size={17}
+                      aria-label="Running check"
                     />{:else if check.state === "unknown"}<CircleHelp
                       size={17}
                       aria-hidden="true"
@@ -161,7 +177,13 @@
                         /></a
                       >{:else}<strong>{check.name}</strong>{/if}
                     <p>{check.state} · {check.description}</p>
-                    <span>{check.workflow}</span>
+                    <div class="review-check-meta">
+                      <span>{check.workflow}</span><CheckDuration
+                        startedAt={check.startedAt}
+                        completedAt={check.completedAt}
+                        running={check.state === "running"}
+                      />
+                    </div>
                   </div>
                 </li>{/each}
             </ul>

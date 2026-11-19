@@ -19,6 +19,8 @@ it("preserves check/status/job target links and treats skipped jobs as passed", 
             conclusion: "success",
             head_sha: sha,
             html_url: "https://github.com/owner/repo/runs/1",
+            started_at: "2026-11-19T10:00:00Z",
+            completed_at: "2026-11-19T10:03:24Z",
           },
         ],
       });
@@ -41,6 +43,8 @@ it("preserves check/status/job target links and treats skipped jobs as passed", 
             status: "completed",
             conclusion: "skipped",
             html_url: "https://github.com/owner/repo/actions/runs/12/job/3",
+            started_at: "2026-11-19T11:00:00Z",
+            completed_at: "2026-11-19T11:01:12Z",
           },
         ],
       });
@@ -67,6 +71,10 @@ it("preserves check/status/job target links and treats skipped jobs as passed", 
     "https://github.com/owner/repo/runs/1",
     "https://example.com/coverage",
   ]);
+  expect(detail.checks[0]).toMatchObject({
+    startedAt: "2026-11-19T10:00:00Z",
+    completedAt: "2026-11-19T10:03:24Z",
+  });
   await loadWorkflowJobs(
     client,
     [detail],
@@ -83,6 +91,8 @@ it("preserves check/status/job target links and treats skipped jobs as passed", 
     state: "passed",
     url: "https://github.com/owner/repo/actions/runs/12/job/3",
     workflow: "CI",
+    startedAt: "2026-11-19T11:00:00Z",
+    completedAt: "2026-11-19T11:01:12Z",
   });
   client.dispose();
 });

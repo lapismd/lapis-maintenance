@@ -19,12 +19,17 @@ Repository branch-action summaries reuse the default-branch head and paginated w
 
 Live cards and persisted snapshots are an attention queue under LM-CACHE-001; resolved workflow history is omitted while compact branch health and passing open PRs remain. PR/workflow inventory completeness is independent of optional-resource errors and controls retirement; partial coverage preserves unverified attention rows.
 
+Detailed check-run and workflow-job reads preserve GitHub's optional start and
+completion timestamps in the normalized check contract so LM-PR-001 can display
+elapsed or final durations. Commit statuses without reliable execution bounds do
+not synthesize timing.
+
 ### Acceptance details
 
 - Discover defaults from dependency-automation's allowlist and show repositories while activity loads; icon-only repository settings expose icon/checkbox rows for defaults, retain explicit additions/exclusions and holds, and keep one coverage row per repository.
 - Batch bounded read-only GraphQL PR summaries with scoped REST fallback for denied, partial or truncated results; read current-head checks/statuses/reviews, workflow attempts and environment waits; closed-PR runs cannot become missing-branch warnings, omitted run associations may link only unique open matching heads, and real coverage failures identify the run, branch and error while draft/running/cancelled/held/unavailable remain distinct.
 - Valid cached boards publish before allowlist discovery and remain visible while repository activity revalidates; manual and five-minute visible refresh retain bounded concurrency, pagination, conditional requests and rate-limit backoff; selected details and validation take queue priority over background inventory, scoped refreshes invalidate affected derived/entity data without scanning unrelated repositories, and the native browser fetch receiver/session boundaries remain intact, with independent cancellation for shared readers.
-- Cached targets restore identity only and command preflights supply fresh authority; the live shell owns lazy timelines, dispatch and independent PR resources; explicitly activated actions use current identity and permission feedback; repository auto-merge settings and PR scheduling state reuse existing reads; navigation/filtering/refresh stay read-only, check/job links retain targets, workflow fallbacks open Actions, previews precede storage, fresh persistent resources avoid provider reads, inventory restore preserves presentation caches, and denial invalidates retained details.
+- Cached targets restore identity only and command preflights supply fresh authority; the live shell owns lazy timelines, dispatch and independent PR resources; explicitly activated actions use current identity and permission feedback; repository auto-merge settings and PR scheduling state reuse existing reads; navigation/filtering/refresh stay read-only, check/job links and optional provider timestamps retain their targets/evidence, workflow fallbacks open Actions, previews precede storage, fresh persistent resources avoid provider reads, inventory restore preserves presentation caches, and denial invalidates retained details.
 
 ## LM-GH-003 — Shared monitoring policy
 
