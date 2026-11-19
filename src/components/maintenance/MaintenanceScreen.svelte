@@ -5,6 +5,7 @@
   import MaintenanceToolbar from "./MaintenanceToolbar.svelte";
   import MaintenanceInbox from "./MaintenanceInbox.svelte";
   import MaintenanceInspector from "./MaintenanceInspector.svelte";
+  import MaintenanceStatus from "./MaintenanceStatus.svelte";
   import ActionInputDialog from "./ActionInputDialog.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { PersonalProfile } from "@lapismd/repository-ui/settings";
@@ -97,16 +98,20 @@
         {title}
         {sessionMode}
         {cacheLabel}
-        {notice}
         {settings}
       />
-      <AppShell.Body layout="regions"
-        ><MaintenanceInbox
-          {sessionMode}
-          {controller}
-          {onConnect}
-          onOpen={openDetail}
-        /></AppShell.Body
+      <AppShell.Body layout="regions" class="maintenance-shell-body"
+        ><div class="maintenance-shell-body-content">
+          <MaintenanceInbox
+            {sessionMode}
+            {controller}
+            {onConnect}
+            onOpen={openDetail}
+          />
+        </div>
+        <footer class="maintenance-body-status">
+          <MaintenanceStatus {controller} {notice} {sessionMode} />
+        </footer></AppShell.Body
       >
     </AppShell.Main>
     <MaintenanceInspector {controller} {sessionMode} onClose={closeDetail} />

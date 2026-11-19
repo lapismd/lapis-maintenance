@@ -115,6 +115,8 @@ export interface MaintenanceDetail {
     name: string;
     state: "passed" | "failed" | "running" | "unknown";
     description?: string;
+    startedAt?: string;
+    completedAt?: string;
   }[];
   checksComplete?: boolean;
   review?: string;

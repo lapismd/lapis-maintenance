@@ -108,7 +108,7 @@
 />
 {#if feedback.owned}<FeedbackHost center={feedback.center} />{/if}
 
-<div class="maintenance-header-status">
+<div class="maintenance-status">
   <Popover.Root bind:open>
     <Popover.Trigger>
       {#snippet child({ props })}

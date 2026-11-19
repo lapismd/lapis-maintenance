@@ -10,6 +10,7 @@
   import MaintenanceNavigation from "../maintenance/MaintenanceNavigation.svelte";
   import MaintenanceToolbar from "../maintenance/MaintenanceToolbar.svelte";
   import MaintenanceInbox from "../maintenance/MaintenanceInbox.svelte";
+  import MaintenanceStatus from "../maintenance/MaintenanceStatus.svelte";
   import GitHubIcon from "../maintenance/GitHubIcon.svelte";
   import ActivityFeed from "../maintenance-activity/ActivityFeed.svelte";
   import ActivityContext from "../maintenance-activity/ActivityContext.svelte";
@@ -221,11 +222,9 @@
       {:else if inbox.view === "activity"}<MaintenanceToolbar
           controller={inbox}
           {title}
-          notice={notice ?? "UI preview · fixture activity"}
           {sessionMode}
           {cacheLabel}
           settings={liveControls}
-          messages={activity.coverage}
           onRefresh={() => activity.refresh()}
           refreshing={activity.refreshing}
         >
@@ -237,43 +236,54 @@
       {:else}<MaintenanceToolbar
           controller={inbox}
           {title}
-          notice={notice ??
-            "UI preview · fixture-only data and simulated actions"}
           {sessionMode}
           {cacheLabel}
           settings={liveControls}
         />{/if}
-      <AppShell.Body layout="regions"
-        >{#if review.workspaceOpen}<ReviewWorkspace
-            controller={review}
-          />{:else if inbox.view === "activity"}<ActivityFeed
-            controller={activity}
-            query={{
-              search: inbox.query,
-              repositoriesRestricted: inbox.repositoryStatuses.length > 0,
-              repositories: inbox.repositoryStatuses.length
-                ? inbox.repositoryRows
-                    .filter(
-                      (r) =>
-                        !inbox.repositories.length ||
-                        inbox.repositories.includes(r.repository),
-                    )
-                    .map((r) => r.repository)
-                : sessionMode === "github" && !inbox.repositories.length
-                  ? (inbox.snapshot?.repositories.map((r) => r.repository) ??
-                    [])
-                  : inbox.repositories,
-              statuses: inbox.statuses,
-            }}
-            onOpen={open}
-            onRepository={openRepository}
-          />{:else}<MaintenanceInbox
-            {sessionMode}
+      <AppShell.Body layout="regions" class="maintenance-shell-body"
+        ><div class="maintenance-shell-body-content">
+          {#if review.workspaceOpen}<ReviewWorkspace
+              controller={review}
+            />{:else if inbox.view === "activity"}<ActivityFeed
+              controller={activity}
+              query={{
+                search: inbox.query,
+                repositoriesRestricted: inbox.repositoryStatuses.length > 0,
+                repositories: inbox.repositoryStatuses.length
+                  ? inbox.repositoryRows
+                      .filter(
+                        (r) =>
+                          !inbox.repositories.length ||
+                          inbox.repositories.includes(r.repository),
+                      )
+                      .map((r) => r.repository)
+                  : sessionMode === "github" && !inbox.repositories.length
+                    ? (inbox.snapshot?.repositories.map((r) => r.repository) ??
+                      [])
+                    : inbox.repositories,
+                statuses: inbox.statuses,
+              }}
+              onOpen={open}
+              onRepository={openRepository}
+            />{:else}<MaintenanceInbox
+              {sessionMode}
+              controller={inbox}
+              onConnect={() => {}}
+              onOpen={open}
+              {onPrefetch}
+            />{/if}
+        </div>
+        <footer class="maintenance-body-status">
+          <MaintenanceStatus
             controller={inbox}
-            onConnect={() => {}}
-            onOpen={open}
-            {onPrefetch}
-          />{/if}</AppShell.Body
+            notice={notice ??
+              (inbox.view === "activity"
+                ? "UI preview · fixture activity"
+                : "UI preview · fixture-only data and simulated actions")}
+            messages={inbox.view === "activity" ? activity.coverage : []}
+            {sessionMode}
+          />
+        </footer></AppShell.Body
       >
     </AppShell.Main>
     <ReviewInspector controller={review} onOpen={workspace} />

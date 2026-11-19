@@ -9,30 +9,25 @@
   import MaintenanceContext from "./MaintenanceContext.svelte";
   import MaintenanceFreshness from "./MaintenanceFreshness.svelte";
   import MaintenanceFilters from "./MaintenanceFilters.svelte";
-  import MaintenanceStatus from "./MaintenanceStatus.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   let {
     controller,
     title,
     sessionMode = "demo",
     cacheLabel = "",
-    notice = "",
     settings,
     context,
     onRefresh,
     refreshing,
-    messages,
   }: {
     controller: MaintenanceController;
     title: string;
     sessionMode?: "demo" | "github";
     cacheLabel?: string;
-    notice?: string;
     settings?: Snippet;
     context?: Snippet<[Snippet]>;
     onRefresh?: () => void | Promise<void>;
     refreshing?: boolean;
-    messages?: string[];
   } = $props();
   let searchOpen = $state(false);
   const searchId = $props.id();
@@ -84,13 +79,11 @@
           >
           <span class="maintenance-breadcrumb-current">{title}</span>
         </div>
-        <MaintenanceStatus
+        <span class="maintenance-toolbar-spacer"
+        ></span>{@render settings?.()}<MaintenanceFreshness
           {controller}
-          {notice}
-          {messages}
-          {sessionMode}
-        />{@render settings?.()}<MaintenanceFreshness {controller} /><Badge
-          variant="secondary">{sessionMode === "demo" ? "Demo" : "Live"}</Badge
+        /><Badge variant="secondary"
+          >{sessionMode === "demo" ? "Demo" : "Live"}</Badge
         >
         <Button
           size="icon-sm"

@@ -11,6 +11,8 @@ interface Job {
   html_url?: string;
   status: string;
   conclusion: string | null;
+  started_at?: string | null;
+  completed_at?: string | null;
   steps?: { name: string; conclusion: string | null }[];
 }
 /** Load only the selected, identified attempt; inventory reads avoid per-job requests. */
@@ -54,6 +56,8 @@ export async function loadWorkflowJobs(
           .map((step) => ` · ${step.name}`)
           .join("") ?? ""
       }`,
+      startedAt: job.started_at ?? undefined,
+      completedAt: job.completed_at ?? undefined,
     }));
     for (const detail of details) detail.checks = checks;
   } catch (error) {

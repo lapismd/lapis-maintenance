@@ -204,6 +204,8 @@ export function reviewFixture(
               workflow: "CI",
               state: "passed",
               description: "Type checking and specification validation passed.",
+              startedAt: "2026-11-15T09:00:00Z",
+              completedAt: "2026-11-15T09:01:12Z",
               url: `${root}/actions/runs/41030/job/12001`,
             },
             {
@@ -220,6 +222,12 @@ export function reviewFixture(
                 : pr.id === "running"
                   ? "Checks are running for this revision."
                   : "88 tests passed for the current commit.",
+              startedAt:
+                pr.id === "running"
+                  ? new Date(Date.now() - 65_000).toISOString()
+                  : "2026-11-15T09:01:15Z",
+              completedAt:
+                pr.id === "running" ? undefined : "2026-11-15T09:04:39Z",
               url: `${root}/actions/runs/41030/job/12002`,
             },
             {
@@ -239,6 +247,8 @@ export function reviewFixture(
               workflow: "Storybook",
               state: "passed",
               description: "Interaction and accessibility journeys passed.",
+              startedAt: "2026-11-15T09:04:40Z",
+              completedAt: "2026-11-15T09:08:00Z",
               url: `${root}/actions/runs/41031/job/12004`,
             },
           ],

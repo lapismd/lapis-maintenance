@@ -5,6 +5,16 @@
 **Requirement.** The dashboard MUST use public Design Core AppShell and controls for a responsive,
 accessible action inbox with light and dark themes.
 
+The selected light or dark theme is a versioned, non-sensitive local browser
+preference. Startup restores only valid stored values before falling back to the
+system preference, storage failures never block switching, and valid changes in
+another tab synchronize without affecting credentials or cached GitHub data.
+
+The counted session status control lives in a compact centred footer within the
+main AppShell body rather than the toolbar. It retains retry, activity coverage,
+live/fixture notices and its motion-aware status log while remaining outside the
+scrolling view content.
+
 The existing Operations view implements LM-OPS-001 with an attention-count navigation badge and fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
 
 Automation decisions display the latest repository value in one compact row;

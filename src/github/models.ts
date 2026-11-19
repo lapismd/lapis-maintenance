@@ -54,6 +54,8 @@ export interface GithubCheck {
   output?: { title?: string; summary?: string };
   html_url?: string;
   details_url?: string;
+  started_at?: string | null;
+  completed_at?: string | null;
 }
 export interface GithubStatus {
   id: number;

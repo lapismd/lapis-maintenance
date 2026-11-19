@@ -56,6 +56,8 @@ export function presentPull(
         description:
           check.output?.title ??
           (check.conclusion ? `Conclusion: ${check.conclusion}` : check.status),
+        startedAt: check.started_at ?? undefined,
+        completedAt: check.completed_at ?? undefined,
       });
   } else gaps.push("Current-revision check runs unavailable.");
   if (statuses.status === "fulfilled") {
