@@ -116,6 +116,10 @@ export function reviewFixture(
   const pr = structuredClone(overview),
     root = `https://github.com/${pr.repository}`,
     failing = scenario === "failed-checks" || pr.id === "failure";
+  if (pr.kind === "workflow" && pr.id === "running")
+    pr.actions = [
+      { kind: "cancel-run", label: "Cancel workflow", available: true },
+    ];
   if (scenario === "markdown-body") pr.description = reviewMarkdown;
   if (scenario === "auto-merge")
     pr.mergeMethods = ["squash", "merge", "rebase"];

@@ -52,6 +52,27 @@ export const EnvironmentApproval: Story = {
   args: { scenario: "environment-approval" },
 };
 
+export const WorkflowActionFooter: Story = {
+  render,
+  args: { selected: "running", view: "workflow" },
+  play: async ({ canvasElement }) => {
+    const c = within(canvasElement);
+    const cancel = await c.findByRole("button", { name: "Cancel workflow" });
+    const footer = cancel.closest<HTMLElement>(".review-inspector-footer")!;
+    const styles = getComputedStyle(footer);
+    await expect(parseFloat(styles.paddingTop)).toBeGreaterThan(0);
+    await expect(parseFloat(styles.paddingRight)).toBeGreaterThan(0);
+    await expect(parseFloat(styles.paddingBottom)).toBeGreaterThan(0);
+    await expect(parseFloat(styles.paddingLeft)).toBeGreaterThan(0);
+    const footerBounds = footer.getBoundingClientRect();
+    const buttonBounds = cancel.getBoundingClientRect();
+    await expect(buttonBounds.top).toBeGreaterThan(footerBounds.top);
+    await expect(buttonBounds.right).toBeLessThan(footerBounds.right);
+    await expect(buttonBounds.bottom).toBeLessThan(footerBounds.bottom);
+    await expect(buttonBounds.left).toBeGreaterThan(footerBounds.left);
+  },
+};
+
 export const LongContent: Story = {
   render,
   args: { scenario: "long-inspector", width: 1074 },
