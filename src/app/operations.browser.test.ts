@@ -224,7 +224,8 @@ it("shows repository refresh errors as a dismissible toast with details in the s
   snapshot.repositories[0] = {
     repository: "example/consumer",
     available: false,
-    reason: "Workflow CI: GitHub data unavailable (HTTP 422).",
+    reason:
+      "Workflow CI: GitHub could not resolve the requested resource reference (HTTP 422).",
   };
   const controller = new MaintenanceController(
     {
@@ -291,7 +292,8 @@ it("shows repository refresh errors as a dismissible toast with details in the s
     snapshot.repositories[0] = {
       repository: "example/consumer",
       available: false,
-      reason: "Workflow CI: GitHub data unavailable (HTTP 422).",
+      reason:
+        "Workflow CI: GitHub could not resolve the requested resource reference (HTTP 422).",
     };
     await controller.refresh(true);
     await tick();

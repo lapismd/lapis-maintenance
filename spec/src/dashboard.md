@@ -44,6 +44,8 @@ using public renderer layout options rather than centered note styling.
 
 Transient repository/session errors, cached-resource refresh failures and command
 outcomes use the public Design Core toast host, without inline duplicate banners.
+An unresolvable resource reference is described as such; permission guidance is
+reserved for an access-denied response.
 Toasts are dismissible and pause their ten-second expiry on hover/focus; their
 full details remain in the session status log. Repeated background failures are
 deduplicated until recovery, command request IDs identify outcomes across panes,

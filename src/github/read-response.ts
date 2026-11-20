@@ -64,7 +64,13 @@ export async function fetchReadResponse(
       response.status,
       response.status === 401
         ? "GitHub rejected this token. Sign in again."
-        : `GitHub data unavailable (HTTP ${response.status}). Check token permissions and repository access.`,
+        : response.status === 403
+          ? "GitHub denied access (HTTP 403). Check token permissions and repository access."
+          : response.status === 404
+            ? "GitHub resource not found or inaccessible (HTTP 404)."
+            : response.status === 422
+              ? "GitHub could not resolve the requested resource reference (HTTP 422)."
+              : `GitHub data unavailable (HTTP ${response.status}).`,
     );
   }
   if (response.status === 304 && cached) return { ...cached, fetchedAt: now() };

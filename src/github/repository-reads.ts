@@ -100,7 +100,10 @@ export async function readRepository(
           .filter((value) => value !== undefined);
         if (run.pull_requests.length) {
           if (!associated.some((pr) => pr.head.sha === run.head_sha)) return [];
-        } else if (run.status !== "waiting") {
+        } else if (
+          run.status !== "waiting" &&
+          run.head_sha !== runs.value.actions.sha
+        ) {
           const current = await client.read<{ sha: string }>(
             `${root}/commits/${encodeURIComponent(run.head_branch || metadata.default_branch)}`,
             signal,

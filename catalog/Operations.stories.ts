@@ -356,7 +356,7 @@ export const RefreshErrorToast: Story = {
   args: {
     shell: true,
     refreshError:
-      "Workflow CI: GitHub data unavailable (HTTP 422). " +
+      "Workflow CI: GitHub could not resolve the requested resource reference (HTTP 422). " +
       "Additional diagnostic detail. ".repeat(20),
   },
   play: async ({ canvasElement }) => {
@@ -371,7 +371,7 @@ export const RefreshErrorToast: Story = {
     await expect(
       within(
         c.getByRole("region", { name: "Maintenance operations" }),
-      ).queryByText(/Workflow CI: GitHub data unavailable/),
+      ).queryByText(/Workflow CI: GitHub could not resolve/),
     ).not.toBeInTheDocument();
     await userEvent.click(
       notifications.getByRole("button", { name: "View details" }),
@@ -379,7 +379,7 @@ export const RefreshErrorToast: Story = {
     const log = within(await page.findByRole("region", { name: "Status log" }));
     await waitFor(() =>
       expect(
-        log.getByText(/Workflow CI: GitHub data unavailable/),
+        log.getByText(/Workflow CI: GitHub could not resolve/),
       ).toBeVisible(),
     );
     await userEvent.keyboard("{Escape}");
@@ -394,6 +394,7 @@ export const DarkNarrowToast: Story = {
     shell: true,
     dark: true,
     width: 390,
-    refreshError: "Workflow CI: GitHub data unavailable (HTTP 422).",
+    refreshError:
+      "Workflow CI: GitHub could not resolve the requested resource reference (HTTP 422).",
   },
 };
