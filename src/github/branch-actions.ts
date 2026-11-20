@@ -40,7 +40,7 @@ export function branchActions(
     if (
       run.head_sha !== sha ||
       run.head_branch !== branch ||
-      ["pull_request", "pull_request_target"].includes(run.event ?? "")
+      run.event !== "push"
     )
       continue;
     if (!latest.has(run.workflow_id)) latest.set(run.workflow_id, run);
@@ -62,6 +62,6 @@ export function branchActions(
         ? "Current branch workflow coverage is unavailable."
         : !states.length
           ? "No workflows reported for the current branch revision."
-          : `${latest.size} workflow${latest.size === 1 ? "" : "s"} at revision ${sha.slice(0, 8)}.`,
+          : `${latest.size} push workflow${latest.size === 1 ? "" : "s"} at revision ${sha.slice(0, 8)}.`,
   };
 }

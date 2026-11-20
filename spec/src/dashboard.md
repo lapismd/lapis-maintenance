@@ -111,5 +111,6 @@ including shared forge frames and grouped checks, without parallel private imple
 ### Acceptance details
 
 - Align theme-aware success/failure/pending/unknown icons at each repository row's right edge, preserving ellipsis and readable accessible status/branch descriptions; collapsed navigation retains one searchable repository picker with the same badges and multi-select branch-status filter.
+- Badge state and accessible descriptions count only current-revision push workflows; scheduled, manual, chained, dynamic and pull-request runs remain available in workflow views without changing default-branch qualification.
 - Apply branch-status selection to repository choices, board items, Operations and workspace activity independently of card statuses; empty matches stay empty, explicit repository selections persist, clear resets filters and hash navigation restores branch filters across PR views and reloads without writes.
 - The Run workflow repository field uses a searchable Command View with keyboard selection and a selected tick; changing repository resets workflow/ref/input discovery and never dispatches, and pending execution disables selection.

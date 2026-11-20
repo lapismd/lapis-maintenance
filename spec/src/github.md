@@ -4,7 +4,7 @@
 
 **Requirement.** The host MUST own one token session, show login without a valid remembered token and render the authenticated GitHub identity and avatar.
 
-Repository branch-action summaries reuse the default-branch head and paginated workflow inventory. Aggregate the latest attempt per workflow only at that head and branch, excluding PR events; failed outranks pending, incomplete or absent results stay unknown, and unrelated PR/issue failures do not erase verified branch status. No badge-specific requests are introduced.
+Repository branch-action summaries reuse the default-branch head and paginated workflow inventory. Aggregate the latest push-event attempt per workflow only at that head and branch; scheduled, manual, chained, dynamic and pull-request runs remain operational evidence without poisoning current push qualification. Failed outranks pending, incomplete or absent results stay unknown, and unrelated PR/issue failures do not erase verified branch status. No badge-specific requests are introduced.
 
 ### Acceptance details
 
