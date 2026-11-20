@@ -28,7 +28,7 @@ export const PublishedButNotAdmitted: Story = {
     await c.findByText(/published 1\.0\.1; coordinator admission/);
     await userEvent.click(
       c.getByRole("button", {
-        name: /example\/repair Manual repair ownership/,
+        name: /example\/repair No PR — Manual repair ownership/,
       }),
     );
     await c.findAllByText("No open pull request observed.");

@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import { operatorFixture } from "../../catalog/operations/fixtures";
 import {
+  currentCoordinatorPresentation,
   currentReleaseIntent,
   currentRepositoryOperation,
 } from "./operations-current";
@@ -67,6 +68,70 @@ it("claims no open pull request only with complete live coverage", () => {
     known: false,
     count: 0,
     label: "Pull-request state is unavailable.",
+  });
+});
+
+it("labels coordinator-only blockers as pre-PR state instead of live held work", () => {
+  const snapshot = operatorFixture();
+  const blocked = snapshot.coordinator!.report!.nodes[1]!;
+  snapshot.repositories = [
+    {
+      repository: blocked.repository,
+      available: true,
+      inventory: { pullRequests: true, workflows: true },
+      actions: {
+        branch: "main",
+        sha: blocked.sourceSha,
+        state: "passed",
+        workflows: 1,
+      },
+    },
+  ];
+  snapshot.items = [];
+  const current = currentRepositoryOperation(snapshot, blocked);
+
+  expect(currentCoordinatorPresentation(blocked, current)).toEqual({
+    status: "blocked-before-pr",
+    summary: "No PR — Manual repair ownership",
+  });
+
+  blocked.attention = [
+    {
+      code: "product-constraint",
+      category: "product-constraint",
+      summary: "Product qualification remains required",
+      detail: "Private archive qualification remains required.",
+      remediation: "Complete product qualification.",
+      repository: blocked.repository,
+      sourceSha: blocked.sourceSha,
+    },
+  ];
+  expect(currentCoordinatorPresentation(blocked, current)).toEqual({
+    status: "automation-inactive",
+    summary: "No PR — Product qualification remains required",
+  });
+});
+
+it("keeps live work authoritative over a coordinator pre-PR blocker", () => {
+  const snapshot = operatorFixture();
+  const node = snapshot.coordinator!.report!.nodes[0]!;
+  snapshot.repositories[0] = {
+    repository: node.repository,
+    available: true,
+    inventory: { pullRequests: true, workflows: true },
+    actions: {
+      branch: "main",
+      sha: node.sourceSha,
+      state: "failed",
+      workflows: 1,
+    },
+  };
+  const current = currentRepositoryOperation(snapshot, node);
+
+  expect(current.currentItem).toBeDefined();
+  expect(currentCoordinatorPresentation(node, current)).toEqual({
+    status: "upstream-wait",
+    summary: "Expected upstream wait",
   });
 });
 

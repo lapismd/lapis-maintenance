@@ -37,6 +37,8 @@
     ) ?? [],
   );
   const category = $derived(primaryAttention(node)?.category);
+  const attention = $derived(primaryAttention(node));
+  const actionRepository = $derived(attention?.repository ?? node.repository);
   const coordinatorAction = $derived(
     !!dispatch &&
       evidenceState === "current" &&
@@ -45,7 +47,10 @@
   const repositoryAction = $derived(
     !!dispatch &&
       evidenceState === "current" &&
-      ["publication", "qualification"].includes(category ?? ""),
+      ["publication", "qualification"].includes(category ?? "") &&
+      !["channel-admission", "publisher-policy"].includes(
+        attention?.code ?? "",
+      ),
   );
   function show(view: View) {
     controller.repositories = [node.repository];
@@ -111,17 +116,36 @@
     {#if repositoryAction}<Button
         variant="outline"
         size="sm"
-        aria-label={`${node.repository}: run repository workflow`}
-        onclick={() => dispatch?.show(node.repository)}
-        ><Play aria-hidden="true" />Run repository workflow</Button
+        aria-label={`${node.repository}: run ${actionRepository} workflow`}
+        onclick={() => dispatch?.show(actionRepository)}
+        ><Play aria-hidden="true" />Run {actionRepository === node.repository
+          ? "repository"
+          : "upstream"} workflow</Button
       >{/if}
-    {#if category === "publication"}<a
+    {#if attention?.code === "channel-admission"}<a
         class="operations-inline-link"
         href={`https://github.com/lapismd/dependency-automation/blob/${policy}/config/channels.json`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label={`${node.repository}: review exact channel policy`}
         ><ExternalLink aria-hidden="true" />Review channel policy</a
+      >{:else if attention?.code === "publisher-policy"}<a
+        class="operations-inline-link"
+        href={`https://github.com/lapismd/dependency-automation/blob/${policy}/config/publications.json`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${node.repository}: review publisher policy`}
+        ><ExternalLink aria-hidden="true" />Review publisher policy</a
+      >{:else if category === "product-constraint"}<a
+        class="operations-inline-link"
+        href={current.issue?.url ??
+          `https://github.com/${node.repository}/issues?q=is%3Aissue+is%3Aopen`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={`${node.repository}: open qualification work`}
+        ><ExternalLink aria-hidden="true" />{current.issue
+          ? `Open qualification issue: ${current.issue.title}`
+          : "Open qualification issues"}</a
       >{/if}
   </div>
   {#if category === "policy-exclusion"}<p class="operations-muted">

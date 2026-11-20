@@ -1,4 +1,6 @@
 import type { WaveNode, WaveReport } from "./operator-types";
+import { attentionReason } from "./operator-types";
+import { primaryAttention } from "./attention";
 import {
   repositoryActionLabels,
   repositoryActionState,
@@ -22,7 +24,13 @@ export interface CurrentRepositoryOperation {
     state: "aligned" | "different" | "unknown";
     label: string;
   };
+  issue?: { title: string; url: string };
   currentItem?: MaintenanceItem;
+}
+
+export interface CurrentCoordinatorPresentation {
+  status: string;
+  summary: string;
 }
 
 export interface CurrentReleaseIntent {
@@ -113,12 +121,53 @@ export function currentRepositoryOperation(
         : "Pull-request state is unavailable.",
     },
     source,
+    issue: snapshot?.issues
+      ?.filter(
+        (issue) =>
+          issue.repository.toLowerCase() === node.repository.toLowerCase(),
+      )
+      .toSorted((a, b) => b.updatedAt.localeCompare(a.updatedAt))[0],
     currentItem: items[0]
       ? {
           ...items[0],
           reasons: [statusLabels[items[0].status], ...items[0].reasons],
         }
       : undefined,
+  };
+}
+
+/**
+ * Coordinator state can describe work that is blocked before a PR exists.
+ * Keep that policy evidence visible without presenting it as a live queue.
+ */
+export function currentCoordinatorPresentation(
+  node: WaveNode,
+  current: CurrentRepositoryOperation,
+): CurrentCoordinatorPresentation {
+  const summary = attentionReason(node);
+  if (
+    !current.pullRequests.known ||
+    current.pullRequests.count > 0 ||
+    current.currentItem ||
+    node.status === "unchanged" ||
+    node.status === "admitted"
+  )
+    return { status: node.status, summary };
+
+  const category = primaryAttention(node)?.category;
+  if (
+    category === "policy-exclusion" ||
+    category === "product-constraint" ||
+    category === "rollout"
+  )
+    return {
+      status: "automation-inactive",
+      summary: `No PR — ${summary}`,
+    };
+
+  return {
+    status: "blocked-before-pr",
+    summary: `No PR — ${summary}`,
   };
 }
 

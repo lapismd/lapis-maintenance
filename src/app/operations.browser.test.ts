@@ -68,7 +68,9 @@ it("separates live state from coordinator intent and opens a host-owned recovery
       .element(page.getByText(/published 1\.0\.1; coordinator admission/))
       .toBeVisible();
     await page
-      .getByRole("button", { name: /example\/repair Manual repair ownership/ })
+      .getByRole("button", {
+        name: /example\/repair No PR — Manual repair ownership branch reconciliation blocked before pr/,
+      })
       .click();
     await expect
       .element(
@@ -89,6 +91,72 @@ it("separates live state from coordinator intent and opens a host-owned recovery
       })
       .click();
     expect(show).toHaveBeenCalledWith("lapismd/dependency-automation");
+  } finally {
+    controller.dispose();
+    await unmount(app);
+    target.remove();
+  }
+});
+
+it("targets the upstream owner when pre-PR publication work has no live PR", async () => {
+  const snapshot = operatorFixture();
+  const node = snapshot.coordinator!.report!.nodes[0]!;
+  node.attention = [
+    {
+      code: "upstream-publication",
+      category: "publication",
+      summary: "Waiting for @example/foundation",
+      detail: "upstream qualification/publication required",
+      remediation: "Complete upstream qualification or publication.",
+      repository: "example/foundation",
+      package: "@lapismd/foundation",
+    },
+  ];
+  snapshot.repositories = [
+    {
+      repository: node.repository,
+      available: true,
+      inventory: { pullRequests: true, workflows: true },
+      actions: {
+        branch: "main",
+        sha: node.sourceSha,
+        state: "passed",
+        workflows: 1,
+      },
+    },
+  ];
+  snapshot.items = [];
+  const controller = new MaintenanceController(
+    {
+      readSnapshot: async () => snapshot,
+      readDetails: vi.fn(),
+      refreshRepository: async () => snapshot,
+    },
+    { execute: vi.fn() },
+  );
+  controller.view = "operations";
+  await controller.refresh();
+  const show = vi.fn();
+  const dispatch = { show } as unknown as DispatchController;
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  const app = mount(OperationsPanel, {
+    target,
+    props: { controller, dispatch },
+  });
+  try {
+    const row = page.getByRole("button", {
+      name: /example\/consumer No PR — Waiting for @example\/foundation publication blocked before pr github passed/,
+    });
+    await expect.element(row).toBeVisible();
+    await row.click();
+    await page
+      .getByRole("button", {
+        name: "example/consumer: run example/foundation workflow",
+        exact: true,
+      })
+      .click();
+    expect(show).toHaveBeenCalledWith("example/foundation");
   } finally {
     controller.dispose();
     await unmount(app);

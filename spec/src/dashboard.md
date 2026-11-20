@@ -24,6 +24,13 @@ published-but-not-admitted releases and complete-coverage confirmation that no
 open pull request exists. Every non-green row names the owner and next step;
 safe contextual controls reuse existing refresh, navigation, approval and manual
 workflow-dispatch surfaces, while unavailable evidence never invents an action.
+When complete live coverage proves that no pull request and no current workflow
+item exists, a coordinator hold MUST be labelled as blocked before PR creation
+or automation inactive rather than as live held/pending work. Product, rollout
+and exclusion policy stays visible without joining the live queue. A propagated
+upstream action MUST target the attention item's owning repository, not the
+downstream consumer, while channel and publisher-policy waits link their exact
+policy source instead of suggesting an ineffective workflow rerun.
 
 Automation decisions display the latest repository value in one compact row;
 expansion reveals current evidence and at most one previous decision with its

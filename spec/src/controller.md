@@ -85,6 +85,13 @@ last snapshot as retained rather than current. Publication history can prove an
 exact release only when package and version both match; otherwise it is described
 only as observed history while the release intent remains unresolved.
 
+With complete live coverage, a current pull request or workflow item remains
+authoritative. When neither exists, unresolved coordinator preparation is
+labelled as blocked before PR and product, rollout or policy constraints are
+labelled as automation inactive; both begin with an explicit no-PR summary and
+retain their owning repository and remediation instead of appearing as queued
+live work.
+
 Concrete next steps derive only from host-owned live capabilities and reviewed
 workflow discovery. Coordinator attention text remains presentation evidence and
 cannot create command authority. The operator can force-refresh both sources,
