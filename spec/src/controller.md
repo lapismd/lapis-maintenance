@@ -69,6 +69,32 @@ reason, displays its category and expands to remediation with safe public links.
 Legacy reports fall back to their first concrete hold; report remediation remains
 presentation only and cannot prepare or authorize a command.
 
+Operations MUST present coordinator intent separately from freshly read GitHub
+state. A valid coordinator report is a policy-bound observation, not proof that
+its repository row is live, that an open pull request exists, or that a verified
+publication is still missing. The view reconciles each public repository and
+release intent with complete live inventory, labels unavailable coverage rather
+than inferring absence, and distinguishes published bytes from channel admission
+or downstream qualification. It exposes both observation times and makes source
+revision drift explicit.
+
+Passing open pull requests remain open work and participate in the live count.
+Retained items cannot expose actions or prove absence when repository or
+kind-specific inventory coverage is unavailable. A failed refresh labels the
+last snapshot as retained rather than current. Publication history can prove an
+exact release only when package and version both match; otherwise it is described
+only as observed history while the release intent remains unresolved.
+
+Concrete next steps derive only from host-owned live capabilities and reviewed
+workflow discovery. Coordinator attention text remains presentation evidence and
+cannot create command authority. The operator can force-refresh both sources,
+open an exact live run or pull request, enter the existing approval surface, or
+open the existing manual workflow dispatcher for a host-selected repository;
+every write retains its normal fresh preflight and explicit activation.
+Contextual workflow choices follow the highest-priority validated attention item,
+use exact policy-revision links and repository-qualified accessible names, and
+never present an unrelated repository issue as the remediation owner.
+
 ### Acceptance details
 
 - Host-owned report resources warm in the background after session startup and load on demand without blocking cached board startup, reuse persisted response resources, retain prior evidence during refresh and reject stale/disposed reads.

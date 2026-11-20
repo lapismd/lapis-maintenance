@@ -13,6 +13,7 @@
     title,
     summary,
     status,
+    secondaryStatus,
     icon: Icon = CircleDot,
     attentionCategory,
     children,
@@ -20,6 +21,7 @@
     title: string;
     summary: string;
     status: string;
+    secondaryStatus?: string;
     icon?: typeof CircleDot;
     attentionCategory?: string;
     children: Snippet;
@@ -48,6 +50,9 @@
               >{attentionCategory.replaceAll("-", " ")}</Badge
             >{/if}
           <OperationsStatus {status} />
+          {#if secondaryStatus}<OperationsStatus
+              status={secondaryStatus}
+            />{/if}
           <span class="operations-row-chevron"
             >{#if disclosure.open}<ChevronDown
                 size={14}

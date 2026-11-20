@@ -268,6 +268,7 @@
             />{:else}<MaintenanceInbox
               {sessionMode}
               controller={inbox}
+              {dispatch}
               onConnect={() => {}}
               onOpen={open}
               {onPrefetch}

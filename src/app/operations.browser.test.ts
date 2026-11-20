@@ -8,6 +8,124 @@ import "@lapismd/design-core/styles.css";
 import "@lapismd/repository-ui/styles.css";
 import "../styles/global.css";
 import OperationsPanel from "../components/maintenance-operations/OperationsPanel.svelte";
+import type { DispatchController } from "../maintenance/dispatch/controller.svelte";
+
+it("separates live state from coordinator intent and opens a host-owned recovery action", async () => {
+  const snapshot = operatorFixture();
+  const report = snapshot.coordinator!.report!;
+  const repair = report.nodes.find(
+    (node) => node.repository === "example/repair",
+  )!;
+  report.publications.push({
+    name: "@example/foundation",
+    version: "1.0.1",
+    integrity: "sha512-fixture",
+  });
+  report.releases[0]!.version = "1.0.1";
+  snapshot.repositories = [
+    {
+      repository: repair.repository,
+      available: true,
+      inventory: { pullRequests: true, workflows: true },
+      actions: {
+        branch: "main",
+        sha: repair.sourceSha,
+        state: "passed",
+        workflows: 4,
+        reason: "Four current-main workflows passed.",
+      },
+    },
+  ];
+  snapshot.items = [];
+  const controller = new MaintenanceController(
+    {
+      readSnapshot: async () => snapshot,
+      readDetails: vi.fn(),
+      refreshRepository: async () => snapshot,
+    },
+    { execute: vi.fn() },
+  );
+  controller.view = "operations";
+  await controller.refresh();
+  const show = vi.fn();
+  const dispatch = { show } as unknown as DispatchController;
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  const app = mount(OperationsPanel, {
+    target,
+    props: { controller, dispatch },
+  });
+  try {
+    await expect
+      .element(
+        page.getByRole("button", {
+          name: "Release intents and admission 1",
+          exact: true,
+        }),
+      )
+      .toBeVisible();
+    await expect
+      .element(page.getByText(/published 1\.0\.1; coordinator admission/))
+      .toBeVisible();
+    await page
+      .getByRole("button", { name: /example\/repair Manual repair ownership/ })
+      .click();
+    await expect
+      .element(
+        page.getByText("No open pull request observed.", { exact: true }),
+      )
+      .toBeVisible();
+    await expect
+      .element(
+        page.getByText(
+          "Observed coordinator source matches the refreshed default branch.",
+        ),
+      )
+      .toBeVisible();
+    await page
+      .getByRole("button", {
+        name: "example/repair: run coordinator workflow",
+        exact: true,
+      })
+      .click();
+    expect(show).toHaveBeenCalledWith("lapismd/dependency-automation");
+  } finally {
+    controller.dispose();
+    await unmount(app);
+    target.remove();
+  }
+});
+
+it("loads coordinator evidence while the initial GitHub snapshot is still loading", async () => {
+  const snapshot = operatorFixture();
+  const readCoordinatorReport = vi.fn(async () => snapshot.coordinator!);
+  const controller = new MaintenanceController(
+    {
+      readCoordinatorReport,
+      readSnapshot: async () => snapshot,
+      readDetails: vi.fn(),
+      refreshRepository: async () => snapshot,
+    },
+    { execute: vi.fn() },
+  );
+  controller.phase = "loading";
+  const target = document.createElement("div");
+  document.body.appendChild(target);
+  const app = mount(OperationsPanel, { target, props: { controller } });
+  try {
+    await vi.waitFor(() =>
+      expect(readCoordinatorReport).toHaveBeenCalledOnce(),
+    );
+    expect(readCoordinatorReport).toHaveBeenCalledWith(
+      expect.any(AbortSignal),
+      { force: true },
+    );
+  } finally {
+    controller.dispose();
+    await unmount(app);
+    target.remove();
+  }
+});
 it("navigates to operator evidence and submits each eligible batch target once", async () => {
   const snapshot = operatorFixture();
   snapshot.coordinator = {

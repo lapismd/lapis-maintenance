@@ -17,6 +17,14 @@ scrolling view content.
 
 The existing Operations view implements LM-OPS-001 with an attention-count navigation badge and fixture-only stories, showing open issues with natural GitHub links alongside current PR/main failure monitoring. Compatibility projects remain human decisions; navigation and reads perform no writes.
 
+Operations labels its independently refreshed live GitHub state and coordinator
+observation instead of presenting either as a universal current state. Generic
+waiting copy is replaced with the most precise known condition, including
+published-but-not-admitted releases and complete-coverage confirmation that no
+open pull request exists. Every non-green row names the owner and next step;
+safe contextual controls reuse existing refresh, navigation, approval and manual
+workflow-dispatch surfaces, while unavailable evidence never invents an action.
+
 Automation decisions display the latest repository value in one compact row;
 expansion reveals current evidence and at most one previous decision with its
 status, time, source and identifiers, while search never resurrects superseded

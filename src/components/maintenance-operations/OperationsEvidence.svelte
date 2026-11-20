@@ -15,7 +15,15 @@
   import { copyIdentifier } from "../../maintenance/copy-identifier";
   import OperationsSource from "./OperationsSource.svelte";
   import "./operations-evidence.css";
-  let { evidence }: { evidence?: CoordinatorEvidence | null } = $props();
+  let {
+    evidence,
+    liveFetchedAt,
+    liveState = "idle",
+  }: {
+    evidence?: CoordinatorEvidence | null;
+    liveFetchedAt?: string;
+    liveState?: string;
+  } = $props();
   const disclosure = useOperationsDisclosure(() => false);
   const report = $derived(evidence?.report);
   const reason = $derived(
@@ -30,6 +38,15 @@
           timeZone: "UTC",
         }) + " UTC"
       : "",
+  );
+  const liveStatus = $derived(
+    !liveFetchedAt
+      ? "Unavailable"
+      : liveState === "error"
+        ? "Refresh failed; retained observation"
+        : ["loading", "refreshing"].includes(liveState)
+          ? "Refreshing; previous observation"
+          : "Latest successful observation",
   );
 </script>
 
@@ -64,12 +81,23 @@
           ><ExternalLink size={14} aria-hidden="true" />Coordinator report
           source</a
         >{/if}
-      {#if report}<dl class="operations-properties">
-          <dt>Observed</dt>
-          <dd><time datetime={report.observedAt}>{report.observedAt}</time></dd>
-          <dt>Generation</dt>
-          <dd>{report.generation}</dd>
-        </dl>
+      {#if report || liveFetchedAt}<dl class="operations-properties">
+          {#if report}<dt>Coordinator observed</dt>
+            <dd>
+              <time datetime={report.observedAt}>{report.observedAt}</time>
+            </dd>
+            <dt>Generation</dt>
+            <dd>{report.generation}</dd>{/if}
+          <dt>Live GitHub status</dt>
+          <dd>{liveStatus}</dd>
+          <dt>Live GitHub refreshed</dt>
+          <dd>
+            {#if liveFetchedAt}<time datetime={liveFetchedAt}
+                >{liveFetchedAt}</time
+              >{:else}Unavailable{/if}
+          </dd>
+        </dl>{/if}
+      {#if report}
         <RepositoryIdentifiers
           placement="inline"
           copyText={copyIdentifier}
