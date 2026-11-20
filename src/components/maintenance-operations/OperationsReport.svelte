@@ -10,6 +10,7 @@
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
   import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
   import {
+    currentCoordinatorPresentation,
     currentReleaseIntent,
     currentRepositoryOperation,
   } from "../../maintenance/operations-current";
@@ -64,10 +65,17 @@
         primaryAttention(node)}{@const current = currentRepositoryOperation(
         controller.snapshot,
         node,
+      )}{@const presentation = currentCoordinatorPresentation(
+        node,
+        current,
       )}<OperationsTimelineItem
         title={node.repository}
-        summary={attentionReason(node)}
-        status={node.scopedAdmission ? `sdk-only-${node.status}` : node.status}
+        summary={node.scopedAdmission
+          ? attentionReason(node)
+          : presentation.summary}
+        status={node.scopedAdmission
+          ? `sdk-only-${node.status}`
+          : presentation.status}
         secondaryStatus={`github-${current.actions.state}`}
         attentionCategory={attention?.category}
         icon={GitBranch}
