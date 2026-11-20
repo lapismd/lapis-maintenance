@@ -23,7 +23,7 @@ LM-PR-001 presentation. Missing or invalid times remain absent, never affect
 check state, eligibility or command authority, and do not introduce a timer into
 the controller or persistent cache lifecycle.
 
-Branch-action filters are host-owned presentation state under LM-UI-004. They intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
+Branch-action summaries and filters are host-owned presentation state under LM-UI-004. The summary projects only current-revision push workflow attempts from the shared live inventory; other event kinds remain workflow evidence without changing branch qualification. Filters intersect explicit repository selection across views, preserve selection when matches disappear, and never issue commands. Header summary counts derive from those same visible items, including query, card-status and view filters, without extra provider reads.
 
 Session-owned feedback is disposable and bounded; shared request IDs deduplicate
 action outcomes across board, inspector and review surfaces. Background refresh

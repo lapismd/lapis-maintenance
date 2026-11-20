@@ -32,7 +32,7 @@ it.each([
 ] as const)("summarizes %s for the current branch revision", (state, runs) => {
   expect(branchActions("main", sha, [...runs], true).state).toBe(state);
 });
-it("ignores old heads, other branches and PR runs, and uses the newest attempt of each workflow", () => {
+it("qualifies current push workflows without unrelated same-revision runs", () => {
   const result = branchActions(
     "main",
     sha,
@@ -56,6 +56,24 @@ it("ignores old heads, other branches and PR runs, and uses the newest attempt o
         id: 23,
         workflow_id: 5,
         event: "pull_request_target",
+        conclusion: "failure",
+      }),
+      run({
+        id: 24,
+        workflow_id: 6,
+        event: "schedule",
+        conclusion: "failure",
+      }),
+      run({
+        id: 25,
+        workflow_id: 7,
+        event: "workflow_dispatch",
+        conclusion: "failure",
+      }),
+      run({
+        id: 26,
+        workflow_id: 8,
+        event: "workflow_run",
         conclusion: "failure",
       }),
     ],

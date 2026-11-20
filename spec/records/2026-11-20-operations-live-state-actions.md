@@ -1,7 +1,7 @@
 # Live Operations state and tangible actions
 
-Owners: LM-OPS-001, LM-GH-004, LM-UI-001, LM-ACT-003, LM-REL-001 and
-LM-PR-002.
+Owners: LM-OPS-001, LM-CTRL-001, LM-GH-001, LM-GH-004, LM-UI-001,
+LM-UI-004, LM-ACT-003, LM-REL-001 and LM-PR-002.
 
 ## Diagnosis and policy
 
@@ -46,10 +46,21 @@ does not silently reuse an older snapshot. The catalog fixture preserves the
 contradictory state that triggered this work as interaction and accessibility
 regression coverage.
 
+Default-branch Actions health now qualifies only push-event workflows at the
+current revision. Scheduled qualification, manual publication, chained
+notification and Dependabot dynamic runs on the same SHA remain available as
+workflow evidence, but their independent outcomes no longer turn an otherwise
+passing current branch badge red.
+
 ## Regression evidence
 
 - The first focused unit run failed because the live-state projection did not
   exist; all six exact state, coverage and publication cases now pass.
+- The exact branch-actions regression initially failed one of nine cases,
+  reporting four workflows and a failed branch when one current push workflow
+  had passed beside three unrelated same-revision failures. After event-aware
+  qualification, all nine cases pass and the branch reports one passing push
+  workflow.
 - The focused Operations browser run exposed one fixture that did not identify
   the intended release version. The fixture now proves the exact-version rule;
   all five Operations browser cases pass, including initial-loading refresh.
