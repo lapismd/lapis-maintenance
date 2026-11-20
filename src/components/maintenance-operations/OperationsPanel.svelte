@@ -3,6 +3,7 @@
   import { ScrollArea } from "@lapismd/design-core/shadcn/scroll-area";
   import { onMount, setContext } from "svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
   import { scopedEvidence } from "../../maintenance/scoped-admission";
   import { operationsScope } from "../../maintenance/operations";
   import {
@@ -27,9 +28,13 @@
   import "./operations.css";
   let {
     controller,
+    dispatch,
     sessionMode = "demo",
-  }: { controller: MaintenanceController; sessionMode?: "demo" | "github" } =
-    $props();
+  }: {
+    controller: MaintenanceController;
+    dispatch?: DispatchController;
+    sessionMode?: "demo" | "github";
+  } = $props();
   const disclosures = new OperationsDisclosures();
   setContext(operationsDisclosureKey, disclosures);
   const rawEvidence = $derived(
@@ -39,7 +44,9 @@
     rawEvidence ? scopedEvidence(rawEvidence) : rawEvidence,
   );
   onMount(() => {
-    if (!controller.reports.loading) void controller.reports.refresh();
+    if (controller.phase === "loading") {
+      if (!controller.reports.loading) void controller.reports.refresh(true);
+    } else void controller.refresh(true);
   });
   const report = $derived(evidence?.report);
   const scope = $derived(
@@ -89,11 +96,18 @@
             />{:else}<UnfoldVertical aria-hidden="true" />{/if}
         </Button>
       </header>
-      <OperationsEvidence {evidence} />
+      <OperationsEvidence
+        {evidence}
+        liveFetchedAt={controller.snapshot?.fetchedAt}
+        liveState={controller.phase}
+      />
       {#if report}<OperationsReport
           {report}
           nodes={scope.nodes}
           matches={scope.matches}
+          {controller}
+          evidenceState={evidence?.state ?? "unavailable"}
+          {dispatch}
         />{/if}
       <OperationsSection
         title="Open GitHub issues"

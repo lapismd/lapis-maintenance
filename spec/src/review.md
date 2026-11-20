@@ -73,6 +73,9 @@ missing, invalid or reversed timestamps render no invented timing.
 **Requirement.** Authorized R4 MUST connect the reviewed workspace to independently cached GitHub activity while keeping file browsing and diffs on GitHub.
 
 The production review shell exposes the shared Operations view and its explicit one-click batch activations under LM-OPS-001; existing individual controls remain available independently of coordinator evidence.
+It supplies host-owned refresh, navigation and manual-workflow discovery to
+Operations without allowing coordinator report content to create command
+authority.
 
 ### Acceptance details
 

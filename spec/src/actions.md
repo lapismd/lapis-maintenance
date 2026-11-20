@@ -38,3 +38,5 @@ follow the same toast policy, preserving the workflow target link and input form
 
 - One explicit batch activation captures each eligible repository, source SHA, run attempt and environment; environment approval comments default empty, with eligibility from live command ports rather than coordinator reports.
 - Execute each activated target at most once, retain separate completed/accepted/rejected/uncertain receipts, reject concurrent submissions, stop on disposal and never replay uncertain targets; a partial failure cannot erase earlier results.
+- Operations contextual actions MUST bind to current live item capabilities or the existing freshly discovered manual-workflow contract.
+- Report status, remediation text, package coordinates and retained branch evidence provide context only and MUST NOT manufacture a command target or bypass the normal preflight.

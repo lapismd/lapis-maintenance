@@ -44,7 +44,7 @@ export const WavesAndIssues: Story = {
       ...canvasElement.querySelectorAll<HTMLElement>("[data-operation-status]"),
     ];
     const waiting = badges.find(
-      (b) => b.dataset.operationStatus === "waiting",
+      (b) => b.dataset.operationStatus === "publication-wait",
     )!;
     const failed = badges.find((b) => b.dataset.operationStatus === "failed")!;
     const held = badges.find((b) => b.dataset.operationStatus === "held")!;

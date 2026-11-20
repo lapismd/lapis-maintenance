@@ -23,6 +23,7 @@
     decisionHistory = false,
     scoped = false,
     refreshError = "",
+    currentState = false,
   }: {
     part?: "page" | "attention" | "footer";
     shell?: boolean;
@@ -35,6 +36,7 @@
     decisionHistory?: boolean;
     scoped?: boolean;
     refreshError?: string;
+    currentState?: boolean;
   } = $props();
   const snapshot = untrack(() =>
     scoped
@@ -44,6 +46,28 @@
         : operatorFixture(),
   );
   snapshot.coordinator!.state = untrack(() => state);
+  untrack(() => {
+    if (!currentState || !snapshot.coordinator?.report) return;
+    snapshot.coordinator.report.publications.push({
+      name: "@example/foundation",
+      version: "1.0.1",
+      integrity: "sha512-fixture",
+    });
+    snapshot.coordinator.report.releases[0]!.version = "1.0.1";
+    snapshot.repositories = snapshot.coordinator.report.nodes.map((node) => ({
+      repository: node.repository,
+      available: true,
+      inventory: { pullRequests: true, workflows: true },
+      actions: {
+        branch: "main",
+        sha: node.sourceSha,
+        state: "passed" as const,
+        workflows: 4,
+        reason: "Four current-main workflows passed.",
+      },
+    }));
+    snapshot.items = [];
+  });
   if (untrack(() => state === "unsupported" || state === "unavailable")) {
     snapshot.coordinator!.report = undefined;
     snapshot.coordinator!.reason =

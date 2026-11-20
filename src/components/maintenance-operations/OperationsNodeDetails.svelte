@@ -10,10 +10,29 @@
     Package,
   } from "@lucide/svelte";
   import type { WaveNode } from "../../maintenance/operator-types";
+  import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
+  import type { CurrentRepositoryOperation } from "../../maintenance/operations-current";
   import OperationsScopedDetails from "./OperationsScopedDetails.svelte";
   import OperationsSource from "./OperationsSource.svelte";
+  import OperationsStatus from "./OperationsStatus.svelte";
+  import OperationsNextActions from "./OperationsNextActions.svelte";
   import "./operations-details.css";
-  let { node, policy }: { node: WaveNode; policy: string } = $props();
+  let {
+    node,
+    policy,
+    current,
+    controller,
+    evidenceState,
+    dispatch,
+  }: {
+    node: WaveNode;
+    policy: string;
+    current: CurrentRepositoryOperation;
+    controller: MaintenanceController;
+    evidenceState: string;
+    dispatch?: DispatchController;
+  } = $props();
   const branchUrl = (repository: string, branch: string) =>
     `https://github.com/${repository}/tree/${branch
       .split("/")
@@ -21,6 +40,20 @@
       .join("/")}`;
 </script>
 
+<section class="operations-detail-section">
+  <h4>Latest observed GitHub state</h4>
+  <dl class="operations-properties">
+    <dt>Default-branch Actions</dt>
+    <dd>
+      <OperationsStatus status={`github-${current.actions.state}`} />
+      {current.actions.reason}
+    </dd>
+    <dt>Pull requests</dt>
+    <dd>{current.pullRequests.label}</dd>
+    <dt>Source</dt>
+    <dd>{current.source.label}</dd>
+  </dl>
+</section>
 <dl class="operations-properties">
   <dt>Repository</dt>
   <dd>
@@ -133,4 +166,12 @@
   changeLabel="policy revision"
   commitChipLabel="Operation"
   changeChipLabel="Policy"
+/>
+<OperationsNextActions
+  {controller}
+  {current}
+  {node}
+  {policy}
+  {evidenceState}
+  {dispatch}
 />

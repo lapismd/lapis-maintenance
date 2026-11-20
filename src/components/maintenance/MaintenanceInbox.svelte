@@ -7,11 +7,13 @@
   import OperationsPanel from "../maintenance-operations/OperationsPanel.svelte";
   import MaintenanceBoard from "./MaintenanceBoard.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
   let {
     controller,
     onConnect,
     sessionMode = "demo",
     onPrefetch,
+    dispatch,
     onOpen = (id: string) => {
       void controller.select(id);
     },
@@ -21,6 +23,7 @@
     onConnect: () => void;
     onOpen?: (id: string) => void;
     onPrefetch?: (id: string, signal: AbortSignal) => Promise<unknown>;
+    dispatch?: DispatchController;
   } = $props();
 </script>
 
@@ -42,7 +45,7 @@
       ></Empty.Root
     >
   {:else if controller.view === "operations"}
-    <OperationsPanel {controller} {sessionMode} />
+    <OperationsPanel {controller} {sessionMode} {dispatch} />
   {:else}
     <div class="maintenance-board-heading">
       <h2>

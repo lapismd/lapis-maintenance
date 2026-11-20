@@ -7,6 +7,12 @@
     CircleAlert,
   } from "@lucide/svelte";
   import type { WaveReport, WaveNode } from "../../maintenance/operator-types";
+  import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import type { DispatchController } from "../../maintenance/dispatch/controller.svelte";
+  import {
+    currentReleaseIntent,
+    currentRepositoryOperation,
+  } from "../../maintenance/operations-current";
   import { attentionReason } from "../../maintenance/operator-types";
   import { primaryAttention } from "../../maintenance/attention";
   import { RelativeTime } from "@lapismd/design-core/shadcn/relative-time";
@@ -22,10 +28,16 @@
     report,
     nodes,
     matches,
+    controller,
+    evidenceState,
+    dispatch,
   }: {
     report: WaveReport;
     nodes: WaveNode[];
     matches: (repository: string, text?: string) => boolean;
+    controller: MaintenanceController;
+    evidenceState: string;
+    dispatch?: DispatchController;
   } = $props();
   const scopedDecisions = $derived(
     new Set(
@@ -49,25 +61,43 @@
 >
   <ol class="operations-timeline">
     {#each nodes as node}{@const attention =
-        primaryAttention(node)}<OperationsTimelineItem
+        primaryAttention(node)}{@const current = currentRepositoryOperation(
+        controller.snapshot,
+        node,
+      )}<OperationsTimelineItem
         title={node.repository}
         summary={attentionReason(node)}
         status={node.scopedAdmission ? `sdk-only-${node.status}` : node.status}
+        secondaryStatus={`github-${current.actions.state}`}
         attentionCategory={attention?.category}
         icon={GitBranch}
       >
-        <OperationsNodeDetails {node} policy={report.policyRevision} />
+        <OperationsNodeDetails
+          {node}
+          policy={report.policyRevision}
+          {current}
+          {controller}
+          {evidenceState}
+          {dispatch}
+        />
       </OperationsTimelineItem>{:else}<li class="operations-empty">
         No downstream operations in this view.
       </li>{/each}
   </ol>
 </OperationsSection>
-<OperationsSection title="Release waves" count={releases.length} icon={Rocket}>
+<OperationsSection
+  title="Release intents and admission"
+  count={releases.length}
+  icon={Rocket}
+>
   <ol class="operations-timeline">
-    {#each releases as release}<OperationsTimelineItem
+    {#each releases as release}{@const current = currentReleaseIntent(
+        report,
+        release,
+      )}<OperationsTimelineItem
         title={release.name}
-        summary={`${release.repository} · ${release.version ?? release.baseline}`}
-        status={release.status}
+        summary={current.summary}
+        status={current.status}
         icon={Rocket}
       >
         <OperationsSource
@@ -77,6 +107,8 @@
         <p>
           Baseline {release.baseline}{#if release.version}
             · Version {release.version}{/if}
+          {#if current.publishedVersion}
+            · Verified publication {current.publishedVersion}{/if}
         </p>
         {#each release.requires as upstream}<p>
             Requires {upstream.name}
