@@ -225,3 +225,19 @@ it("retains previews on a rate limit rather than treating it as lost permission"
   expect(new GithubError(403, "Paused", 123).discardPreview).toBe(false);
   expect(new GithubError(403, "Denied").discardPreview).toBe(true);
 });
+it("does not describe an unresolvable resource reference as a permission failure", async () => {
+  const client = new GithubTransport(
+    "test",
+    new MemoryResponseCache(),
+    async () => Response.json({}, { status: 422 }),
+  );
+  const error = await client
+    .read("/repos/owner/repo/commits/deleted-ref", signal())
+    .catch((value: unknown) => value);
+  expect(error).toMatchObject({
+    status: 422,
+    message:
+      "GitHub could not resolve the requested resource reference (HTTP 422).",
+  });
+  expect((error as Error).message).not.toContain("permission");
+});
