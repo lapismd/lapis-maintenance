@@ -5,13 +5,18 @@
   import {
     KanbanBoard,
     KanbanActivityView,
+    type KanbanColumnData,
     type KanbanColumnMeta,
     type KanbanCardContext,
   } from "@lapismd/design-core/workspace/kanban";
   import { Badge } from "@lapismd/design-core/shadcn/badge";
-  import { LoaderCircle, Tag } from "@lucide/svelte";
+  import { Button } from "@lapismd/design-core/shadcn/button";
+  import { Copy, LoaderCircle, Tag } from "@lucide/svelte";
   import { maintenanceColumns } from "../../maintenance/board";
+  import { copyIdentifier } from "../../maintenance/copy-identifier";
+  import type { FeedbackNotice } from "../../maintenance/feedback.svelte";
   import type { MaintenanceController } from "../../maintenance/controller.svelte";
+  import FeedbackFeed from "../feedback/FeedbackFeed.svelte";
   let {
     controller,
     onOpen,
@@ -27,6 +32,8 @@
   onDestroy(() => prefetch.dispose());
   let metadata = $state<Record<string, KanbanColumnMeta>>({});
   let order = $state<string[]>([]);
+  let copyNotices = $state<FeedbackNotice[]>([]);
+  let copyNoticeSequence = 0;
   const columns = $derived(
     maintenanceColumns(controller.items, controller.snapshot?.fetchedAt)
       .map((c) => ({
@@ -50,6 +57,9 @@
   const dates = $derived(
     new Map(controller.items.map((item) => [item.id, item.updatedAt])),
   );
+  const itemsById = $derived(
+    new Map(controller.items.map((item) => [item.id, item])),
+  );
   const entries = $derived(
     columns.flatMap((column) =>
       column.cards.map((card) => ({
@@ -59,6 +69,41 @@
       })),
     ),
   );
+  const columnUrls = (column: KanbanColumnData) =>
+    column.cards.flatMap((card) => {
+      const url = itemsById.get(card.id)?.url;
+      return url ? [url] : [];
+    });
+  async function copyColumnLinks(
+    column: KanbanColumnData,
+    closeMenu: () => void,
+  ) {
+    const urls = columnUrls(column);
+    if (!urls.length) return;
+    try {
+      await copyIdentifier(urls.join("\n"));
+      copyNotices = [
+        {
+          id: `board-copy-links:${++copyNoticeSequence}`,
+          title: "GitHub links copied",
+          severity: "info",
+          message: `Copied ${urls.length} GitHub ${urls.length === 1 ? "link" : "links"}.`,
+        },
+      ];
+    } catch (error) {
+      copyNotices = [
+        {
+          id: `board-copy-links:${++copyNoticeSequence}`,
+          title: "Could not copy GitHub links",
+          severity: "error",
+          message: "The GitHub links could not be copied to the clipboard.",
+          detail: error instanceof Error ? error.message : String(error),
+        },
+      ];
+    } finally {
+      closeMenu();
+    }
+  }
 </script>
 
 {#snippet cardTags({ card }: KanbanCardContext)}
@@ -116,10 +161,23 @@
         emptyTitle="No maintenance items match"
         emptyDescription="Clear the filters or refresh to check for new work."
         brandLabel="Lapis Maintenance"
-      />
+      >
+        {#snippet columnMenuActions(column, closeMenu)}
+          <Button
+            variant="ghost"
+            role="menuitem"
+            disabled={!columnUrls(column).length}
+            onclick={() => copyColumnLinks(column, closeMenu)}
+          >
+            <Copy size={14} aria-hidden="true" />
+            <span>Copy GitHub links</span>
+          </Button>
+        {/snippet}
+      </KanbanBoard>
     {/key}
   {/if}
 </div>
+<FeedbackFeed scope="board-copy-links" notices={copyNotices} />
 
 <style>
   .maintenance-card-tags,

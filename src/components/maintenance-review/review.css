@@ -168,8 +168,8 @@
   font-size: 0.7rem;
   color: var(--muted-foreground);
 }
-.review-inspector-footer > .review-pr-actions {
-  padding: 0.65rem 0.75rem 0;
+.review-inspector-footer {
+  padding: 0.65rem 0.75rem;
 }
 .review-inspector-footer > .review-approvals-compact:has(.review-approval) {
   margin-top: 0.65rem;

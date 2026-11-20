@@ -17,9 +17,10 @@ outcomes follow LM-UI-001 toast policy, retaining cached content and recovery
 controls rather than inserting banners into the review layout. Optional toast
 links capture the completed command's original target URL.
 
-Inspector review actions use one compact row without an inline description;
-Comment has a short visible label, constrained labels truncate, and unavailable
-action reasons remain in accessible descriptions and hover titles.
+Inspector review actions use one compact row inside an internally padded footer
+container without an inline description; Comment has a short visible label, constrained labels
+truncate, and unavailable action reasons remain in accessible descriptions and
+hover titles.
 
 Merge footers in the overview, Checks tab and inspector contain controls without
 an inline policy paragraph. Unavailable merge actions retain their reasons as
