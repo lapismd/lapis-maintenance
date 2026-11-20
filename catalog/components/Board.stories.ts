@@ -1,4 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/svelte-vite";
+import { expect, spyOn, userEvent, waitFor, within } from "storybook/test";
 import Component from "../../src/components/maintenance/MaintenanceBoard.svelte";
 import Demo from "../ComponentDemo.svelte";
 export default {
@@ -16,6 +17,32 @@ export default {
 type Story = StoryObj<typeof Demo>;
 export const Kanban: Story = {
   render: () => ({ Component: Demo, props: { part: "board" } }),
+};
+export const CopyGitHubLinks: Story = {
+  render: () => ({ Component: Demo, props: { part: "board" } }),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("button", {
+      name: "Column options for Failing",
+    });
+    const writeText = spyOn(navigator.clipboard, "writeText").mockResolvedValue(
+      undefined,
+    );
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Column options for Failing" }),
+    );
+    const page = within(document.body);
+    const copy = page.getByRole("menuitem", { name: "Copy GitHub links" });
+    await waitFor(() => expect(copy).toBeVisible());
+    await expect(copy.querySelector("svg")).toBeInTheDocument();
+    await userEvent.click(copy);
+    await expect(writeText).toHaveBeenCalledWith(
+      "https://github.com/lapismd/lapis-desktop/actions/runs/41031",
+    );
+    await waitFor(() => expect(copy).not.toBeVisible());
+    await page.findByText("Copied 1 GitHub link.");
+    writeText.mockRestore();
+  },
 };
 export const Activity: Story = {
   render: () => ({
@@ -44,6 +71,16 @@ export const EmptyColumnsCollapsed: Story = {
     await expect(empty).toHaveAttribute("aria-expanded", "false");
     await userEvent.click(empty);
     await c.findByRole("button", { name: "Collapse 0 Approval waiting" });
+    await userEvent.click(
+      c.getByRole("button", {
+        name: "Column options for Approval waiting",
+      }),
+    );
+    await expect(
+      within(document.body).getByRole("menuitem", {
+        name: "Copy GitHub links",
+      }),
+    ).toBeDisabled();
   },
 };
 export const RunningLane: Story = {

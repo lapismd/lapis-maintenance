@@ -35,7 +35,7 @@
     "pwa:icons": "node scripts/pwa-icons.mjs"
   },
   "dependencies": {
-    "@lapismd/design-core": "^0.13.4",
+    "@lapismd/design-core": "^0.13.7",
     "@lapismd/repository-ui": "^0.2.6",
     "@lucide/svelte": "^1.66.0",
     "@tanstack/svelte-virtual": "^3.13.52",
