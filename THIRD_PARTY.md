@@ -7,8 +7,6 @@ upstream; no private checks implementation is copied into this application.
 The [license](licenses/repository-ui-Apache-2.0.md) and
 [package notice](licenses/repository-ui-NOTICE.md) are retained for attribution.
 
-`@tursodatabase/database-wasm` is a registry dependency licensed under MIT and
-provides the local database. The app owns its combined isolation/PWA worker.
 The development-only `@resvg/resvg-js` rasterizer is MPL-2.0 and generates install
 icons from the existing Lapis vector logo.
 

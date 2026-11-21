@@ -14,14 +14,6 @@ it("restores real persistent fallback cards before blocked background discovery 
   const token = `invented-reload-${crypto.randomUUID()}`;
   const id = 987654322,
     sha = "a".repeat(40);
-  const descriptor = Object.getOwnPropertyDescriptor(
-    globalThis,
-    "crossOriginIsolated",
-  );
-  Object.defineProperty(globalThis, "crossOriginIsolated", {
-    value: false,
-    configurable: true,
-  });
   localStorage.removeItem(credentialKey);
   const nativeFetch = globalThis.fetch.bind(globalThis);
   let block = false,
@@ -143,9 +135,6 @@ it("restores real persistent fallback cards before blocked background discovery 
     target.remove();
     send.mockRestore();
     localStorage.removeItem(credentialKey);
-    if (descriptor)
-      Object.defineProperty(globalThis, "crossOriginIsolated", descriptor);
-    else Reflect.deleteProperty(globalThis, "crossOriginIsolated");
     const cache = await IndexedDbResponseCache.open(partition);
     await cache.clear();
     await cache.close();

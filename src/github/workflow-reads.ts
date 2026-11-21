@@ -1,5 +1,9 @@
 import type { MaintenanceDetail } from "../maintenance/types";
-import { approvalWaiting, workflowApproval } from "./workflow-authority";
+import {
+  approvalWaiting,
+  deploymentApprovalPossible,
+  workflowApproval,
+} from "./workflow-authority";
 import { category, type GithubEnvironment, type GithubRun } from "./models";
 import { workflowAction, type GithubAccess } from "./action-policy";
 import {
@@ -88,7 +92,7 @@ export async function readWorkflow(
       },
     ],
   };
-  if (run.status !== "waiting") return [detail];
+  if (!deploymentApprovalPossible(run)) return [detail];
   try {
     const pending = await client.read<GithubEnvironment[]>(
       `/repos/${repository}/actions/runs/${run.id}/pending_deployments`,

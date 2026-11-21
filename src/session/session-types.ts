@@ -1,5 +1,5 @@
 import type { DeviceStore } from "./device-store";
-import type { openResponseCache } from "../cache/turso-cache";
+import type { openResponseCache } from "../cache/browser-cache";
 export interface SessionDependencies {
   store: DeviceStore;
   openCache?: typeof openResponseCache;

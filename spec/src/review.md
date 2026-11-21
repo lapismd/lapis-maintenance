@@ -53,7 +53,7 @@ missing, invalid or reversed timestamps render no invented timing.
 
 ### Acceptance details
 
-- PR-run approval accepts verified public same-repository automation and fork PRs, checking status/conclusion, current PR/head/branch, base repository and run attempt; environment approve/reject revalidates the pending environment and GitHub actor eligibility without requiring the actor to have repository push permission.
+- PR-run approval accepts verified public same-repository automation and fork PRs, checking status/conclusion, current PR/head/branch, base repository and run attempt; environment approve/reject discovers protected runs reported as either `waiting` or `pending`, then revalidates the pending environment and GitHub actor eligibility without requiring the actor to have repository push permission.
 - Each disabled action explains its actual blocker, unrelated resource failures do not remove valid authority, and GitHub rejection details distinguish Actions and Deployments permissions without replaying uncertain writes.
 - Workflow/job/check titles and results link to actual targets, retaining explicit action activation and card-to-inspector navigation; manual workflow dispatch follows LM-REL-001.
 

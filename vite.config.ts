@@ -46,7 +46,6 @@ export default defineConfig({
       "@lapismd/design-core/shadcn/scroll-area",
       "@lapismd/repository-ui/jj",
       "@lapismd/repository-ui/settings",
-      "@tursodatabase/database-wasm/bundle",
     ],
   },
 });

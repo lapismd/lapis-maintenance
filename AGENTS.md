@@ -20,7 +20,7 @@ dispatch in this continuation.
 - `PLAN.md` records the complete approved plan and slice gates. Implement only
   the current authorized slice. Slice 1 is approved. Slice 2 authorizes token
   login, remembered local credentials, live read-only GitHub adapters and a
-  token-partitioned Turso WASM cache. The user subsequently authorized Slice 3
+  token-partitioned IndexedDB cache. The user subsequently authorized Slice 3
   PR/CI writes through the live app/story; stop before Slice 4 release actions.
   The user also explicitly authorized publishing required dependencies, pushing
   the completed changes and deploying the live app to GitHub Pages. The user authorized Slice 5 PWA installation/offline work on 2026-11-11;
@@ -41,7 +41,7 @@ dispatch in this continuation.
   app for manual token acceptance; it has no token args or automated play.
   Live transport belongs in
   src/github, persistence in src/cache and src/session; credentials never enter
-  controller state or the data cache. The app worker caches public versioned assets only; private data remains in Turso.
+  controller state or the data cache. The app worker caches public versioned assets only; private data remains in IndexedDB.
 - Keep new production files within 300 counted lines, stories within 400 and
   tests within 500. Split by responsibility.
 - Run exact changed tests first, then all repository check, test, Storybook

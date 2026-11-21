@@ -110,8 +110,8 @@ function fixture(checksUnavailable = false, missingConfig = false) {
     if (path.endsWith("/pending_deployments"))
       return Response.json([
         {
-          environment: { id: 6, name: "production" },
-          current_user_can_approve: false,
+          environment: { id: 6, name: "registry-production" },
+          current_user_can_approve: true,
           wait_timer: 0,
           reviewers: [{ type: "User", reviewer: { login: "release-owner" } }],
         },
@@ -127,10 +127,12 @@ function fixture(checksUnavailable = false, missingConfig = false) {
                 ...run,
                 id: 104,
                 workflow_id: 3,
+                name: "Publish plugin to registry",
+                event: "workflow_run",
                 head_branch: "main",
                 head_sha: "main-new",
                 pull_requests: [],
-                status: "waiting",
+                status: "pending",
                 conclusion: null,
               },
               {
@@ -162,7 +164,7 @@ function fixture(checksUnavailable = false, missingConfig = false) {
     client,
     () => selection,
     () => now,
-    undefined,
+    "maintainer",
     cache,
   );
   return {
@@ -213,8 +215,8 @@ it("discovers defaults/coordinator, preserves holds and access gaps, and ignores
     ),
   ).toBe(false);
   const approval = snapshot.items.find((value) => value.kind === "approval")!;
-  expect(approval.reasons.join(" ")).toContain("cannot approve");
-  expect(approval.actions.every((action) => !action.available)).toBe(true);
+  expect(approval.title).toContain("registry-production");
+  expect(approval.actions.every((action) => action.available)).toBe(true);
   expect(
     send.mock.calls.every(
       ([url, init]) =>
@@ -350,7 +352,7 @@ it("bounds workflow inventory to current heads and pending approvals", async () 
     queries.every(
       (url) =>
         url.searchParams.has("head_sha") ||
-        ["waiting", "action_required"].includes(
+        ["waiting", "pending", "action_required"].includes(
           url.searchParams.get("status") ?? "",
         ),
     ),
