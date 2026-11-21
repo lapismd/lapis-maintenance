@@ -41,6 +41,14 @@ Repository settings include monitoring-only defaults from LM-GH-003, retain cons
 
 Rapid authenticated remounts retain their persistent cache through the host-owned connection handoff, preserving cached content rather than selecting a transient fallback.
 
+IndexedDB is the silent primary persistent response cache. A bounded in-memory
+cache is used only when IndexedDB is unavailable; the dashboard does not expose
+optional remote-database configuration or warn during normal browser storage.
+
+Workflow details surface protected-environment approvals when GitHub reports the
+run as either `waiting` or `pending`, provided the exact pending deployment read
+confirms the current user can review it.
+
 Running work has its own Kanban lane; the live board and cached snapshots retain
 the attention queue under LM-CACHE-001, including passing open PRs while omitting
 resolved successful/cancelled workflows and preserving compact branch health.
@@ -87,7 +95,7 @@ accessibility gates or visual baselines.
 - The production host composes live ports, GitHub outcome labels, settings, PWA controls, profile/avatar and disconnect; login startup is bounded and late activation preserves input; hash navigation retains PR/tab and board filters across reload/back; navigation exposes Inbox, Activity, Pull Requests, Workflows and Approvals, transparent sidebar/resize handle, expandable ellipsized repositories, one collapsed Command View picker, centered logo and collapsed-icon tooltips.
 - Four summary tiles stay on one row and reflect active repository, branch-action, query, status and view filters; mobile/desktop disclosure choices persist, a filter-icon toggle starts closed and retains filters with accent when open, summary bottom spacing is larger when closed, repository options have vertical spacing, the breadcrumb truncates before bounded status/time, and status opens a counted timeline with retry and motion-aware indicators.
 - Attention prioritizes approval waits, current failures, reviews and blockers before drafts/running work; unavailable data never appears healthy; category chips and Activity counts retain their inset/contrast; long lanes use measured rendering; empty lanes start collapsed across views/filter changes, remain expandable and never inherit the approval anchor; icon-labelled column actions copy visible GitHub URLs in lane order with toast feedback while empty lanes disable them.
-- Cached boards retain motion-aware card refresh indicators; selection opens/updates the inspector with summaries, retained details and disabled pending actions; tablet panes remain adjacent, phones compact navigation, and long titles/review summaries wrap within the pane; inspector footer actions retain container-owned inset spacing; refresh/GitHub controls use neutral hover and keyboard focus, sidebar check groups start collapsed per selection; shared panels retain square headers, fixed icon actions, horizontal descriptions and check/job/workflow links; empty checks start collapsed and pending summaries never invent results.
+- Cached boards retain motion-aware refresh; normal startup uses IndexedDB silently and shows fallback only if persistence fails; selection opens cached inspector details and pending actions, including confirmed eligible `waiting` or `pending` environment approvals; tablet panes, phone navigation, title wrapping, footer insets, neutral focus/hover, collapsed sidebar check groups, square headers, fixed icon actions, horizontal descriptions and check links remain compact; empty checks start collapsed and never invent results.
 
 ## LM-UI-002 — Storybook review boundary
 

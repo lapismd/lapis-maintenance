@@ -8,6 +8,9 @@ import {
 } from "./transport";
 export const approvalWaiting = (run: GithubRun) =>
   run.status === "action_required" || run.conclusion === "action_required";
+/** Protected environments can surface as either waiting or pending. */
+export const deploymentApprovalPossible = (run: GithubRun) =>
+  ["waiting", "pending"].includes(run.status);
 /** GitHub can require PR-run approval for fork and same-repository automation branches. */
 export async function workflowApproval(
   client: GithubTransport,

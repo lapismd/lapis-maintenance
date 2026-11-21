@@ -1,4 +1,4 @@
-import { openResponseCache } from "../cache/turso-cache";
+import { openResponseCache } from "../cache/browser-cache";
 import { sessionPartition } from "./session-identity";
 import type { GithubUser } from "../github/models";
 export async function openSessionCache(

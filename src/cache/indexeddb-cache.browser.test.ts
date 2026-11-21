@@ -1,6 +1,6 @@
 import { expect, it, vi } from "vitest";
 import { IndexedDbResponseCache } from "./indexeddb-cache";
-import { openResponseCache } from "./turso-cache";
+import { openResponseCache } from "./browser-cache";
 
 it("expires old records on reopen while retaining the exact retention boundary", async () => {
   const present = Date.now();
@@ -52,20 +52,32 @@ it("persists bounded browser fallback records across connections and isolates to
   await other.close();
 });
 
-it("uses persistent browser storage when isolation is unavailable and memory when both stores fail", async () => {
+it("removes obsolete app-owned file caches without touching unrelated files", async () => {
+  const root = await navigator.storage.getDirectory();
+  const suffix = "a".repeat(64);
+  const obsolete = `lapis-maintenance-${suffix}.db`;
+  const unrelated = `other-app-${crypto.randomUUID()}.db`;
+  await root.getFileHandle(obsolete, { create: true });
+  await root.getFileHandle(`${obsolete}-wal`, { create: true });
+  await root.getFileHandle(unrelated, { create: true });
+  const cache = await openResponseCache(`test-${crypto.randomUUID()}`);
+  try {
+    await expect(root.getFileHandle(obsolete)).rejects.toThrow();
+    await expect(root.getFileHandle(`${obsolete}-wal`)).rejects.toThrow();
+    await expect(root.getFileHandle(unrelated)).resolves.toBeDefined();
+  } finally {
+    await cache.cache.clear();
+    await cache.cache.close();
+    await root.removeEntry(unrelated).catch(() => {});
+  }
+});
+
+it("uses IndexedDB without a warning and memory when persistent storage fails", async () => {
   const partition = `test-${crypto.randomUUID()}`;
-  const isolated = Object.getOwnPropertyDescriptor(
-    globalThis,
-    "crossOriginIsolated",
-  );
-  Object.defineProperty(globalThis, "crossOriginIsolated", {
-    value: false,
-    configurable: true,
-  });
   try {
     const opened = await openResponseCache(partition);
     expect(opened.cache.kind).toBe("indexeddb");
-    expect(opened.notice).toContain("browser storage");
+    expect(opened.notice).toBeUndefined();
     await opened.cache.put("board", {
       body: "retained",
       fetchedAt: Date.now(),
@@ -87,9 +99,9 @@ it("uses persistent browser storage when isolation is unavailable and memory whe
       unavailable.mockRestore();
     }
   } finally {
-    if (isolated)
-      Object.defineProperty(globalThis, "crossOriginIsolated", isolated);
-    else Reflect.deleteProperty(globalThis, "crossOriginIsolated");
+    const cache = await IndexedDbResponseCache.open(partition);
+    await cache.clear();
+    await cache.close();
   }
 });
 

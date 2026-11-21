@@ -17,7 +17,7 @@ The user also authorized dependency publication, pushing and Pages hosting;
 The user authorized Slice 5 PWA implementation on 2026-11-11.
 The 2026-11-14 continuation authorizes Slice 4, including manual dispatch.
 Slice 2 remembers a token on this device,
-shows token login without a valid session, and uses Turso WASM to cache reads.
+shows token login without a valid session, and uses IndexedDB to cache reads.
 
 ### Continuation authorized 2026-11-14
 
@@ -113,16 +113,13 @@ Commit evidence, present the Storybook review URL, and stop for approval.
   Preserve holds and explicitly show incomplete coverage.
 - Refresh manually and every five minutes while visible, with bounded
   concurrency, pagination, conditional requests and rate-limit backoff.
-- Use token-partitioned Turso WASM/OPFS response caching with five-minute
+- Use token-partitioned IndexedDB response caching with five-minute
   freshness, ETag revalidation, bounded retention and visible freshness/cache
   status. Online remembered sessions may display a token-bound read-only preview
   while authentication runs; authenticate before live reads or enabling actions.
   Offline startup stays on the reconnect shell. Disconnect clears the partition.
-  If Turso cannot start, use bounded token-partitioned IndexedDB persistence;
-  fall back visibly to memory only when neither persistent store is available.
-- Bundle a same-origin isolation bootstrap for WASM compatibility on GitHub
-  Pages. Its replacement in Slice 5 caches only public app assets. Build
-  and exercise the static application now; publishing remains Slice 5.
+  Fall back visibly to memory only when persistent browser storage is unavailable.
+- Build and exercise the static application now; publishing remains Slice 5.
 - Use browser REST plus narrow GraphQL operations where needed. Reject stale
   responses after refresh, reconnect or disposal.
 - Fine-grained tokens belong to one owner. Inaccessible repositories remain
@@ -158,10 +155,10 @@ from static builds and automated story runs. Use hash navigation and base-aware 
 manifest and service-worker scope. The offline worker caches versioned app assets
 only, excluding credentials, authenticated responses, repository data and
 Storybook from CacheStorage; the authorized token record and token-partitioned
-Turso response cache remain separate device storage. Offline mode opens the
+IndexedDB response cache remain separate device storage. Offline mode opens the
 shell with a reconnect message without restoring account data or sending GitHub
-requests. Use one worker for isolation and precaching, migrate the old isolation
-worker, and offer explicit reload for waiting updates so forms and writes are
+requests. Use one worker for precaching, migrate the old isolation worker, and
+offer explicit reload for waiting updates so forms and writes are
 not interrupted. Complete production acceptance.
 
 ## Verification and acceptance
@@ -221,8 +218,8 @@ Slice 4 remains unapproved.
 
 Restore assembled cards before discovery, retain them during background refresh
 and mark repository/card revalidation independently. Checkpoint partial scans so
-reload can reuse completed work. Turso remains preferred, with a persistent
-browser-storage fallback when isolation is unavailable. Qualify the shared UI
+reload can reuse completed work. IndexedDB provides persistent browser storage.
+Qualify the shared UI
 runtime floor upstream to keep long checks separate from merge controls, then
 consume the npm release. See `spec/records/2026-11-11-cached-reload.md` for the
 failure ledger and qualification; Slice 4 remains unapproved.
@@ -237,7 +234,7 @@ above now permits implementing the remaining live follow-up slices.
 ### Intended product and findings
 
 Retain Svelte, Design Core AppShell, Repository UI primitives, direct browser
-GitHub requests, remembered token sessions and token-partitioned Turso caches.
+GitHub requests, remembered token sessions and token-partitioned IndexedDB caches.
 T3 Code supplies patterns for batched GraphQL summaries, independent resources,
 conditional refresh, 150ms intent prefetch and exact fork/head approval checks.
 Preserve provenance and MIT attribution for later code adaptations.

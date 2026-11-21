@@ -51,13 +51,12 @@ token. The preview is read-only until authentication succeeds. Existing saved
 logins validate once after this update to remember the identity needed for this
 startup path. Offline startup continues to show the reconnect screen.
 
-Repository reads use a token-partitioned Turso WASM database with five-minute
+Repository reads use a token-partitioned IndexedDB cache with five-minute
 freshness, conditional requests, bounded storage and rate-limit backoff. Fresh
 cached details open immediately; manual refresh revalidates them. GitHub actions
 always re-read their target. Cached cards remain visible during background refresh,
-with an indicator on cards being re-fetched. Where Turso cannot start, a bounded
-IndexedDB cache preserves data across reloads; memory is the final fallback if
-both persistent stores are unavailable.
+with an indicator on cards being re-fetched. Memory is the final fallback if
+persistent browser storage is unavailable.
 
 The saved board is an attention queue: open PRs, failures, approvals, blocked,
 running and unavailable work. Confirmed successful or cancelled workflows are
@@ -67,10 +66,9 @@ PR and workflow inventories establish completeness independently, so unrelated
 optional-resource failures do not block verified cleanup. Partial inventories
 and uncertain action outcomes do not prove that work is resolved.
 
-All tokens share one Turso store and one IndexedDB store, each limited to
-**12.5 MiB and 1,000 records**, with a **1 MiB limit per record** including its key.
-Their combined serialized payload budget is **25 MiB**; database/index/WAL and
-browser overhead are additional. Records expire after **24 hours**, with cleanup
+All tokens share one IndexedDB store limited to **25 MiB and 1,000 records**,
+with a **1 MiB limit per record** including its key. Database/index and browser
+overhead are additional. Records expire after **24 hours**, with cleanup
 during reads, writes and minute maintenance. Active legacy caches migrate through
 this policy; expired inactive legacy stores are removed when unlocked.
 Each memory fallback is capped at **25 MiB/1,000 records**, and synchronous
@@ -88,7 +86,7 @@ to Dock**; on iPhone/iPad, use **Share → Add to Home Screen**.
 
 The installed app opens in its own window. Offline startup shows a reconnect
 screen; GitHub data and actions require a connection. The service worker caches
-only public app assets, separately from the remembered token and Turso database.
+only public app assets, separately from the remembered token and IndexedDB cache.
 It excludes authenticated responses, repository data and Storybook.
 
 When a new version is ready, choose the **Update** arrow. Updates wait so they do not

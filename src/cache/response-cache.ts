@@ -17,7 +17,7 @@ export interface CachedResponse {
   fetchedAt: number;
 }
 export interface ResponseCache {
-  readonly kind: "turso" | "indexeddb" | "memory";
+  readonly kind: "indexeddb" | "memory";
   get(key: string): Promise<CachedResponse | undefined>;
   put(key: string, value: CachedResponse): Promise<void>;
   remove(key: string): Promise<void>;

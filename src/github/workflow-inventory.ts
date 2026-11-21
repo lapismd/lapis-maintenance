@@ -1,5 +1,8 @@
 import { branchActions } from "./branch-actions";
-import { approvalWaiting } from "./workflow-authority";
+import {
+  approvalWaiting,
+  deploymentApprovalPossible,
+} from "./workflow-authority";
 import type { GithubPull, GithubRun } from "./models";
 import {
   GithubError,
@@ -40,7 +43,7 @@ export async function readWorkflowInventory(
     })),
     {
       query: "status=waiting",
-      matches: (run: GithubRun) => run.status === "waiting",
+      matches: deploymentApprovalPossible,
     },
     {
       query: "status=action_required",

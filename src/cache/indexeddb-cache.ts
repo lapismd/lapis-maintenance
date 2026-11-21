@@ -29,7 +29,7 @@ const request = <T>(value: IDBRequest<T>) =>
     value.onsuccess = () => resolve(value.result);
     value.onerror = () => reject(value.error);
   });
-/** Persistent fallback where threaded Turso cannot start; never stores credentials. */
+/** Persistent browser cache for GitHub-derived responses; never stores credentials. */
 class IndexedDbStore implements ResponseCache {
   readonly kind = "indexeddb";
   #closed = false;

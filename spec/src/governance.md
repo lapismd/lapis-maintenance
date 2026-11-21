@@ -19,8 +19,8 @@ entry for the same cold-start boundary, with safe HTML policy supplied upstream.
 The inbox presentation follow-up uses the released Deno-free Spec Validator ^0.2.1
 with ordinary registry resolution and unchanged specification checks.
 
-Attention-retention acceptance exercises the real origin-wide Turso/IndexedDB
-budgets, logical token isolation, legacy migration and tab leases under
+Attention-retention acceptance exercises the real origin-wide IndexedDB
+budget, logical token isolation and legacy migration under
 LM-CACHE-001; browser files run serially because they share that origin, with
 explicit token/tab concurrency tests and unchanged assertions, while all unit,
 browser, Storybook, production PWA, build and canonical specification lanes
