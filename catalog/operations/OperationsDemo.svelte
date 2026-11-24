@@ -5,6 +5,8 @@
   import MaintenanceScreen from "../../src/components/maintenance/MaintenanceScreen.svelte";
   import OperationsPanel from "../../src/components/maintenance-operations/OperationsPanel.svelte";
   import { MaintenanceController } from "../../src/maintenance/controller.svelte";
+  import { autocraftFixture } from "./autocraft-fixture";
+  import type { AutocraftEvidence } from "../../src/maintenance/autocraft-types";
   import { scopedFixture } from "./scoped-fixture";
   import { operatorFixture, decisionHistoryFixture } from "./fixtures";
   import type {
@@ -24,6 +26,7 @@
     scoped = false,
     refreshError = "",
     currentState = false,
+    autocraftState,
   }: {
     part?: "page" | "attention" | "footer";
     shell?: boolean;
@@ -37,6 +40,7 @@
     scoped?: boolean;
     refreshError?: string;
     currentState?: boolean;
+    autocraftState?: AutocraftEvidence["state"];
   } = $props();
   const snapshot = untrack(() =>
     scoped
@@ -94,6 +98,9 @@
       }
   });
   const read: MaintenanceReadPort = {
+    ...(untrack(() => autocraftState)
+      ? { readAutocraftReport: async () => autocraftFixture(autocraftState) }
+      : {}),
     readSnapshot: async () => snapshot,
     refreshRepository: async () => snapshot,
     readDetails: async (id) => ({

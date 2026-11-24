@@ -18,6 +18,9 @@ import type { ResponseCache } from "../cache/response-cache";
 import { readCachedDetail, saveCachedDetail } from "../cache/detail-cache";
 import { viewKey } from "../cache/view-cache";
 import { ResourceCache } from "../cache/resource-cache";
+import { readAutocraftReport } from "./autocraft-report";
+import { parseAutocraftReport } from "./autocraft-schema";
+import type { AutocraftEvidence } from "../maintenance/autocraft-types";
 import { readCoordinatorReport } from "./coordinator-report";
 import { GithubSnapshots } from "./snapshot-reader";
 import { PreviewMap } from "../cache/preview-map";
@@ -83,6 +86,30 @@ export class GithubReadPort implements MaintenanceReadPort {
       signal,
       { force: options.force },
     );
+  }
+  async readAutocraftReport(signal: AbortSignal, options: ReadOptions = {}) {
+    const evidence = await this.#reports.read<AutocraftEvidence>(
+      "autocraft-evidence:v1",
+      () => 0,
+      (readOptions, ownedSignal) =>
+        readAutocraftReport(this.client, ownedSignal, readOptions, this.now()),
+      signal,
+      { force: options.force },
+    );
+    // Recheck age on cached reads; never turn unavailable provenance into current evidence.
+    if (evidence.report && ["current", "stale"].includes(evidence.state))
+      return {
+        ...parseAutocraftReport(
+          evidence.report,
+          evidence.report.policyDigest,
+          this.now(),
+        ),
+        sourceRevision: evidence.sourceRevision,
+        ...(evidence.state === "stale"
+          ? { state: "stale" as const, reason: evidence.reason }
+          : {}),
+      };
+    return evidence;
   }
   readCommandTarget(command: MaintenanceCommand, signal: AbortSignal) {
     const existing = this.#snapshots.details.get(command.itemId);

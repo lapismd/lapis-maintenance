@@ -126,7 +126,11 @@ export class MaintenanceController {
     this.#readAbort = new AbortController();
     this.phase = this.snapshot ? "refreshing" : "loading";
     this.error = null;
-    if (this.reports.evidence || (force && this.view === "operations"))
+    if (
+      this.reports.evidence ||
+      this.reports.autocraft.evidence ||
+      (force && this.view === "operations")
+    )
       void this.reports.refresh(force);
     try {
       const snapshot = await this.#read.readSnapshot(this.#readAbort.signal, {

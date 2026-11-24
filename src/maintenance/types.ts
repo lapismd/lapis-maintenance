@@ -132,6 +132,10 @@ export interface MaintenanceDetail {
   workflowApprovals?: MaintenanceItem[];
 }
 export interface MaintenanceReadPort {
+  readAutocraftReport?(
+    signal: AbortSignal,
+    options?: { force?: boolean },
+  ): Promise<import("./autocraft-types").AutocraftEvidence>;
   readCoordinatorReport?(
     signal: AbortSignal,
     options?: { force?: boolean },
