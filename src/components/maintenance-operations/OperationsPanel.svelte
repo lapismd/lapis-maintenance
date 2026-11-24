@@ -19,6 +19,7 @@
     operationsDisclosureKey,
   } from "./disclosure.svelte";
   import OperationsTimelineItem from "./OperationsTimelineItem.svelte";
+  import AutocraftQueue from "./AutocraftQueue.svelte";
   import OperationsFooter from "./OperationsFooter.svelte";
   import OperationsSection from "./OperationsSection.svelte";
   import OperationsReport from "./OperationsReport.svelte";
@@ -96,6 +97,12 @@
             />{:else}<UnfoldVertical aria-hidden="true" />{/if}
         </Button>
       </header>
+      <AutocraftQueue
+        evidence={controller.reports.autocraft.evidence}
+        loading={controller.reports.autocraft.loading}
+        repositories={controller.repositories}
+        query={controller.query}
+      />
       <OperationsEvidence
         {evidence}
         liveFetchedAt={controller.snapshot?.fetchedAt}

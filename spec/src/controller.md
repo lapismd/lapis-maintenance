@@ -44,6 +44,12 @@ Application build identity is static public presentation metadata under
 LM-UI-001, independent of repository/card revisions and command authority. Its
 short commit label links to the full application source commit.
 
+AutoCraft queue evidence has its own lazy, cancellable host resource alongside
+coordinator evidence. Operations navigation/refresh may request both independently;
+a failed coordinator read does not prevent AutoCraft presentation. Clear both on
+disconnect and fence stale completions after disposal. Neither report changes
+command capabilities or the immutable targets captured by existing manual controls.
+
 ### Acceptance details
 
 - Reads supply snapshots/details with PR identity and workflow Actions links; commands bind to a PR SHA, run attempt or deployment identity, with check completeness independent of unrelated resource gaps and return completed, accepted, rejected or uncertain; the selected card remains available for immediate inspector presentation while ports load full cached details; subsequent cached progress replaces that summary and preserves disabled actions until the detail read settles.

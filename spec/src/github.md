@@ -70,3 +70,14 @@ the immutable holds, waits, qualification and ownership fields remain authority.
 - Lazily read `report.json` from coordinator branch `automation/dependency-wave-state` independently of cached inbox startup, resolving the branch before reading bytes at its immutable source commit.
 - Unsupported, missing, malformed, older-than-24-hour, future-dated and policy-revision-mismatched reports remain explicit and never authorize writes.
 - Expose only the versioned public report contract, keep private coverage opaque and preserve browser credentials within the existing session transport without forwarding them to coordinator Actions.
+
+## LM-GH-005 — Read-only AutoCraft queue evidence
+
+**Requirement.** The authenticated host MUST lazily read the private AutoCraft operations report as bounded presentation evidence without granting command authority.
+
+### Acceptance details
+
+- Resolve the private report branch to immutable bytes through the existing user-token transport, retain report/worker source identities separately, compare the worker source to current main and match the SHA-256 digest of its operations policy.
+- Validate schema, kind, exact PR/workflow URLs, immutable heads, typed receipt identities/outcomes/times, duplicate targets, coverage and field bounds within 512 KiB; discard unknown fields before caching.
+- Label reports older than thirty minutes, future-dated by over one minute or policy-mismatched as stale; missing, denied, unsupported or unverifiable evidence remains explicit without granting command authority or disabling manual controls.
+- Keep raw bytes out of response persistence, age-check token-partitioned validated projections and cancel/fence superseded or disconnected requests independently of coordinator loading and cached inbox startup.

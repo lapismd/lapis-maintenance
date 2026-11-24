@@ -1,3 +1,4 @@
+import { AutocraftReports } from "./autocraft-report.svelte";
 import type { CoordinatorEvidence } from "./operator-types";
 import type { MaintenanceReadPort } from "./types";
 /** Independent lazy evidence: cached inbox startup must never wait for coordinator networking. */
@@ -7,9 +8,14 @@ export class OperatorReports {
   #sequence = 0;
   #abort?: AbortController;
   #disposed = false;
-  constructor(private read: MaintenanceReadPort) {}
+  readonly autocraft: AutocraftReports;
+  constructor(private read: MaintenanceReadPort) {
+    this.autocraft = new AutocraftReports(read);
+  }
   async refresh(force = false) {
-    if (this.#disposed || !this.read.readCoordinatorReport) return;
+    if (this.#disposed) return;
+    void this.autocraft.refresh(force);
+    if (!this.read.readCoordinatorReport) return;
     const sequence = ++this.#sequence;
     this.#abort?.abort();
     this.#abort = new AbortController();
@@ -38,6 +44,7 @@ export class OperatorReports {
     }
   }
   clear() {
+    this.autocraft.clear();
     ++this.#sequence;
     this.#abort?.abort();
     this.evidence = null;
@@ -45,6 +52,7 @@ export class OperatorReports {
   }
   dispose() {
     this.#disposed = true;
+    this.autocraft.dispose();
     this.clear();
   }
 }

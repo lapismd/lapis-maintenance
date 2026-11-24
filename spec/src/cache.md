@@ -27,6 +27,12 @@ fields; invalid scoped data becomes unavailable and over-age scoped data stays
 explicitly stale, while legacy reports and original audit/source identities keep
 their existing retention and command-authority boundaries.
 
+LM-GH-005 AutoCraft evidence retains only a validated presentation projection in
+the existing token-partitioned resource cache. Raw report/policy reads bypass
+response persistence; cached evidence is age-checked again before display.
+Report provenance and worker source coordinates stay distinct, and cached queue
+rows never supply command authority or enter the public asset cache.
+
 ### Acceptance details
 
 - Policy-versioned detail/review namespaces recompute action eligibility after upgrades while retaining eligible responses; resources publish verified results before persistence settles, drain writes before retirement and clear denied previews; persist reads, validators, assembled views and details separately from credentials, partitioned by token and repository selection; publish boards before discovery, checkpoint partial scans, serve fresh details directly and retain revision-matching details up to one day during revalidation with refresh/failure feedback, while commands bypass cached data.

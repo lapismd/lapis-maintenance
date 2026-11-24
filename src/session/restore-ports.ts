@@ -45,6 +45,13 @@ export class RestorePorts
     this.#write = write;
     this.preview = null;
   }
+  readAutocraftReport: NonNullable<MaintenanceReadPort["readAutocraftReport"]> =
+    async (signal, options) => {
+      signal.throwIfAborted();
+      return this.#read?.readAutocraftReport
+        ? this.#read.readAutocraftReport(signal, options)
+        : { state: "unavailable", reason: pending };
+    };
   readCoordinatorReport: NonNullable<
     MaintenanceReadPort["readCoordinatorReport"]
   > = async (signal, options) => {
